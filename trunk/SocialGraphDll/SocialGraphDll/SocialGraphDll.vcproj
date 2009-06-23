@@ -311,6 +311,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Logger.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Logger.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Main.cpp"
 				>
 			</File>
@@ -348,14 +356,6 @@
 			</File>
 			<File
 				RelativePath=".\Graph.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Logger.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Logger.h"
 				>
 			</File>
 			<File
@@ -416,6 +416,30 @@
 			</File>
 			<File
 				RelativePath=".\InferenceHeuristic.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="mIRC"
+			>
+			<File
+				RelativePath="..\mIRC\SocialGraph\Configs\#sample1.Config.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\mIRC\SocialGraph\changelog_en.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\mIRC\SocialGraph\Changelog_lt.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\mIRC\SocialGraph\Installation.txt"
+				>
+			</File>
+			<File
+				RelativePath="..\mIRC\SocialGraph\SocialGraph.mrc"
 				>
 			</File>
 		</Filter>

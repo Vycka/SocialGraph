@@ -1,0 +1,113 @@
+//Sorry for lithuanian comments, no time to translate right now, anyway project theoricly does not exists yet :P
+
+//CIA REIKIA PAKEIST PALEI SAVE KANALO PAVADINIMA IR FTP DUOMENIS(jei reikia)
+
+//Irasyt vietoj #kanalas zemiau savo kanalo pavadinima (kabutes palikt)
+nChannel "#sample1"
+
+
+//uzpildyt ar uploadintu i ftp, ir jei taip, ftp prisijungimo duomenys
+//ftpup stuff
+//1 - true; 0 - false;
+
+ftpUpload  0
+ftpHost    "host"
+ftpPort    21
+ftpUser    "user"
+ftpPass    "pass"
+ftpDir     "remote/ftp/dir"
+//nenaudokit # failo pavadinime nebent zinot ka darot
+ftpFile    "filename.png"
+
+//Koks butu paveiksliuko dydis? 
+iOutputWidth   1280
+iOutputHeight  720
+
+//-------------------------------------------------------------------------------
+
+//KEIST JEI ZINAI KA KEITI
+
+//kelio pradzia yra ten, kur kur randas mirc.exe, tad jeigu .dll isextractinas ne i
+// <mircdir>\SocialGraph\ , tada teks pakeisti siuos kelius pilnais i egzistuojancius
+
+//cia kur image dumpins
+fImageOutput  "SocialGraph\Graph-Saves\#sample1.Image.png"
+
+//o cia kur info saugos apie visa grafika (kad poto galetu resumintis)
+fGraphData    "SocialGraph\Graph-Saves\#sample1.GraphData.txt"
+
+
+//image             R   G   B   A
+iBackgroundColor  255 255 255 255
+iChannelColor     238 238 255 255
+iLabelColor       0     0   0 255
+iTitleColor       153 153 204 255
+iNodeBorderColor  102 102 255 255
+iNodeColor        255 255   0 255
+//Edge Alpha negalioja, nes alpha skaiciuoja scriptas (t.y. kokio stiprumo bus edge). tad ten svarbu kad siaip koks skaiciu butu
+iEdgeColor        102 102 255 255
+iBorderColor      102 102 102 255
+
+//------------------------------------------------------
+
+//o cia tik advanced useriam
+
+//nekist nagu prie mime jei nezinai :D
+//image/bmp image/jpeg image/gif image/tiff image/png 
+fEncoderMime   "image/png"
+
+
+//o vo cia jau atsargiai reiktu keist
+//Graph - nekeist situ, jei nezinai ka daro, bo as ir pats nevisus tezinau
+gTemporalDecayAmount        0.02
+//21600 = 1/4 paros
+gEdgeDecayMultiplyIdleSecs  21600
+gSpringEmbedderIterations   1500
+gK                          2
+gC                          0.01
+gMaxRepulsiveForceDistance  6
+gMaxNodeMovement            0.5
+gMinDiagramSize             10
+gBorderSize                 50
+gNodeRadius                 5
+gEdgeThreshold              0
+gNodeBumpWeight             0.2
+//neduok dieve gMinPauseBeforeNextRender  pavaryt < 20, bo gali but blogai
+gMinPauseBeforeNextRender   180
+gMinPauseBeforeNextUpload   180
+gCacheGdiTools              1
+
+
+
+
+//Inference Heuristics - irgi geriau nagu nekeist
+hAdjacency   0.03
+hBinary      0.50
+hDirect      0.50
+hIndirect    0.15
+
+//------------ OLD FRAMES SAVING / UPLOADING -------------------
+
+//Ar issaugot senus kadrus
+//1 - true; 0 - false;
+oSaveOldFrames 0
+
+// oPathBegin+Frame+oPathEnd sudaryt turi pilna kelia, kaip atrodys failas. (direktoriju automatiskai nekuria, tad Frame turi but kazkur vidury failo, o kitaip neveiks) 
+oPathBegin "\Graph-Saves\OldFrames\sample1-"
+oPathEnd   ".png"
+
+
+//Everything below is not implanted so keep it untouched
+
+//------------ LOGGING ----------
+
+//log faila poto galima panaudot surenderint frames grazesniu formatu, tik tam dar toolsa padaryt reik
+//ar savinam loga?
+logSave 0
+logFile "SocialGraph\Graph-Saves\#sample1.GraphLog.txt"
+
+//------------ VIDEO RENDERING ------------
+vidRenderPBegin "I:\FRAPS\SocialGraph\sample1-"
+vidRenderPEnd   ".png"
+vidFramesPerDay 1500
+vidSEIterationsPerFrame 1
