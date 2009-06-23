@@ -2,7 +2,7 @@ alias sgDll {
   return $shortfn($scriptdirSocialGraph.dll)
 }
 
-;sito is isores necallint, bus blogai
+;this should not be called by user otherwise bad things might happen. You been WARNED
 alias -l sgStartup {
   ;window @SocialGraph
   unset %sgChans
@@ -37,15 +37,16 @@ on *:text:*:%sgChans: {
   var %t = $dllcall($sgDll,return,mAddMessage,$chan $nick $strip($1-))
 }
 
+;This one is not tested cuz im running from bot not from my chat mirc :)
 on *:input:%sgChans: {
   ;dll $sgDll mAddMessage $chan $me $strip($1-)
   var %t = $dllcall($sgDll,return,mAddMessage,$chan $me $strip($1-))
 }
 
 on *:nick: {
-  var %x = $numtok(%sgChans,$chr(44))
+  var %x = $numtok(%sgChans,44)
   while (%x) {
-    var %chan = $gettok(%sgChans,%x,$chr(44))
+    var %chan = $gettok(%sgChans,%x,44)
     if ($newnick ison %chan) {
       dll $sgDll mAddJoin %chan $newnick
     }
@@ -59,9 +60,8 @@ on *:signal:SocialGraph: {
   ;getNicks genFrame setChan
   ;echo -sg SocialGraph Signal: $1-
   if (genFrame == $1) {
-    if ($calc($3 % 100) == 0 && $2 == #linkomanija) {
-      msg $2 Reminder: Social Graph is LIVE: http://hddforum.net/PISG/socialgraph/linkomanija.htm (Frame $3 generated) P.s. Graph is updated every few minutes.
-    } 
+    ;you can announce here to channel when new graph is creaded $2 - channel name, $3 - frame number
+    return
   }
   else if (getNicks == $1) {
     sgCollectNicks $2
@@ -96,7 +96,7 @@ alias sgCollectNicks {
   }
 }
 
-;debug tikslais
+;only for debug reasons this one
 alias sgDumpFile {
   dll $sgDll mDumpFile $1 $scriptdirManualDump.txt
 }
@@ -133,6 +133,7 @@ alias sgDestroyGraph {
   dll $sgDll mDestroyGraph $1
 }
 
+;Video rendering is experimental and slow function, use with care. or dont use at all.
 
 alias sgRenderCalc {
   if (!$4) {
