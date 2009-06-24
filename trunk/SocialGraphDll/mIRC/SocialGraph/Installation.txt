@@ -1,5 +1,6 @@
-This is a basic installation instruction to get this thing working.
+This is a basic installation instructions to get this thing working.
 advanced program features will not be reviewed here at the moment.
+(sorry for bad grammar, didn't had time to review what i wrote, but its still better than nothing, if you want, you can fix, it would realy help for the project :P)
 
 First you need to copy everything from this directory (where this installation.txt is located) to <mIRC RootDir>\SocialGraph\
 by default mIRC is located in "C:\Program Files\mIRC\"
