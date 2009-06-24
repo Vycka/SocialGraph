@@ -1,6 +1,5 @@
 #pragma once
 //#define HEURISTIC_NOTICES
-//#define COMP_EXE
 #define GRAPHNOTICES
 #include <map>
 #include <set>

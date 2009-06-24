@@ -1,6 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Tools.h"
-#include "Graph.h"
 #include <time.h>
 #include <Gdiplus.h>
 #include <iostream>
@@ -37,6 +36,24 @@ void replaceChars(const std::string *src, std::string *des,const std::string *sr
 				break;
 			}
 }
+
+void replaceString(const std::string *src, std::string *des,const std::string *srcStr,const std::string *desStr,int changes)
+{
+	int changed = 0;
+	*des = *src;
+	int searchPos = 0;
+	while (searchPos+srcStr->size() <= des->size() && changes != 0)
+	{
+		searchPos = des->find(srcStr->c_str(),searchPos);
+		if (searchPos == std::string::npos)
+			return;
+		des->erase(searchPos,srcStr->size());
+		des->insert(searchPos,desStr->c_str());
+		searchPos += desStr->size();
+		changes--;
+	}
+}
+
 
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {

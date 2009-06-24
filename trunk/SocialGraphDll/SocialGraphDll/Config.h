@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 
+
 class Graph;
 class GdiTools;
 
@@ -15,7 +16,7 @@ class Config
 public:
 	Config(const char *fn);
 	~Config(void);
-	void read(const char *fn);
+	void read();
 
 
 	int getInt(const char *cfgName);
@@ -31,6 +32,10 @@ public:
 	//friend GdiTools;
 	//friend Graph;
 //private:
+	//replace variables
+	//if there are gonna be more replace varialbes in the future, then it would need to be rewriten
+	//to std::vecotr<struct { string a,b }> to support as many keys as need.
+	std::string rChannel;
 	//img config
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
@@ -48,7 +53,7 @@ public:
 	//Heuristic Weightings
 	double hAdjacency,hBinary,hDirect,hIndirect;
 	//names outputs.. etc..
-	std::wstring fWEncoderMime,fWImageOutput,nWChannel;
+	std::wstring fWEncoderMime,fWImageOutput,nWChannel,nWTitle;
 	std::string fImageOutput,fGraphOutput,nChannel;
 	//old frame saving stuff
 	std::string oPathBegin,oPathEnd;
