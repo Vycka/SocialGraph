@@ -883,10 +883,6 @@ Config* Graph::getConfig()
 void Graph::renderVideo()
 {
 	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
-	//TODO: Perdaryt noClear/clearedBeforeNoClear Handlinima, kad nereiktu tokiu if'u
-	//mazaud kad nereiktu checkint situ daugiau, gal patikrint ar inpause, jei jo
-	//tada netrint visko i tik dalinai
-
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
 	double weight,cx,cy,r1,r2;
@@ -895,10 +891,10 @@ void Graph::renderVideo()
 	Edge *e;
 	std::fstream flog(cfg->logFile.c_str(),std::ios_base::in);
 	std::string buffer;
-	getline(flog,buffer,'\0'); //gal nuskaicius visa faila i atminti vaziuos greiciau
+	getline(flog,buffer,'\0');
 	flog.close();
 	std::stringstream ss(buffer);
-	//davaziuojam iki pirmo keyframe
+	//read until first keyframe (VID_INIT)
 	do
 	{
 		ss >> timestamp >> key;
@@ -911,11 +907,13 @@ void Graph::renderVideo()
 		switch (key)
 		{
 		case VID_ADDNODE:
+			if (!pauseRender)
+				renderFrames(nextRender,lastTime);	
 			ss >> n1 >> weight;
 			node1 = addNode(&n1,weight);
 			if (node1->getX() < minX || node1->getX() > maxX || node1->getY() < minY || node1->getY() > maxY)
 			{
-				//overridinsim koordinates kad atsirastu akiai grazesnej vietoj
+				//override coords so node appears in place between min/max x/y
 				r1 = -0.05 + ((rand() % 11) / 100.0);
 				r2 = -0.05 + ((rand() % 11) / 100.0);
 				cx = ((minX + maxX) / 2) + r1;
@@ -954,12 +952,10 @@ void Graph::renderVideo()
 			deleteNode(&ln1);
 			break;
 		case VID_CLEAR:
-			//po uzpauzinimo leidziam VIENA karta pravalyt dalinai
-			//tam kad dvigubai nevalytu infos kai jungias du logai kruvon
 			if (pauseRender && canClear)
 			{
 				deleteUnusedNodes();
-				//ir poto nuresetint weightus, nes kitaip appendintu ant virsaus
+				//clearing unused nodes; all edges; and reseting node weight to 0
 				for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 					i->second->setWeight(0);
 				for (unsigned int x = 0;x < edges.size();x++)
@@ -967,8 +963,8 @@ void Graph::renderVideo()
 				edges.clear();
 				canClear = false;
 			}
-			else if (!pauseRender) //jei nepauzej, tai manualclear kviesta vadinas kazkas isvale visa db
-				clear();
+			else if (!pauseRender) //if VID_CLEAR is not in pause condition, that means someone manualy called clear(), 
+				clear();			//and we can asume that graph is reseted,but technicly i dont think, thats posible.
 			break;
 		case VID_SETFRAME:
 			ss >> lastFrame;
@@ -998,7 +994,7 @@ void Graph::renderFrames(int &nextRender, int timestamp)
 	while (nextRender < timestamp)
 	{
 		//paanouncinkim karts nuo karto, kiek surenderinom
-		if (vidRendFrame % 500 == 0)
+		if (vidRendFrame % 250 == 0)
 		{
 			char frameNr[20];
 			_itoa(vidRendFrame - VIDRENDER_BEGINFRAME,frameNr,10);
