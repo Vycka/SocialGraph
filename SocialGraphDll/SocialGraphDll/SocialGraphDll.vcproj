@@ -427,14 +427,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\mIRC\SocialGraph\changelog_en.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\mIRC\SocialGraph\Changelog_lt.txt"
-				>
-			</File>
-			<File
 				RelativePath="..\mIRC\SocialGraph\Installation.txt"
 				>
 			</File>
@@ -442,6 +434,26 @@
 				RelativePath="..\mIRC\SocialGraph\SocialGraph.mrc"
 				>
 			</File>
+			<Filter
+				Name="Junk"
+				>
+				<File
+					RelativePath="..\mIRC\SocialGraph\changelog_en.txt"
+					>
+				</File>
+				<File
+					RelativePath="..\mIRC\SocialGraph\Changelog_lt.txt"
+					>
+				</File>
+				<File
+					RelativePath="..\mIRC\SocialGraph\Graph-Saves\OldFrames\old video frames copied here by default.txt"
+					>
+				</File>
+				<File
+					RelativePath="..\mIRC\SocialGraph\Graph-Saves\RenderedFrames\Rendered video stills goes here by default.txt"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

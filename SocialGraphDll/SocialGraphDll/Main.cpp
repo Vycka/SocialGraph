@@ -77,6 +77,10 @@ ALIAS mInitGraph(ALP)
 	if (graphIter != graphs.end())
 		return 1;
 
+	std::string configFile(data);
+	configFile.erase(0,configFile.rfind("\\",configFile.size()));
+	std::string mmsg = "/echo -sg SocialGraph: Config File: " + configFile + " Loaded for channel: " + c.nChannel;
+	execInMirc(&mmsg);
 
 	Graph *graph = new Graph(&c);
 	graphs.insert(std::make_pair(lchan,graph));
@@ -274,17 +278,24 @@ void main(int argc, char** arg)
 
 	}
 
-	Config c(arg[1]);
+	Config c("C:\\Users\\Viki\\Documents\\Visual Studio 2008\\Projects\\SocialGraphDll\\mIRC\\SocialGraph\\Configs\\#sample1.Config.txt");
 	if (c.isBadConfig())
 	{
 		std::cout << "Bad Config file\n";	
 		system("pause");
-		return;
+		//return;
 	}
 
 	srand((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
+
+	std::string src,des,a,b;
+	a = "bbaabaabbbbaaabbabbbb";
+	src = "bbb";
+	des = "1";
+	replaceString(&a,&b,&src,&des);
+	std::cout << b << std::endl;
 	//...
 	//do smth here for god sake...
 	//...

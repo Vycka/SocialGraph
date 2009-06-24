@@ -4,6 +4,7 @@
 
 //Irasyt vietoj #kanalas zemiau savo kanalo pavadinima (kabutes palikt)
 nChannel "#sample1"
+nTitle   "Social graph for channel"
 
 
 //uzpildyt ar uploadintu i ftp, ir jei taip, ftp prisijungimo duomenys
@@ -23,7 +24,6 @@ ftpFile    "filename.png"
 iOutputWidth   1280
 iOutputHeight  720
 
-//-------------------------------------------------------------------------------
 
 //KEIST JEI ZINAI KA KEITI
 
@@ -31,11 +31,12 @@ iOutputHeight  720
 // <mircdir>\SocialGraph\ , tada teks pakeisti siuos kelius pilnais i egzistuojancius
 
 //cia kur image dumpins
-fImageOutput  "SocialGraph\Graph-Saves\#sample1.Image.png"
+fImageOutput  "SocialGraph\Graph-Saves\<channel>.Image.png"
 
 //o cia kur info saugos apie visa grafika (kad poto galetu resumintis)
-fGraphData    "SocialGraph\Graph-Saves\#sample1.GraphData.txt"
+fGraphData    "SocialGraph\Graph-Saves\<channel>.GraphData.txt"
 
+//########### DONT CHEANGE ANYTHING BELOW HERE UNLESS YOU KNOW WHAT ARE YOU DOING ##############
 
 //image             R   G   B   A
 iBackgroundColor  255 255 255 255
@@ -77,9 +78,6 @@ gMinPauseBeforeNextRender   180
 gMinPauseBeforeNextUpload   180
 gCacheGdiTools              1
 
-
-
-
 //Inference Heuristics - irgi geriau nagu nekeist
 hAdjacency   0.03
 hBinary      0.50
@@ -93,7 +91,7 @@ hIndirect    0.15
 oSaveOldFrames 0
 
 // oPathBegin+Frame+oPathEnd sudaryt turi pilna kelia, kaip atrodys failas. (direktoriju automatiskai nekuria, tad Frame turi but kazkur vidury failo, o kitaip neveiks) 
-oPathBegin "\Graph-Saves\OldFrames\sample1-"
+oPathBegin "\Graph-Saves\OldFrames\<channel>-"
 oPathEnd   ".png"
 
 
@@ -104,10 +102,10 @@ oPathEnd   ".png"
 //log faila poto galima panaudot surenderint frames grazesniu formatu, tik tam dar toolsa padaryt reik
 //ar savinam loga?
 logSave 0
-logFile "SocialGraph\Graph-Saves\#sample1.GraphLog.txt"
+logFile "SocialGraph\Graph-Saves\<channel>.GraphLog.txt"
 
 //------------ VIDEO RENDERING ------------
-vidRenderPBegin "I:\FRAPS\SocialGraph\sample1-"
+vidRenderPBegin "SocialGraph\Graph-Saves\RenderedFrames\<channel>-"
 vidRenderPEnd   ".png"
 vidFramesPerDay 1500
 vidSEIterationsPerFrame 1

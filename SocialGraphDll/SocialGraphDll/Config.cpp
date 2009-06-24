@@ -5,13 +5,25 @@
 
 Config::Config(const char *fn)
 {
-	//TODO Reikia su try/catch pazaist
+	//No try catch, in that way users sees all bad config variables at once :)
 	badConfig = false;
-	read(fn);
+	configFile = fn;
+	read();
+	if (!cfgList.size())
+	{
+		badConfig = true;
+		std::string mmsg = "/.echo -sg SocialGraph: Config file is empty or not exists: ";
+		mmsg += configFile;
+		execInMirc(&mmsg);
+		return;
+	}
+	rChannel = "<channel>";
 
 	//names/filestuff
 	nWChannel     = getWString("nChannel");
 	nChannel      = getString("nChannel");
+	rChannel      = nChannel.c_str();
+	nWTitle       = getWString("nTitle");
 	fImageOutput  = getString("fImageOutput");
 	fWImageOutput = getWString("fImageOutput");
 	fGraphOutput  = getString("fGraphData");
@@ -74,6 +86,7 @@ Config::Config(const char *fn)
 	vidFramesPerDay         = getInt("vidFramesPerDay");
 	vidSEIterationsPerFrame = getInt("vidSEIterationsPerFrame");
 
+	//...
 
 	//clear list 
 	cfgList.clear();
@@ -114,6 +127,8 @@ std::string Config::getString(const char *cfgName)
 	std::string des;
 	std::string buff = getParam(cfgName);
 	des = getInQuotes(&buff);
+	std::string srcStr = "<channel>";
+	replaceString(&des,&des,&srcStr,&rChannel);
 	return des;
 }
 std::wstring Config::getWString(const char *cfgName)
@@ -121,6 +136,8 @@ std::wstring Config::getWString(const char *cfgName)
 	std::string des;
 	std::string buff = getParam(cfgName);
 	des = getInQuotes(&buff);
+	std::string srcStr = "<channel>";
+	replaceString(&des,&des,&srcStr,&rChannel);
 	std::wstring wdes;
 	wdes.assign(des.begin(),des.end());
 	return wdes;
@@ -139,10 +156,9 @@ CColor Config::getCColor(const char *cfgName)
 	return des;
 }
 
-void Config::read(const char *fn)
+void Config::read()
 {
-	this->configFile = fn;
-	std::fstream f(fn,std::ios_base::in);
+	std::fstream f(configFile.c_str(),std::ios_base::in);
 	std::string buff;
 	while (f.good())
 	{
