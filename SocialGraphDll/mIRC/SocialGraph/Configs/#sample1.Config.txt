@@ -4,7 +4,7 @@
 
 //Irasyt vietoj #kanalas zemiau savo kanalo pavadinima (kabutes palikt)
 nChannel "#sample1"
-nTitle   "Social graph for channel"
+nTitle   "A Social Network Diagram for an IRC Channel"
 
 
 //uzpildyt ar uploadintu i ftp, ir jei taip, ftp prisijungimo duomenys
@@ -17,7 +17,7 @@ ftpPort    21
 ftpUser    "user"
 ftpPass    "pass"
 ftpDir     "remote/ftp/dir"
-//nenaudokit # failo pavadinime nebent zinot ka darot
+//dont use # in file name because browsers get crazy about that
 ftpFile    "filename.png"
 
 //Koks butu paveiksliuko dydis? 
