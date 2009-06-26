@@ -55,6 +55,8 @@ public:
 	Config* getConfig();
 	void renderVideo();
 	void renderFrames(int &nextRender,int timestamp);
+protected:
+	double minX,maxX,minY,maxY;
 private:
 	Config *cfg;
 	std::map<std::string,Node*> nodes;
@@ -64,10 +66,11 @@ private:
 	std::set<std::string> ignoreNicks;
 	unsigned int lastFrame,lastRender,lastUpload;
 	GdiTools *gt;
-	double minX,maxX,minY,maxY,maxWeight;
-	bool isVideoRenderingGraph,abortRendering;
-	int vidRendFrame;
-	int vidSecsPerFrame;
+	double maxWeight;
+	bool isVideoRenderingGraph;
 	Logger *logger;
 	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
+
+	int vidRendFrame;
+	int vidSecsPerFrame;
 };

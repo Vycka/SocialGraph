@@ -33,7 +33,6 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	maxX = 2;
 	minY = 0;
 	maxY = 2;
-	abortRendering = false;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -176,6 +175,8 @@ void Graph::deleteNode(const std::string *lnick)
 	for (unsigned int x = 0;x < edges.size();x++)
 		if (edges[x]->getSource() == iNode->second || edges[x]->getTarget() == iNode->second)
 		{
+			edges[x]->getSource()->appConEdges(-1);
+			edges[x]->getTarget()->appConEdges(-1);
 			delete edges[x];
 			edges.erase(edges.begin()+x);
 			x--;
@@ -211,6 +212,8 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		//tokie tikrai yra cia tik siaip reikia surast ju adresus
 		Node *source = findNode(ln1);
 		Node *target = findNode(ln2);
+		source->appConEdges(1);
+		target->appConEdges(1);
 		Edge *e = new Edge(source,target,weight);
 		edges.push_back(e);
 		if (cfg->logSave)
@@ -342,6 +345,8 @@ void Graph::loadFromFile(const char *fn)
 		strToLower(&n2,&ln2);
 		Node *node1 = findNode(&ln1);
 		Node *node2 = findNode(&ln2);
+		node1->appConEdges(1);
+		node2->appConEdges(1);
 		Edge *e = new Edge(node1,node2,weight,secs + tPassed);
 		edges.push_back(e);
 		if (cfg->logSave)
@@ -421,6 +426,8 @@ void Graph::decay(double d, int tNow)
 		edges[x]->appWeight(-newDecay);
 		if (edges[x]->getWeight() <= 0)
 		{
+			edges[x]->getSource()->appConEdges(-1);
+			edges[x]->getTarget()->appConEdges(-1);
 			delete edges[x];
 			edges.erase(edges.begin()+x);
 			x--;
@@ -456,10 +463,11 @@ void Graph::deleteUnusedNodes()
 		delete iNode->second;
 		nodes.erase(iNode);
 	}
-	if (this->isVideoRenderingGraph)
-		return;
-	std::string mmsg = "/.signal SocialGraph getNicks " + cfg->nChannel;
-	execInMirc(&mmsg);
+	if (!this->isVideoRenderingGraph)
+	{
+		std::string mmsg = "/.signal SocialGraph getNicks " + cfg->nChannel;
+		execInMirc(&mmsg);
+	}
 }
 
 void Graph::addIgnore(const char *lnick)
@@ -938,6 +946,8 @@ void Graph::renderVideo()
 			{
 				node1 = findNode(&ln1);
 				node2 = findNode(&ln2);
+				node1->appConEdges(1);
+				node2->appWeight(1);
 				e = new Edge(node1,node2,weight,activity);
 				edges.push_back(e);
 			}
@@ -957,7 +967,10 @@ void Graph::renderVideo()
 				deleteUnusedNodes();
 				//clearing unused nodes; all edges; and reseting node weight to 0
 				for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+				{
 					i->second->setWeight(0);
+					i->second->appConEdges(-i->second->getConEdges());
+				}
 				for (unsigned int x = 0;x < edges.size();x++)
 					delete edges[x];
 				edges.clear();
