@@ -19,6 +19,7 @@ public:
 	void setFY(double fy) { this->fy = fy; };
 	void setWeight(double weight) { this->weight = weight; };
 	void appWeight(double weight) { this->weight += weight; };
+	void appConEdges(int n) { this->cEdges += n; };
 
 	const std::string* getNick() { return &nick; };
 	const std::string* getLNick() { return &lnick; };
@@ -28,10 +29,13 @@ public:
 	double getFY() { return fy; };
 	double getWeight() { return weight; };
 	const wchar_t* getWNick() { return wnick.c_str(); };
+	int getConEdges() { return cEdges; };
+
 
 	friend Edge;
 private:
 	std::string nick,lnick;
 	std::wstring wnick;
 	double weight,x,y,fx,fy;
+	int cEdges;
 };

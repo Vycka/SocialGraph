@@ -78,7 +78,7 @@ ALIAS mInitGraph(ALP)
 		return 1;
 
 	std::string configFile(data);
-	configFile.erase(0,configFile.rfind("\\",configFile.size()));
+	configFile.erase(0,configFile.rfind("\\",configFile.size())+1);
 	std::string mmsg = "/echo -sg SocialGraph: Config File: " + configFile + " Loaded for channel: " + c.nChannel;
 	execInMirc(&mmsg);
 
