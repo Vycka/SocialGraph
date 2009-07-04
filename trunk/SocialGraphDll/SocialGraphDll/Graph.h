@@ -55,6 +55,7 @@ public:
 	Config* getConfig();
 	void renderVideo();
 	void renderFrames(int &nextRender,int timestamp);
+	void renderRelocateNode(Node *n);
 protected:
 	double minX,maxX,minY,maxY;
 private:

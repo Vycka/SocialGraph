@@ -30,9 +30,9 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 2;
+	maxX = 150; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 2;
+	maxY = 150;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -677,6 +677,7 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 void Graph::calcBounds()
 {
 	double tminX,tminY,tmaxX,tmaxY;
+	static bool renderFirstTime = true;
 	if (visibleNodes.size() > 0)
 	{
 		tminX = visibleNodes[0]->getX();
@@ -717,14 +718,25 @@ void Graph::calcBounds()
 	}
 	else
 	{
-		double dminX = minX - tminX;
-		double dmaxX = maxX - tmaxX;
-		double dminY = minY - tminY;
-		double dmaxY = maxY - tmaxY;
-		minX -= dminX / 10;
-		maxX -= dmaxX / 10;
-		minY -= dminY / 10;
-		maxY -= dmaxY / 10;
+		if (renderFirstTime)
+		{
+			minX = tminX;
+			maxX = tmaxX;
+			minY = tminY;
+			maxY = tmaxY;
+			renderFirstTime = false;
+		}
+		else
+		{
+			double dminX = minX - tminX;
+			double dmaxX = maxX - tmaxX;
+			double dminY = minY - tminY;
+			double dmaxY = maxY - tmaxY;
+			minX -= dminX / 10;
+			maxX -= dmaxX / 10;
+			minY -= dminY / 10;
+			maxY -= dmaxY / 10;
+		}
 	}
 
 	// Increase size if too small.
@@ -842,6 +854,13 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fNick,
 			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
+		//some debug stuff
+		/*if (this->isVideoRenderingGraph)
+		{
+			wchar_t cNodesW[10];
+			_itow(n->getConEdges(),cNodesW,10);
+			gt->g->DrawString(cNodesW,2,gt->fNick,Gdiplus::PointF((float)x1-15,(float)y1-6),gt->sbLabel);
+		}*/
 	}
 	gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
 
@@ -893,8 +912,8 @@ void Graph::renderVideo()
 	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
-	double weight,cx,cy,r1,r2;
-	bool pauseRender = false,canClear = false;
+	double weight;
+	bool pauseRender = false;
 	Node *node1,*node2;
 	Edge *e;
 	std::fstream flog(cfg->logFile.c_str(),std::ios_base::in);
@@ -918,17 +937,7 @@ void Graph::renderVideo()
 			if (!pauseRender)
 				renderFrames(nextRender,lastTime);	
 			ss >> n1 >> weight;
-			node1 = addNode(&n1,weight);
-			if (node1->getX() < minX || node1->getX() > maxX || node1->getY() < minY || node1->getY() > maxY)
-			{
-				//override coords so node appears in place between min/max x/y
-				r1 = -0.05 + ((rand() % 11) / 100.0);
-				r2 = -0.05 + ((rand() % 11) / 100.0);
-				cx = ((minX + maxX) / 2) + r1;
-				cy = ((minY + maxY) / 2) + r2;
-				node1->setX(cx);
-				node1->setY(cy);
-			}
+			addNode(&n1,weight);	
 			if (!pauseRender)
 				renderFrames(nextRender,timestamp);
 			break;
@@ -946,8 +955,10 @@ void Graph::renderVideo()
 			{
 				node1 = findNode(&ln1);
 				node2 = findNode(&ln2);
+				renderRelocateNode(node1);
+				renderRelocateNode(node2);
 				node1->appConEdges(1);
-				node2->appWeight(1);
+				node2->appConEdges(1);
 				e = new Edge(node1,node2,weight,activity);
 				edges.push_back(e);
 			}
@@ -962,32 +973,23 @@ void Graph::renderVideo()
 			deleteNode(&ln1);
 			break;
 		case VID_CLEAR:
-			if (pauseRender && canClear)
+			if (pauseRender)
 			{
 				deleteUnusedNodes();
-				//clearing unused nodes; all edges; and reseting node weight to 0
 				for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
-				{
 					i->second->setWeight(0);
-					i->second->appConEdges(-i->second->getConEdges());
-				}
 				for (unsigned int x = 0;x < edges.size();x++)
-					delete edges[x];
-				edges.clear();
-				canClear = false;
+					edges[x]->setWeight(0);
 			}
 			else if (!pauseRender) //if VID_CLEAR is not in pause condition, that means someone manualy called clear(), 
-				clear();			//and we can asume that graph is reseted,but technicly i dont think, thats posible.
+				clear();			//and we can assume that graph is reseted,but technicly i dont think, thats posible.
 			break;
 		case VID_SETFRAME:
 			ss >> lastFrame;
 			break;
 		case VID_PAUSE:
 			if (!pauseRender)
-			{
-				pauseRender = true;
-				canClear = true;  
-			}
+				pauseRender = true; 
 			break;
 		case VID_RESUME:
 			pauseRender = false;
@@ -1004,6 +1006,7 @@ void Graph::renderVideo()
 
 void Graph::renderFrames(int &nextRender, int timestamp)
 {
+	static bool firstFrame = true;
 	while (nextRender < timestamp)
 	{
 		//paanouncinkim karts nuo karto, kiek surenderinom
@@ -1021,8 +1024,39 @@ void Graph::renderFrames(int &nextRender, int timestamp)
 		_itow(vidRendFrame++,frameNr,10);
 		dir += frameNr;
 		dir += cfg->vidRenderPEnd;
-		makeImage(cfg->vidSEIterationsPerFrame,&dir,nextRender);
+		if (firstFrame)
+		{
+			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
+			updateVisibleNodeList();
+			//doLayout(iterations); first time dont do layout :P, so you will get a nice circle
+			calcBounds();
+			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
+			drawImage(&dir,nextRender);
+			firstFrame = false;
+		}
+		else
+			makeImage(cfg->vidSEIterationsPerFrame,&dir,nextRender);
 		nextRender += vidSecsPerFrame;
 
+	}
+}
+
+void Graph::renderRelocateNode(Node *n)
+{
+	static int nodeDeg = 0;
+	double radian;
+	const static double pirad = 3.14159265 / 180;
+	if (n->getConEdges() == 0)
+	{
+		double cx = ((minX + maxX) / 2);
+		double cy = ((minY + maxY) / 2);
+		double rx = abs(maxX - minX) / 20;
+		double ry = abs(maxY - minY) / 20;
+		radian = pirad * nodeDeg;
+		cx += cos(radian) * rx;
+		cy += sin(radian) * ry;
+		nodeDeg = (nodeDeg + 25);
+		n->setX(cx);
+		n->setY(cy);
 	}
 }
