@@ -85,6 +85,7 @@ Config::Config(const char *fn)
 	vidRenderPEnd           = getWString("vidRenderPEnd");
 	vidFramesPerDay         = getInt("vidFramesPerDay");
 	vidSEIterationsPerFrame = getInt("vidSEIterationsPerFrame");
+	vidRendererThreads      = getInt("vidRendererThreads");
 
 	//...
 
