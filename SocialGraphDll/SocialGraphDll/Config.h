@@ -60,7 +60,7 @@ public:
 	bool oSaveOldFrames;
 	//logging/video
 	bool logSave;
-	int vidFramesPerDay,vidSEIterationsPerFrame;
+	int vidFramesPerDay,vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd;
 	std::string logFile;
 

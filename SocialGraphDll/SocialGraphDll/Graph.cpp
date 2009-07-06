@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define VIDRENDER_MAX_FRAME_Q 60
 #define VIDRENDER_BEGINFRAME 1000000
 #include "Graph.h"
 #include "Tools.h"
@@ -15,7 +16,61 @@
 #include <sstream>
 #include <iostream>
 #include <set>
+#include <queue>
 #include <Math.h>
+
+struct GraphRendererFrame
+{
+	std::wstring fName;
+	Gdiplus::Bitmap *fbmp;
+};
+
+struct GraphRendererQueoe
+{
+	GraphRendererQueoe() : framesRendered(0), stopThreads(false) {};
+	int framesRendered;
+	bool stopThreads;
+	std::queue<GraphRendererFrame*> renderQueoe;
+	CLSID encoderClsid;
+};
+
+DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
+{
+	execInMirc("/echo -sg SocialGraph: Video Renderer Thread Created");
+	GraphRendererQueoe* gr = (GraphRendererQueoe*)lp;
+	while (true)
+	{
+		if (gr->renderQueoe.empty())
+		{
+			//execInMirc("/echo -sg SocialGraph: Renderer Queue is Empty!");		
+			if (gr->stopThreads)
+			{
+				execInMirc("/echo -sg SocialGraph: Video Renderer Thread Exited");
+				return 0;
+			}
+			Sleep(1);
+		}
+		else
+		{
+			GraphRendererFrame *frame = gr->renderQueoe.front();
+			gr->renderQueoe.pop();
+			frame->fbmp->Save(frame->fName.c_str(),&gr->encoderClsid);
+
+			delete frame->fbmp;
+			delete frame;
+
+			if ((++gr->framesRendered % 250) == 0)
+			{
+				char frameNr[20];
+				_itoa(gr->framesRendered,frameNr,10);
+				std::string mmsg = "/.echo -sg SocialGraph: Video Frames Rendered: ";
+				mmsg += frameNr;
+				execInMirc(&mmsg);			
+			}
+		}
+	}
+	return 0;
+}
 
 Graph::Graph(const Config *cfg,bool videoRendering)
 {
@@ -25,14 +80,14 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	this->cfg->logSave = false;	
 #endif
 	gt = NULL;
-	
+
 	lastFrame = 0;
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 150; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 60; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 150;
+	maxY = 60;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -54,6 +109,7 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 		this->cfg->logSave = false;
 		vidRendFrame = VIDRENDER_BEGINFRAME;
 		vidSecsPerFrame = 86400 / cfg->vidFramesPerDay;
+		grq = new GraphRendererQueoe;
 		renderVideo();
 	}
 }
@@ -93,6 +149,8 @@ Graph::~Graph(void)
 
 		dumpToFile(cfg->fGraphOutput.c_str());
 	}
+	else
+		delete grq;
 
 	if (cfg->logSave)
 		logger->wPause();
@@ -862,7 +920,17 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 			gt->g->DrawString(cNodesW,2,gt->fNick,Gdiplus::PointF((float)x1-15,(float)y1-6),gt->sbLabel);
 		}*/
 	}
-	gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
+	if (this->isVideoRenderingGraph)
+	{
+		GraphRendererFrame *frame = new GraphRendererFrame;
+		frame->fName = *fWPath;
+		frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
+		while (grq->renderQueoe.size() >= VIDRENDER_MAX_FRAME_Q)
+			Sleep(1);
+		grq->renderQueoe.push(frame);
+	}
+	else
+		gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
 
 	if (!cfg->gCacheGdiTools)
 		delete gt;
@@ -910,6 +978,22 @@ Config* Graph::getConfig()
 void Graph::renderVideo()
 {
 	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
+	//initialize multithreated renderer stuff
+	grq->encoderClsid = gt->encoderClsid;
+	HANDLE *grh = new HANDLE[cfg->vidRendererThreads];
+	for (int x = 0;x < cfg->vidRendererThreads;x++)
+	{
+		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,grq,NULL,NULL);
+		if (grh[x] == NULL)
+		{
+			execInMirc("/.echo SocialGraph: Unable to create renderer threads. Halting!");
+			grq->stopThreads = true;
+			for (int y = 0; y < x;y++)
+				CloseHandle(grh[y]);
+			delete [] grh;
+			return;
+		}
+	}
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
 	double weight;
@@ -1001,6 +1085,11 @@ void Graph::renderVideo()
 		lastTime = timestamp;
 	}
 	//fd.close();
+	grq->stopThreads = true;
+	WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
+	for (int x = 0;x < cfg->vidRendererThreads;x++)
+		CloseHandle(grh[x]);
+	delete [] grh;
 	execInMirc("/.echo -sg SocialGraph: Video Rendering Finished");
 }
 
@@ -1009,16 +1098,6 @@ void Graph::renderFrames(int &nextRender, int timestamp)
 	static bool firstFrame = true;
 	while (nextRender < timestamp)
 	{
-		//paanouncinkim karts nuo karto, kiek surenderinom
-		if (vidRendFrame % 250 == 0)
-		{
-			char frameNr[20];
-			_itoa(vidRendFrame - VIDRENDER_BEGINFRAME,frameNr,10);
-			std::string mmsg = "/.echo -sg SocialGraph: Video Frames Rendered: ";
-			mmsg += frameNr;
-			execInMirc(&mmsg);
-		}
-
 		wchar_t frameNr[20];
 		std::wstring dir = cfg->vidRenderPBegin;
 		_itow(vidRendFrame++,frameNr,10);

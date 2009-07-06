@@ -109,3 +109,4 @@ vidRenderPBegin "SocialGraph\Graph-Saves\RenderedFrames\<channel>-"
 vidRenderPEnd   ".png"
 vidFramesPerDay 1500
 vidSEIterationsPerFrame 1
+vidRendererThreads 2
