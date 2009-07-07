@@ -25,11 +25,11 @@ struct GraphRendererFrame
 	Gdiplus::Bitmap *fbmp;
 };
 
-struct GraphRendererQueoe
+struct GraphRendererQueue
 {
-	GraphRendererQueoe() : framesRendered(0), stopThreads(false) {};
+	GraphRendererQueue() : framesRendered(0), stopThreads(false), queueInUse(false) {};
 	int framesRendered;
-	bool stopThreads;
+	bool stopThreads,queueInUse;
 	std::queue<GraphRendererFrame*> renderQueoe;
 	CLSID encoderClsid;
 };
@@ -37,10 +37,10 @@ struct GraphRendererQueoe
 DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 {
 	execInMirc("/echo -sg SocialGraph: Video Renderer Thread Created");
-	GraphRendererQueoe* gr = (GraphRendererQueoe*)lp;
+	GraphRendererQueue* gr = (GraphRendererQueue*)lp;
 	while (true)
 	{
-		if (gr->renderQueoe.empty())
+		if (gr->renderQueoe.empty() || gr->queueInUse)
 		{
 			//execInMirc("/echo -sg SocialGraph: Renderer Queue is Empty!");		
 			if (gr->stopThreads)
@@ -52,8 +52,10 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 		}
 		else
 		{
+			gr->queueInUse = true;
 			GraphRendererFrame *frame = gr->renderQueoe.front();
 			gr->renderQueoe.pop();
+			gr->queueInUse = false;
 			frame->fbmp->Save(frame->fName.c_str(),&gr->encoderClsid);
 
 			delete frame->fbmp;
@@ -85,9 +87,9 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 60; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 70; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 60;
+	maxY = 70;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -109,7 +111,7 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 		this->cfg->logSave = false;
 		vidRendFrame = VIDRENDER_BEGINFRAME;
 		vidSecsPerFrame = 86400 / cfg->vidFramesPerDay;
-		grq = new GraphRendererQueoe;
+		grq = new GraphRendererQueue;
 		renderVideo();
 	}
 }
@@ -1079,7 +1081,16 @@ void Graph::renderVideo()
 			pauseRender = false;
 			break;
 		case VID_INIT:
+			break;
 		default:
+			std::stringstream ssmmsg;
+			ssmmsg << "SocialGraph: error in log key: " << timestamp << " " << key;
+			execInMirc(ssmmsg.str().c_str());
+			grq->stopThreads = true;
+			WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
+			for (int x = 0;x < cfg->vidRendererThreads;x++)
+				CloseHandle(grh[x]);
+			delete [] grh;
 			break;
 		}
 		lastTime = timestamp;
