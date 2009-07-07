@@ -1086,11 +1086,7 @@ void Graph::renderVideo()
 			std::stringstream ssmmsg;
 			ssmmsg << "SocialGraph: error in log key: " << timestamp << " " << key;
 			execInMirc(ssmmsg.str().c_str());
-			grq->stopThreads = true;
-			WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
-			for (int x = 0;x < cfg->vidRendererThreads;x++)
-				CloseHandle(grh[x]);
-			delete [] grh;
+			ss.setstate(std::ios::badbit);
 			break;
 		}
 		lastTime = timestamp;
