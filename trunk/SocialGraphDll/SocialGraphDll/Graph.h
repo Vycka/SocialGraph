@@ -6,7 +6,6 @@
 #include <vector>
 #include <string>
 #include <Windows.h>
-#include <Gdiplus.h>
 #include <time.h>
 #include <fstream>
 
@@ -17,7 +16,7 @@ class Edge;
 class InferenceHeuristic;
 class Logger;
 
-struct GraphRendererQueoe;
+struct GraphRendererQueue;
 
 class Graph
 {
@@ -75,5 +74,5 @@ private:
 	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
 	int vidRendFrame;
 	int vidSecsPerFrame;
-	GraphRendererQueoe *grq;
+	GraphRendererQueue *grq;
 };
