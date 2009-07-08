@@ -1,8 +1,8 @@
 #pragma once
 #define LOG_WRITE_COUNT 30
 #include <fstream>
-//#include <queue>
-//#include <string>
+#include <sstream>
+#include <string>
 
 class Edge;
 class Node;
@@ -31,9 +31,8 @@ public:
 	void wDelNode(Node *n);
 	void wPause();
 	void wResume();
-	//void qFlush(bool force = false); //TODO: do it in the future
-	//void qAdd(std::string *s);
+	void qFlush(bool force = false);
 private:
-	std::fstream log;
-	//std::queue<std::string> logQ;
+	std::fstream logFile;
+	std::stringstream logQueue;
 };

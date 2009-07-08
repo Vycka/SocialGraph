@@ -87,9 +87,9 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 70; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 75; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 70;
+	maxY = 75;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -1084,7 +1084,7 @@ void Graph::renderVideo()
 			break;
 		default:
 			std::stringstream ssmmsg;
-			ssmmsg << "SocialGraph: error in log key: " << timestamp << " " << key;
+			ssmmsg << "/echo -sg SocialGraph: Unknown Log Key: " << timestamp << " " << key;
 			execInMirc(ssmmsg.str().c_str());
 			ss.setstate(std::ios::badbit);
 			break;
@@ -1097,7 +1097,7 @@ void Graph::renderVideo()
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 		CloseHandle(grh[x]);
 	delete [] grh;
-	execInMirc("/.echo -sg SocialGraph: Video Rendering Finished");
+	execInMirc("/echo -sg SocialGraph: Video Rendering Finished");
 }
 
 void Graph::renderFrames(int &nextRender, int timestamp)
