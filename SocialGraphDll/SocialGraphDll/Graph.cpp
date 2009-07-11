@@ -15,6 +15,7 @@
 #include "IndirectAddressingInferenceHeuristic.h"
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <set>
 #include <queue>
 #include <Math.h>
@@ -135,9 +136,8 @@ void Graph::initGraphForLogging()
 	std::string mmsg = "/.signal SocialGraph addChan " + cfg->nChannel;
 	execInMirc(&mmsg);
 
-#ifndef COMP_EXE
 	deleteUnusedNodes();
-#endif
+
 	if (cfg->logSave)
 		logger->wResume();
 }
@@ -343,23 +343,63 @@ void Graph::printLists()
 {
 	std::cout << "----Nodes----\n";
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
-		std::cout << i->first << " | " << *i->second->getNick() << " " << i->second->getWeight()
-		<< " " << i->second->getX() << " " << i->second->getY() << std::endl;
-	std::cout << "----Edges----\n";
+	{
+		std::cout << " | " << std::setw(16) << i->first << " | " 
+				  << std::setw(16) << *i->second->getNick() << " | ";
+		std::cout.setf(std::ios::left);
+		std::cout << std::setw(10) << i->second->getWeight() << " | "
+				  << std::setw(10) << i->second->getX() << " | " 
+				  << std::setw(10) << i->second->getY() << " |" << std::endl;
+		std::cout.unsetf(std::ios::left);
+	}
+	std::cout << "\n----Edges----\n";
 	for (unsigned int x = 0;x < edges.size();x++)
-		std::cout << *edges[x]->getSource()->getNick() << " " << *edges[x]->getTarget()->getNick()
-		<< " " << edges[x]->getWeight() << " " << edges[x]->getActivityTime() << std::endl;
-	//std::cout << "----Inferences----\n";
-	//for (unsigned int x = 0;x < inferences.size();x++)
-	//	std::cout << inferences[x] << "  " << inferences[x]->getName() << std::endl;
+	{
+		std::cout << " | " << std::setw(16) << *edges[x]->getSource()->getNick() << " - ";
+		std::cout.setf(std::ios::left);
+		std::cout << std::setw(16) << *edges[x]->getTarget()->getNick() << " | "
+				  << std::setw(10) << edges[x]->getWeight() << " | "
+				  << edges[x]->getActivityTime() << " | " << std::endl;
+		std::cout.unsetf(std::ios::left);
+	}
+	std::cout << "\n----Inferences----\n";
+	for (unsigned int x = 0;x < inferences.size();x++)
+	{
+		std::cout << " | " << inferences[x] << " | "
+				  << std::setw(40) << inferences[x]->getName() << " | " << std::endl;
+	}
 	updateVisibleNodeList();
-	std::cout << "----Visible Nodes----\n";
+	std::cout << "\n----Visible Nodes----\n";
 	for (unsigned int x = 0;x < visibleNodes.size();x++)
-		std::cout << *visibleNodes[x]->getNick() << " " << visibleNodes[x]->getWeight() << " "
-		<< visibleNodes[x]->getX() << " " << visibleNodes[x]->getY() << std::endl;
-	std::cout << "----Ignore Nicks----\n";
+	{
+		std::cout << " | " << std::setw(16) << *visibleNodes[x]->getNick() << " | ";
+		std::cout.setf(std::ios::left);
+		std::cout << std::setw(10) << visibleNodes[x]->getWeight() << " | "
+				  << std::setw(10) << visibleNodes[x]->getX() << " | "
+				  << std::setw(10) << visibleNodes[x]->getY() << " | " << std::endl;
+		std::cout.unsetf(std::ios::left);
+	}
+	std::cout << "\n----Ignore Nicks----\n";
 	for (std::set<std::string>::iterator i = ignoreNicks.begin();i != ignoreNicks.end();i++)
-		std::cout << *i << std::endl;
+	{
+		std::cout << " | " << std::setw(16) << *i << " | "  << std::endl;
+	}
+
+	int tNow = (int)time(NULL);
+	double d = cfg->gTemporalDecayAmount;
+	std::cout << "\n----Decay----\n";
+	for (unsigned int x = 0;x < edges.size();x++)
+	{
+		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
+		std::cout << " | " << std::setw(16) << *edges[x]->getSource()->getNick() << " - ";
+		std::cout.setf(std::ios::left);
+		std::cout << std::setw(16) << *edges[x]->getTarget()->getNick() << " | "
+				  << std::setw(10) << edges[x]->getWeight() << " | "
+				  << edges[x]->getActivityTime() << " | "
+				  << std::setw(10) << newDecay << " |" << std::endl;
+		std::cout.unsetf(std::ios::left);
+	}
+	std::cout << "\nEOF!\n\n";
 }
 
 void Graph::updateVisibleNodeList()
@@ -466,9 +506,6 @@ void Graph::decay(double d, int tNow)
 {
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 	{
-#ifdef COMP_EXE
-		break;
-#endif
 		i->second->appWeight(-d);
 		if (i->second->getWeight() < 0)
 			i->second->setWeight(0);
@@ -478,11 +515,6 @@ void Graph::decay(double d, int tNow)
 	{
 		//tipo extra saugiklis kad senesni edges greiciau mazetu
 		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
-#ifdef COMP_EXE
-		std::cout << *edges[x]->getSource()->getNick() << "\t" << *edges[x]->getTarget()->getNick() << "\t"
-			<< edges[x]->getWeight() << "\t" << edges[x]->getActivityTime() << "\t" << newDecay << std::endl;
-		continue;
-#endif
 		edges[x]->appWeight(-newDecay);
 		if (edges[x]->getWeight() <= 0)
 		{
