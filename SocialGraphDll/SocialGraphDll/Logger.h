@@ -2,7 +2,6 @@
 #define LOG_WRITE_COUNT 30
 #include <fstream>
 #include <sstream>
-#include <string>
 
 class Edge;
 class Node;

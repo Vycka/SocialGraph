@@ -145,5 +145,5 @@ alias sgRenderCalc {
 }
 
 alias sgRenderVideo {
-  var %r = $dllcall($sgDll,return,mRenderVideo,$sfile($$scriptdirConfigs\*config.txt,Select channel config file...,Select))
+  var %r = $dllcall($sgDll,return,mRenderVideo,$$sfile($scriptdirConfigs\*config.txt,Select channel config file...,Select))
 }
