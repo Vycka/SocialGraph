@@ -278,7 +278,7 @@ void main(int argc, char** arg)
 
 	}
 
-	Config c("C:\\Users\\Viki\\Documents\\Visual Studio 2008\\Projects\\SocialGraphDll\\mIRC\\SocialGraph\\Configs\\#sample1.Config.txt");
+	Config c(arg[1]);
 	if (c.isBadConfig())
 	{
 		std::cout << "Bad Config file\n";	
@@ -289,17 +289,9 @@ void main(int argc, char** arg)
 	srand((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-
-	std::string src,des,a,b;
-	a = "bbaabaabbbbaaabbabbbb";
-	src = "bbb";
-	des = "1";
-	replaceString(&a,&b,&src,&des);
-	std::cout << b << std::endl;
-	//...
-	//do smth here for god sake...
-	//...
-
+	Graph *g = new Graph(&c);
+	g->printLists();
+	delete g;
 	Gdiplus::GdiplusShutdown(gdiplusToken);
 	
 
