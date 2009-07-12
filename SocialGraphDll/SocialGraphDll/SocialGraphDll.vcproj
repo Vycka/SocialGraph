@@ -359,6 +359,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphVideo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphVideo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Node.cpp"
 				>
 			</File>
@@ -372,50 +380,6 @@
 			>
 			<File
 				RelativePath=".\def.def"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="InferenceHeuristics"
-			>
-			<File
-				RelativePath=".\AdjacencyInferenceHeuristic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AdjacencyInferenceHeuristic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BinarySequenceInferenceHeuristic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\BinarySequenceInferenceHeuristic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DirectAddressingInferenceHeuristic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DirectAddressingInferenceHeuristic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IndirectAddressingInferenceHeuristic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\IndirectAddressingInferenceHeuristic.h"
-				>
-			</File>
-			<File
-				RelativePath=".\InferenceHeuristic.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InferenceHeuristic.h"
 				>
 			</File>
 		</Filter>
@@ -451,6 +415,50 @@
 				</File>
 				<File
 					RelativePath="..\mIRC\SocialGraph\Graph-Saves\RenderedFrames\Rendered video stills goes here by default.txt"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="InferenceHeuristics"
+				>
+				<File
+					RelativePath=".\AdjacencyInferenceHeuristic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AdjacencyInferenceHeuristic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\BinarySequenceInferenceHeuristic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\BinarySequenceInferenceHeuristic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DirectAddressingInferenceHeuristic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DirectAddressingInferenceHeuristic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IndirectAddressingInferenceHeuristic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\IndirectAddressingInferenceHeuristic.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InferenceHeuristic.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InferenceHeuristic.h"
 					>
 				</File>
 			</Filter>
