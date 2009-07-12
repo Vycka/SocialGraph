@@ -11,6 +11,7 @@
 
 #include "Tools.h"
 #include "Graph.h"
+#include "GraphVideo.h"
 #include "Config.h"
 
 #define ALIAS int __stdcall
@@ -19,7 +20,7 @@ int mVer;
 HWND mHwnd;
 //multichannel supportui
 std::map<std::string,Graph*> graphs;
-Graph *gRender = NULL;
+GraphVideo *gRender = NULL;
 
 Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 ULONG_PTR gdiplusToken;
@@ -234,7 +235,7 @@ ALIAS mRenderVideo(ALP)
 		return 1;
 	}
 
-	gRender = new Graph(&c,true); //kai kuriama video renderinimui, tai automatiskai iskart ir renderins..
+	gRender = new GraphVideo(&c); //kai kuriama video renderinimui, tai automatiskai iskart ir renderins..
 	delete gRender;
 	gRender = NULL;
 	return 1;

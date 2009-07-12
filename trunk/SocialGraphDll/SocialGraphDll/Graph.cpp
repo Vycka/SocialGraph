@@ -1,6 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define VIDRENDER_MAX_FRAME_Q 60
-#define VIDRENDER_BEGINFRAME 1000000
 #include "Graph.h"
 #include "Tools.h"
 #include "Node.h"
@@ -19,61 +17,6 @@
 #include <set>
 #include <queue>
 #include <Math.h>
-
-struct GraphRendererFrame
-{
-	std::wstring fName;
-	Gdiplus::Bitmap *fbmp;
-};
-
-struct GraphRendererQueue
-{
-	GraphRendererQueue() : framesRendered(0), stopThreads(false), queueInUse(false) {};
-	int framesRendered;
-	bool stopThreads,queueInUse;
-	std::queue<GraphRendererFrame*> renderQueoe;
-	CLSID encoderClsid;
-};
-
-DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
-{
-	execInMirc("/echo -sg SocialGraph: Video Renderer Thread Created");
-	GraphRendererQueue* gr = (GraphRendererQueue*)lp;
-	while (true)
-	{
-		if (gr->renderQueoe.empty() || gr->queueInUse)
-		{
-			//execInMirc("/echo -sg SocialGraph: Renderer Queue is Empty!");		
-			if (gr->stopThreads)
-			{
-				execInMirc("/echo -sg SocialGraph: Video Renderer Thread Exited");
-				return 0;
-			}
-			Sleep(1);
-		}
-		else
-		{
-			gr->queueInUse = true;
-			GraphRendererFrame *frame = gr->renderQueoe.front();
-			gr->renderQueoe.pop();
-			gr->queueInUse = false;
-			frame->fbmp->Save(frame->fName.c_str(),&gr->encoderClsid);
-
-			delete frame->fbmp;
-			delete frame;
-
-			if ((++gr->framesRendered % 250) == 0)
-			{
-				char frameNr[20];
-				_itoa(gr->framesRendered,frameNr,10);
-				std::string mmsg = "/.echo -sg SocialGraph: Video Frames Rendered: ";
-				mmsg += frameNr;
-				execInMirc(&mmsg);			
-			}
-		}
-	}
-	return 0;
-}
 
 Graph::Graph(const Config *cfg,bool videoRendering)
 {
@@ -102,19 +45,6 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 
 	if (!videoRendering)
 		initGraphForLogging();
-	else
-	{
-		//overridinam kaikuriuos configus ir renderinam
-		srand(12345); // kad nesikeistu perrenderinant randomas :)
-		this->cfg->gCacheGdiTools = true;
-		this->cfg->gSpringEmbedderIterations = this->cfg->vidSEIterationsPerFrame;
-		gt = new GdiTools(this->cfg);
-		this->cfg->logSave = false;
-		vidRendFrame = VIDRENDER_BEGINFRAME;
-		vidSecsPerFrame = 86400 / cfg->vidFramesPerDay;
-		grq = new GraphRendererQueue;
-		renderVideo();
-	}
 }
 
 void Graph::initGraphForLogging()
@@ -151,8 +81,6 @@ Graph::~Graph(void)
 
 		dumpToFile(cfg->fGraphOutput.c_str());
 	}
-	else
-		delete grq;
 
 	if (cfg->logSave)
 		logger->wPause();
@@ -419,7 +347,12 @@ void Graph::loadFromFile(const char *fn)
 {
 	std::fstream f(fn,std::ios_base::in);
 	if (!f.good())
+	{
+		std::string mmsg = "/echo -sg SocialGraph: Unable to open GraphData file: ";
+		mmsg += fn;
+		execInMirc(&mmsg);
 		return;
+	}
 
 	clear();
 	int n = 0;
@@ -464,6 +397,9 @@ void Graph::loadFromFile(const char *fn)
 	{
 		lastFrame = 0;
 		clear();
+		std::string mmsg = "/echo -sg SocialGraph: Unable to read GraphData file correctly (file might be corrupted): ";
+		mmsg += fn;
+		execInMirc(&mmsg);
 	}
 	if (cfg->logSave)
 		logger->wFrame(lastFrame);
@@ -554,11 +490,6 @@ void Graph::deleteUnusedNodes()
 			logger->wDelNode(iNode->second);
 		delete iNode->second;
 		nodes.erase(iNode);
-	}
-	if (!this->isVideoRenderingGraph)
-	{
-		std::string mmsg = "/.signal SocialGraph getNicks " + cfg->nChannel;
-		execInMirc(&mmsg);
 	}
 }
 
@@ -768,14 +699,12 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 
 void Graph::calcBounds()
 {
-	double tminX,tminY,tmaxX,tmaxY;
-	static bool renderFirstTime = true;
 	if (visibleNodes.size() > 0)
 	{
-		tminX = visibleNodes[0]->getX();
-		tmaxX = visibleNodes[0]->getX();
-		tminY = visibleNodes[0]->getY();
-		tmaxY = visibleNodes[0]->getY();
+		minX = visibleNodes[0]->getX();
+		maxX = visibleNodes[0]->getX();
+		minY = visibleNodes[0]->getY();
+		maxY = visibleNodes[0]->getY();
 	}
 	else
 	{
@@ -788,47 +717,17 @@ void Graph::calcBounds()
 
 	for (unsigned int x = 0; x < visibleNodes.size();x++)	
 	{
-		if (visibleNodes[x]->getX() > tmaxX)
-			tmaxX = visibleNodes[x]->getX();
+		if (visibleNodes[x]->getX() > maxX)
+			maxX = visibleNodes[x]->getX();
 
-		if (visibleNodes[x]->getX() < tminX)
-			tminX = visibleNodes[x]->getX();
+		if (visibleNodes[x]->getX() < minX)
+			minX = visibleNodes[x]->getX();
 
-		if (visibleNodes[x]->getY() > tmaxY)
-			tmaxY = visibleNodes[x]->getY();
+		if (visibleNodes[x]->getY() > maxY)
+			maxY = visibleNodes[x]->getY();
 
-		if (visibleNodes[x]->getY() < tminY)
-			tminY = visibleNodes[x]->getY();
-	}
-	
-	if (!isVideoRenderingGraph)
-	{
-		minX = tminX;
-		maxX = tmaxX;
-		minY = tminY;
-		maxY = tmaxY;
-	}
-	else
-	{
-		if (renderFirstTime)
-		{
-			minX = tminX;
-			maxX = tmaxX;
-			minY = tminY;
-			maxY = tmaxY;
-			renderFirstTime = false;
-		}
-		else
-		{
-			double dminX = minX - tminX;
-			double dmaxX = maxX - tmaxX;
-			double dminY = minY - tminY;
-			double dmaxY = maxY - tmaxY;
-			minX -= dminX / 10;
-			maxX -= dmaxX / 10;
-			minY -= dminY / 10;
-			maxY -= dmaxY / 10;
-		}
+		if (visibleNodes[x]->getY() < minY)
+			minY = visibleNodes[x]->getY();
 	}
 
 	// Increase size if too small.
@@ -946,25 +845,8 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fNick,
 			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
-		//some debug stuff
-		/*if (this->isVideoRenderingGraph)
-		{
-			wchar_t cNodesW[10];
-			_itow(n->getConEdges(),cNodesW,10);
-			gt->g->DrawString(cNodesW,2,gt->fNick,Gdiplus::PointF((float)x1-15,(float)y1-6),gt->sbLabel);
-		}*/
 	}
-	if (this->isVideoRenderingGraph)
-	{
-		GraphRendererFrame *frame = new GraphRendererFrame;
-		frame->fName = *fWPath;
-		frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
-		while (grq->renderQueoe.size() >= VIDRENDER_MAX_FRAME_Q)
-			Sleep(1);
-		grq->renderQueoe.push(frame);
-	}
-	else
-		gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
+	gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
 
 	if (!cfg->gCacheGdiTools)
 		delete gt;
@@ -1008,173 +890,4 @@ void Graph::saveOldFrame()
 Config* Graph::getConfig()
 {
 	return cfg;
-}
-void Graph::renderVideo()
-{
-	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
-	//initialize multithreated renderer stuff
-	grq->encoderClsid = gt->encoderClsid;
-	HANDLE *grh = new HANDLE[cfg->vidRendererThreads];
-	for (int x = 0;x < cfg->vidRendererThreads;x++)
-	{
-		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,grq,NULL,NULL);
-		if (grh[x] == NULL)
-		{
-			execInMirc("/.echo SocialGraph: Unable to create renderer threads. Halting!");
-			grq->stopThreads = true;
-			for (int y = 0; y < x;y++)
-				CloseHandle(grh[y]);
-			delete [] grh;
-			return;
-		}
-	}
-	int timestamp,lastTime,key,activity;
-	std::string n1,ln1,ln2;
-	double weight;
-	bool pauseRender = false;
-	Node *node1,*node2;
-	Edge *e;
-	std::fstream flog(cfg->logFile.c_str(),std::ios_base::in);
-	std::string buffer;
-	getline(flog,buffer,'\0');
-	flog.close();
-	std::stringstream ss(buffer);
-	//read until first keyframe (VID_INIT)
-	do
-	{
-		ss >> timestamp >> key;
-	} while (key != VID_INIT && ss.good());
-	lastTime = timestamp;
-	int nextRender = timestamp + vidSecsPerFrame;
-	while (ss.good())
-	{
-		ss >> timestamp >> key;
-		switch (key)
-		{
-		case VID_ADDNODE:
-			if (!pauseRender)
-				renderFrames(nextRender,lastTime);	
-			ss >> n1 >> weight;
-			addNode(&n1,weight);	
-			if (!pauseRender)
-				renderFrames(nextRender,timestamp);
-			break;
-		case VID_ADDEDGE:
-			if (!pauseRender)
-				renderFrames(nextRender,lastTime);			
-			ss >> ln1 >> ln2 >> weight >> activity;
-			e = findEdge(&ln1,&ln2);
-			if (e)
-			{
-				e->appWeight(weight);
-				e->updateActivityTime(activity);
-			}
-			else
-			{
-				node1 = findNode(&ln1);
-				node2 = findNode(&ln2);
-				renderRelocateNode(node1);
-				renderRelocateNode(node2);
-				node1->appConEdges(1);
-				node2->appConEdges(1);
-				e = new Edge(node1,node2,weight,activity);
-				edges.push_back(e);
-			}
-			if (!pauseRender)
-			{
-				renderFrames(nextRender,timestamp);
-				decay(cfg->gTemporalDecayAmount,timestamp);
-			}
-			break;
-		case VID_DELETENODE:
-			ss >> ln1;
-			deleteNode(&ln1);
-			break;
-		case VID_CLEAR:
-			if (pauseRender)
-			{
-				deleteUnusedNodes();
-				for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
-					i->second->setWeight(0);
-				for (unsigned int x = 0;x < edges.size();x++)
-					edges[x]->setWeight(0);
-			}
-			else if (!pauseRender) //if VID_CLEAR is not in pause condition, that means someone manualy called clear(), 
-				clear();			//and we can assume that graph is reseted,but technicly i dont think, thats posible.
-			break;
-		case VID_SETFRAME:
-			ss >> lastFrame;
-			break;
-		case VID_PAUSE:
-			if (!pauseRender)
-				pauseRender = true; 
-			break;
-		case VID_RESUME:
-			pauseRender = false;
-			break;
-		case VID_INIT:
-			break;
-		default:
-			std::stringstream ssmmsg;
-			ssmmsg << "/echo -sg SocialGraph: Unknown Log Key: " << timestamp << " " << key;
-			execInMirc(ssmmsg.str().c_str());
-			ss.setstate(std::ios::badbit);
-			break;
-		}
-		lastTime = timestamp;
-	}
-	//fd.close();
-	grq->stopThreads = true;
-	WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
-	for (int x = 0;x < cfg->vidRendererThreads;x++)
-		CloseHandle(grh[x]);
-	delete [] grh;
-	execInMirc("/echo -sg SocialGraph: Video Rendering Finished");
-}
-
-void Graph::renderFrames(int &nextRender, int timestamp)
-{
-	static bool firstFrame = true;
-	while (nextRender < timestamp)
-	{
-		wchar_t frameNr[20];
-		std::wstring dir = cfg->vidRenderPBegin;
-		_itow(vidRendFrame++,frameNr,10);
-		dir += frameNr;
-		dir += cfg->vidRenderPEnd;
-		if (firstFrame)
-		{
-			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
-			updateVisibleNodeList();
-			//doLayout(iterations); first time dont do layout :P, so you will get a nice circle
-			calcBounds();
-			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
-			drawImage(&dir,nextRender);
-			firstFrame = false;
-		}
-		else
-			makeImage(cfg->vidSEIterationsPerFrame,&dir,nextRender);
-		nextRender += vidSecsPerFrame;
-
-	}
-}
-
-void Graph::renderRelocateNode(Node *n)
-{
-	static int nodeDeg = 0;
-	double radian;
-	const static double pirad = 3.14159265 / 180;
-	if (n->getConEdges() == 0)
-	{
-		double cx = ((minX + maxX) / 2);
-		double cy = ((minY + maxY) / 2);
-		double rx = abs(maxX - minX) / 20;
-		double ry = abs(maxY - minY) / 20;
-		radian = pirad * nodeDeg;
-		cx += cos(radian) * rx;
-		cy += sin(radian) * ry;
-		nodeDeg = (nodeDeg + 25);
-		n->setX(cx);
-		n->setY(cy);
-	}
 }

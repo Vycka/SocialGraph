@@ -7,7 +7,6 @@
 #include <string>
 #include <Windows.h>
 #include <time.h>
-#include <fstream>
 
 class GdiTools;
 class Config;
@@ -40,39 +39,34 @@ public:
 	void dumpToFile(const char *fn);
 	void loadFromFile(const char *fn);
 	void decay(double d,int tNow = (int)time(NULL));
-	void deleteUnusedNodes();
+	virtual void deleteUnusedNodes();
 	void addIgnore(const char *lnick);
 	void addIgnore(const std::string *lnick);
 	bool findIgnore(const std::string *lnick);
 	void deleteIgnore(const std::string *lnick);
 	void updateFrame();
-	void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
+	virtual void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
 	void makeImage();
-	void doLayout(int gSpringEmbedderIterations);
-	void calcBounds();
-	void drawImage(std::wstring *fWPath,int szClock);
+	virtual void doLayout(int gSpringEmbedderIterations);
+	virtual void calcBounds();
+	virtual void drawImage(std::wstring *fWPath,int szClock);
 	void upload();
 	void saveOldFrame();
 	Config* getConfig();
-	void renderVideo();
-	void renderFrames(int &nextRender,int timestamp);
-	void renderRelocateNode(Node *n);
 protected:
 	double minX,maxX,minY,maxY;
-private:
+	GdiTools *gt;
 	Config *cfg;
 	std::map<std::string,Node*> nodes;
 	std::vector<Edge*> edges;
+	unsigned int lastFrame;
+	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
+	double maxWeight;
 	std::vector<Node*> visibleNodes;
+private:
 	std::vector<InferenceHeuristic*> inferences;
 	std::set<std::string> ignoreNicks;
-	unsigned int lastFrame,lastRender,lastUpload;
-	GdiTools *gt;
-	double maxWeight;
+	unsigned int lastRender,lastUpload;
 	bool isVideoRenderingGraph;
 	Logger *logger;
-	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
-	int vidRendFrame;
-	int vidSecsPerFrame;
-	GraphRendererQueue *grq;
 };
