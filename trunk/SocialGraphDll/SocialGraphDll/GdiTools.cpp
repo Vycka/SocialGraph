@@ -1,8 +1,8 @@
 #include "GdiTools.h"
-#include "Config.h"
+#include "GraphConfig.h"
 #include "Tools.h"
 
-GdiTools::GdiTools(Config *cfg)
+GdiTools::GdiTools(GraphConfig *cfg)
 {
 	bmp = new Gdiplus::Bitmap(cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
 	g = new Gdiplus::Graphics(bmp);

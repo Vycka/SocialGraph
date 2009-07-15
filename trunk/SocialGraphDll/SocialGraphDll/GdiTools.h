@@ -2,12 +2,12 @@
 #include <Windows.h>
 #include <Gdiplus.h>
 
-class Config;
+class GraphConfig;
 
 class GdiTools
 {
 public:
-	GdiTools(Config *cfg);
+	GdiTools(GraphConfig *cfg);
 	~GdiTools(void);
 
 	CLSID encoderClsid;

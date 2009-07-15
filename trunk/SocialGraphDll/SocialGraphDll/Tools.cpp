@@ -40,7 +40,8 @@ void replaceChars(const std::string *src, std::string *des,const std::string *sr
 void replaceString(const std::string *src, std::string *des,const std::string *srcStr,const std::string *desStr,int changes)
 {
 	int changed = 0;
-	*des = *src;
+	if (src != des)
+		*des = *src;
 	int searchPos = 0;
 	while (searchPos+srcStr->size() <= des->size() && changes != 0)
 	{

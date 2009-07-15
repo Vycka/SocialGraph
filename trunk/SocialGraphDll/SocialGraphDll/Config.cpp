@@ -5,7 +5,6 @@
 
 Config::Config(const char *fn)
 {
-	//No try catch, in that way users sees all bad config variables at once :)
 	badConfig = false;
 	configFile = fn;
 	read();
@@ -15,82 +14,7 @@ Config::Config(const char *fn)
 		std::string mmsg = "/.echo -sg SocialGraph: Config file is empty or not exists: ";
 		mmsg += configFile;
 		execInMirc(&mmsg);
-		return;
 	}
-	rChannel = "<channel>";
-
-	//names/filestuff
-	nWChannel     = getWString("nChannel");
-	nChannel      = getString("nChannel");
-	rChannel      = nChannel.c_str();
-	nWTitle       = getWString("nTitle");
-	fImageOutput  = getString("fImageOutput");
-	fWImageOutput = getWString("fImageOutput");
-	fGraphOutput  = getString("fGraphData");
-	fWEncoderMime = getWString("fEncoderMime");
-
-	//image stuff
-	iOutputWidth     = getInt("iOutputWidth");
-	iOutputHeight    = getInt("iOutputHeight");
-	iBackgroundColor = getCColor("iBackgroundColor");
-	iChannelColor    = getCColor("iChannelColor");
-	iLabelColor      = getCColor("iLabelColor");
-	iTitleColor      = getCColor("iTitleColor");
-	iNodeBorderColor = getCColor("iNodeBorderColor");
-	iNodeColor       = getCColor("iNodeColor");
-	iEdgeColor       = getCColor("iEdgeColor");
-	iBorderColor     = getCColor("iBorderColor");
-
-	//ftp
-	ftpUpload = getBool("ftpUpload");
-	ftpHost   = getString("ftpHost");
-	ftpPort   = getInt("ftpPort");
-	ftpUser   = getString("ftpUser");
-	ftpPass   = getString("ftpPass");
-	ftpDir    = getString("ftpDir");
-	ftpFile   = getString("ftpFile");
-
-	//graph
-	gTemporalDecayAmount       = getDouble("gTemporalDecayAmount");
-	gSpringEmbedderIterations  = getInt("gSpringEmbedderIterations");
-	gK                         = getDouble("gK");
-	gC                         = getDouble("gC");
-	gMaxRepulsiveForceDistance = getDouble("gMaxRepulsiveForceDistance");
-	gMaxNodeMovement           = getDouble("gMaxNodeMovement");
-	gMinDiagramSize            = getDouble("gMinDiagramSize");
-	gBorderSize                = getDouble("gBorderSize");
-	gNodeRadius                = getDouble("gNodeRadius");
-	gEdgeThreshold             = getDouble("gEdgeThreshold");
-	gNodeBumpWeight            = getDouble("gNodeBumpWeight");
-	gMinPauseBeforeNextRender  = getInt("gMinPauseBeforeNextRender");
-	gMinPauseBeforeNextUpload  = getInt("gMinPauseBeforeNextUpload");
-	gEdgeDecayMultiplyIdleSecs = getInt("gEdgeDecayMultiplyIdleSecs");
-	gCacheGdiTools             = getInt("gCacheGdiTools");
-
-	//inference heuristics
-	hAdjacency  = getDouble("hAdjacency");
-	hBinary     = getDouble("hBinary");
-	hDirect     = getDouble("hDirect");
-	hIndirect   = getDouble("hIndirect");
-
-	//old frames stuff
-	oPathBegin     = getString("oPathBegin");
-	oPathEnd       = getString("oPathEnd");
-	oSaveOldFrames = getBool("oSaveOldFrames");
-
-	//logging/video
-	logSave                 = getBool("logSave");
-	logFile                 = getString("logFile");
-	vidRenderPBegin         = getWString("vidRenderPBegin");
-	vidRenderPEnd           = getWString("vidRenderPEnd");
-	vidFramesPerDay         = getInt("vidFramesPerDay");
-	vidSEIterationsPerFrame = getInt("vidSEIterationsPerFrame");
-	vidRendererThreads      = getInt("vidRendererThreads");
-
-	//...
-
-	//clear list 
-	cfgList.clear();
 }
 
 
@@ -128,8 +52,7 @@ std::string Config::getString(const char *cfgName)
 	std::string des;
 	std::string buff = getParam(cfgName);
 	des = getInQuotes(&buff);
-	std::string srcStr = "<channel>";
-	replaceString(&des,&des,&srcStr,&rChannel);
+	replaceParam(&des);
 	return des;
 }
 std::wstring Config::getWString(const char *cfgName)
@@ -137,8 +60,7 @@ std::wstring Config::getWString(const char *cfgName)
 	std::string des;
 	std::string buff = getParam(cfgName);
 	des = getInQuotes(&buff);
-	std::string srcStr = "<channel>";
-	replaceString(&des,&des,&srcStr,&rChannel);
+	replaceParam(&des);
 	std::wstring wdes;
 	wdes.assign(des.begin(),des.end());
 	return wdes;
@@ -189,4 +111,10 @@ std::string Config::getParam(const char *key)
 	}
 	else
 		return cfgIter->second;
+}
+
+void Config::replaceParam(std::string *param)
+{
+	for (unsigned int x = 0;x < replaceTable.size();x++)
+		replaceString(param,param,&replaceTable[x].from,&replaceTable[x].to);
 }

@@ -9,7 +9,7 @@
 #include <time.h>
 
 class GdiTools;
-class Config;
+class GraphConfig;
 class Node;
 class Edge;
 class InferenceHeuristic;
@@ -20,7 +20,7 @@ struct GraphRendererQueue;
 class Graph
 {
 public:
-	Graph(const Config *cfg,bool videoRendering = false);
+	Graph(const GraphConfig *cfg,bool videoRendering = false);
 	~Graph(void);
 	void initGraphForLogging();
 	void clear();
@@ -38,7 +38,7 @@ public:
 	void printLists();
 	void dumpToFile(const char *fn);
 	void loadFromFile(const char *fn);
-	void decay(double d,int tNow = (int)time(NULL));
+	virtual void decay(double d,int tNow = (int)time(NULL));
 	virtual void deleteUnusedNodes();
 	void addIgnore(const char *lnick);
 	void addIgnore(const std::string *lnick);
@@ -52,11 +52,11 @@ public:
 	virtual void drawImage(std::wstring *fWPath,int szClock);
 	void upload();
 	void saveOldFrame();
-	Config* getConfig();
+	GraphConfig* getConfig();
 protected:
 	double minX,maxX,minY,maxY;
 	GdiTools *gt;
-	Config *cfg;
+	GraphConfig *cfg;
 	std::map<std::string,Node*> nodes;
 	std::vector<Edge*> edges;
 	unsigned int lastFrame;

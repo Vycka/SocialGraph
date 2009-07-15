@@ -8,7 +8,7 @@
 #include "Logger.h"
 #include "Node.h"
 #include "Edge.h"
-#include "Config.h"
+#include "GraphConfig.h"
 #include <queue>
 #include <fstream>
 
@@ -71,7 +71,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 	return 0;
 }
 
-GraphVideo::GraphVideo(Config *cfg) : Graph(cfg,true)
+GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 {
 	//overridinam kaikuriuos configus ir renderinam
 	srand(12345); // kad nesikeistu perrenderinant randomas :)
@@ -163,11 +163,12 @@ void GraphVideo::renderVideo()
 			ss >> lastFrame;
 			break;
 		case VID_PAUSE:
-			if (!pauseRender)
-				pauseRender = true; 
+			pauseRender = true; 
 			break;
 		case VID_RESUME:
 			pauseRender = false;
+			decay(0,timestamp); //remove empty edges
+			renderFrames(nextRender,timestamp);
 			break;
 		case VID_INIT:
 			break;
@@ -367,10 +368,10 @@ void GraphVideo::calcBounds()
 		double dmaxX = maxX - tmaxX;
 		double dminY = minY - tminY;
 		double dmaxY = maxY - tmaxY;
-		minX -= dminX / 10;
-		maxX -= dmaxX / 10;
-		minY -= dminY / 10;
-		maxY -= dmaxY / 10;
+		minX -= dminX / 20;
+		maxX -= dmaxX / 20;
+		minY -= dminY / 20;
+		maxY -= dmaxY / 20;
 	}
 
 	// Increase size if too small.
@@ -601,7 +602,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		}
 		if (!node2)
 		{
-			std::string mmsg("/echo -sg SocialGraph: missing nick in log: ");
+			std::string mmsg("/echo -sg SocialGraph: Missing nick in log: ");
 			mmsg += *ln2;
 			execInMirc(&mmsg);
 			node2 = addNode(ln2,ln2,0);
@@ -612,5 +613,30 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		node2->appConEdges(1);
 		e = new Edge(node1,node2,weight,activity);
 		edges.push_back(e);
+	}
+}
+
+void GraphVideo::decay(double d, int tNow)
+{
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	{
+		i->second->appWeight(-d);
+		if (i->second->getWeight() < 0)
+			i->second->setWeight(0);
+
+	}
+	for (unsigned int x = 0;x < edges.size();x++)
+	{
+		//tipo extra saugiklis kad senesni edges greiciau mazetu
+		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
+		edges[x]->appWeight(-newDecay);
+		if (edges[x]->getWeight() <= 0)
+		{
+			edges[x]->getSource()->appConEdges(-1);
+			edges[x]->getTarget()->appConEdges(-1);
+			delete edges[x];
+			edges.erase(edges.begin()+x);
+			x--;
+		}
 	}
 }
