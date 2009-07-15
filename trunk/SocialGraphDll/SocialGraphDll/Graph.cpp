@@ -22,7 +22,7 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 {
 	isVideoRenderingGraph = videoRendering;
 	this->cfg = new GraphConfig(*cfg);
-#ifdef COM_EXE
+#ifdef COMP_EXE
 	this->cfg->logSave = false;	
 #endif
 	gt = NULL;
@@ -280,21 +280,26 @@ void Graph::printLists()
 				  << std::setw(10) << i->second->getY() << " |" << std::endl;
 		std::cout.unsetf(std::ios::left);
 	}
-	std::cout << "\n----Edges----\n";
+	int tNow = (int)time(NULL);
+	double d = cfg->gTemporalDecayAmount;
+	std::cout << "\n----Edges/Decay----\n";
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
+		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
 		std::cout << " | " << std::setw(16) << *edges[x]->getSource()->getNick() << " - ";
 		std::cout.setf(std::ios::left);
 		std::cout << std::setw(16) << *edges[x]->getTarget()->getNick() << " | "
 				  << std::setw(10) << edges[x]->getWeight() << " | "
-				  << edges[x]->getActivityTime() << " | " << std::endl;
+				  << edges[x]->getActivityTime() << " | "
+				  << std::setw(10) << newDecay << " |" << std::endl;
 		std::cout.unsetf(std::ios::left);
 	}
 	std::cout << "\n----Inferences----\n";
 	for (unsigned int x = 0;x < inferences.size();x++)
 	{
 		std::cout << " | " << inferences[x] << " | "
-				  << std::setw(40) << inferences[x]->getName() << " | " << std::endl;
+				  << std::setw(40) << inferences[x]->getName() << " | "
+				  << std::setw(10) << inferences[x]->getWeighting() << " | " << std::endl;
 	}
 	updateVisibleNodeList();
 	std::cout << "\n----Visible Nodes----\n";
@@ -311,21 +316,6 @@ void Graph::printLists()
 	for (std::set<std::string>::iterator i = ignoreNicks.begin();i != ignoreNicks.end();i++)
 	{
 		std::cout << " | " << std::setw(16) << *i << " | "  << std::endl;
-	}
-
-	int tNow = (int)time(NULL);
-	double d = cfg->gTemporalDecayAmount;
-	std::cout << "\n----Decay----\n";
-	for (unsigned int x = 0;x < edges.size();x++)
-	{
-		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
-		std::cout << " | " << std::setw(16) << *edges[x]->getSource()->getNick() << " - ";
-		std::cout.setf(std::ios::left);
-		std::cout << std::setw(16) << *edges[x]->getTarget()->getNick() << " | "
-				  << std::setw(10) << edges[x]->getWeight() << " | "
-				  << edges[x]->getActivityTime() << " | "
-				  << std::setw(10) << newDecay << " |" << std::endl;
-		std::cout.unsetf(std::ios::left);
 	}
 	std::cout << "\nEOF!\n\n";
 }
