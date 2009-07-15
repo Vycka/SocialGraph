@@ -3,7 +3,7 @@
 #include "Tools.h"
 #include "Node.h"
 #include "Edge.h"
-#include "Config.h"
+#include "GraphConfig.h"
 #include "GdiTools.h"
 #include "Logger.h"
 #include "InferenceHeuristic.h"
@@ -18,10 +18,10 @@
 #include <queue>
 #include <Math.h>
 
-Graph::Graph(const Config *cfg,bool videoRendering)
+Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 {
 	isVideoRenderingGraph = videoRendering;
-	this->cfg = new Config(*cfg);
+	this->cfg = new GraphConfig(*cfg);
 #ifdef COM_EXE
 	this->cfg->logSave = false;	
 #endif
@@ -31,9 +31,9 @@ Graph::Graph(const Config *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 75; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 300; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 75;
+	maxY = 300;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -889,7 +889,7 @@ void Graph::saveOldFrame()
 }
 
 
-Config* Graph::getConfig()
+GraphConfig* Graph::getConfig()
 {
 	return cfg;
 }

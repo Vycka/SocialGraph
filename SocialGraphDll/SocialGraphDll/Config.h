@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <map>
 
 
@@ -11,13 +12,20 @@ struct CColor
 	unsigned char r,g,b,a;
 };
 
+struct CReplace {
+	CReplace (std::string f,std::string t) : from(f), to(t) {};
+	std::string from,to;
+};
+
 class Config
 {
 public:
 	Config(const char *fn);
 	~Config(void);
-	void read();
+	bool isBadConfig() { return badConfig; };
 
+protected:
+	void read();
 
 	int getInt(const char *cfgName);
 	bool getBool(const char *cfgName);
@@ -27,45 +35,11 @@ public:
 	CColor getCColor(const char *cfgName);
 
 	std::string getParam(const char *key);
-	bool isBadConfig() { return badConfig; };
+	void replaceParam(std::string *param);
 
-	//friend GdiTools;
-	//friend Graph;
-//private:
-	//replace variables
-	//if there are gonna be more replace varialbes in the future, then it would need to be rewriten
-	//to std::vecotr<struct { string a,b }> to support as many keys as need.
-	std::string rChannel;
-	//img config
-	int iOutputWidth,iOutputHeight;
-	CColor iBackgroundColor,iChannelColor,
-		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor;
-	//graph config
-	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
-		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
-		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
-	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations;
-	//ftp stuff
-	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;
-	int ftpPort;
-	bool ftpUpload;
-	//Heuristic Weightings
-	double hAdjacency,hBinary,hDirect,hIndirect;
-	//names outputs.. etc..
-	std::wstring fWEncoderMime,fWImageOutput,nWChannel,nWTitle;
-	std::string fImageOutput,fGraphOutput,nChannel;
-	//old frame saving stuff
-	std::string oPathBegin,oPathEnd;
-	bool oSaveOldFrames;
-	//logging/video
-	bool logSave;
-	int vidFramesPerDay,vidSEIterationsPerFrame,vidRendererThreads;
-	std::wstring vidRenderPBegin,vidRenderPEnd;
-	std::string logFile;
 
-private:
 	std::string configFile;
-	std::map<std::string,std::string> cfgList;
+	std::vector<CReplace> replaceTable;
 	bool badConfig;
+	std::map<std::string,std::string> cfgList;
 };

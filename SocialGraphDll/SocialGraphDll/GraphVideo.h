@@ -5,7 +5,7 @@
 class GraphVideo : public Graph
 {
 public:
-	GraphVideo(Config *cfg);
+	GraphVideo(GraphConfig *cfg);
 	~GraphVideo();
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight,int activity);
 	void renderVideo();
@@ -16,6 +16,7 @@ public:
 	void doLayout(int gSpringEmbedderIterations);
 	void calcBounds();
 	void deleteUnusedNodes();
+	void decay(double d, int tNow);
 private:
 	int vidRendFrame;
 	int vidSecsPerFrame;

@@ -12,7 +12,7 @@
 #include "Tools.h"
 #include "Graph.h"
 #include "GraphVideo.h"
-#include "Config.h"
+#include "GraphConfig.h"
 
 #define ALIAS int __stdcall
 #define ALP HWND mWnd, HWND aWnd, char *data, char *parms, BOOL show, BOOL nopause
@@ -64,7 +64,7 @@ int __stdcall UnloadDll(int type)
 
 ALIAS mInitGraph(ALP)
 {
-	Config c(data);
+	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
 		std::string mmsg = "/echo -sg SocialGraph: Graph not initialized due bad config: " + std::string(data);
@@ -227,7 +227,7 @@ ALIAS mDumpFile(ALP)
 
 ALIAS mRenderVideo(ALP)
 {
-	Config c(data);
+	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
 		std::string mmsg = "/echo -sg SocialGraph: Graph not initialized due bad config: " + std::string(data);
@@ -279,7 +279,7 @@ void main(int argc, char** arg)
 
 	}
 
-	Config c(arg[1]);
+	GraphConfig c(arg[1]);
 	if (c.isBadConfig())
 	{
 		std::cout << "Bad Config file\n";	

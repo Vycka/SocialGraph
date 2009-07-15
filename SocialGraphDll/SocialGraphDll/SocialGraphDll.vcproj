@@ -463,6 +463,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\GraphConfig.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\GraphConfig.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
