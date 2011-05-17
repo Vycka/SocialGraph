@@ -26,6 +26,9 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iEdgeColor       = getCColor("iEdgeColor");
 	iBorderColor     = getCColor("iBorderColor");
 
+	//font/sizes stuff
+	iNickFontSize = getDouble("iNickFontSize");
+
 	//ftp
 	ftpUpload = getBool("ftpUpload");
 	ftpHost   = getString("ftpHost");
@@ -71,6 +74,8 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidFramesPerDay         = getInt("vidFramesPerDay");
 	vidSEIterationsPerFrame = getInt("vidSEIterationsPerFrame");
 	vidRendererThreads      = getInt("vidRendererThreads");
+	vidBeginRenderTime      = getInt("vidBeginRenderTime");
+	vidEndRenderTime        = getInt("vidEndRenderTime");
 
 	//...
 

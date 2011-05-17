@@ -13,6 +13,8 @@ public:
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
 		iEdgeColor,iBorderColor;
+	//img font stuff
+	double iNickFontSize;
 	//graph config
 	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
@@ -32,6 +34,7 @@ public:
 	bool oSaveOldFrames;
 	//logging/video
 	bool logSave;
+	int vidBeginRenderTime,vidEndRenderTime;
 	int vidFramesPerDay,vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd;
 	std::string logFile;

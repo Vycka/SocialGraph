@@ -26,8 +26,8 @@ void BinarySequenceInferenceHeuristic::infer(const std::string *lnick,const std:
 		if (uniqNicks.size() == 2)
 		{
 			std::set<std::string>::iterator iUniqNicks = uniqNicks.begin();
-			std::string *s1 = &(*iUniqNicks++);
-			std::string *s2 = &(*iUniqNicks);
+			std::string *s1 = &(std::string)(*iUniqNicks++);
+			std::string *s2 = &(std::string)(*iUniqNicks);
 #ifdef HEURISTIC_NOTICES
 			char buff[15];
 			sprintf(buff,"%f",getWeighting());

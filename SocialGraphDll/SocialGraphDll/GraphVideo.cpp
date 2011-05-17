@@ -124,8 +124,10 @@ void GraphVideo::renderVideo()
 		ss >> timestamp >> key;
 	} while (key != VID_INIT && ss.good());
 	lastTime = timestamp;
-	int nextRender = timestamp + vidSecsPerFrame;
-	while (ss.good())
+	double nextRender = (cfg->vidBeginRenderTime > timestamp ? cfg->vidBeginRenderTime : timestamp + 1);
+	if (cfg->vidEndRenderTime <= 0)
+		cfg->vidBeginRenderTime = 0x7FFFFFFF;
+	while (ss.good() && timestamp < cfg->vidBeginRenderTime)
 	{
 		ss >> timestamp >> key;
 		switch (key)
@@ -174,9 +176,10 @@ void GraphVideo::renderVideo()
 			break;
 		default:
 			std::stringstream ssmmsg;
-			ssmmsg << "/echo -sg SocialGraph: Unknown Log Key: " << timestamp << " " << key;
+			ssmmsg << "/echo -sg SocialGraph: Unknown Log Key: " << timestamp << " " << key << " Seeking till the new line!";
 			execInMirc(ssmmsg.str().c_str());
-			ss.setstate(std::ios::badbit);
+			ss.ignore(0x7FFFFFFF,'\n');
+			//ss.setstate(std::ios::badbit);
 			break;
 		}
 		lastTime = timestamp;
@@ -189,7 +192,7 @@ void GraphVideo::renderVideo()
 	execInMirc("/echo -sg SocialGraph: Video Rendering Finished");
 }
 
-void GraphVideo::renderFrames(int &nextRender, int timestamp)
+void GraphVideo::renderFrames(double &nextRender, int timestamp)
 {
 	static bool firstFrame = true;
 	while (nextRender < timestamp)
@@ -206,11 +209,11 @@ void GraphVideo::renderFrames(int &nextRender, int timestamp)
 			//doLayout(iterations); first time dont do layout :P, so you will get a nice circle
 			calcBounds();
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
-			drawImage(&dir,nextRender);
+			drawImage(&dir,(int)nextRender);
 			firstFrame = false;
 		}
 		else
-			makeImage(cfg->vidSEIterationsPerFrame,&dir,nextRender);
+			makeImage(cfg->vidSEIterationsPerFrame,&dir,(int)nextRender);
 		nextRender += vidSecsPerFrame;
 
 	}
