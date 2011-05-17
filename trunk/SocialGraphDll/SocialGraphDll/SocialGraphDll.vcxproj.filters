@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="OtherFiles">
+      <UniqueIdentifier>{94120be9-58ca-45ca-aed2-1a155653815c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Graph">
+      <UniqueIdentifier>{88836f85-fd41-4ade-bc4f-38fcfef6cac3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Definitions">
+      <UniqueIdentifier>{2816a723-728d-45f0-820f-f333d5e3be0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mIRC">
+      <UniqueIdentifier>{2f6468e9-984a-41bb-9ddc-a446eb160f3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mIRC\Junk">
+      <UniqueIdentifier>{2992540e-7801-4ff2-89e4-b23a5c631f38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InferenceHeuristics">
+      <UniqueIdentifier>{60a1fc2b-7a19-4742-a482-547cf7b07dad}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Config.cpp">
+      <Filter>OtherFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphConfig.cpp">
+      <Filter>OtherFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>OtherFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>OtherFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Tools.cpp">
+      <Filter>OtherFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Edge.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="GdiTools.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphVideo.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjacencyInferenceHeuristic.cpp">
+      <Filter>InferenceHeuristics</Filter>
+    </ClCompile>
+    <ClCompile Include="BinarySequenceInferenceHeuristic.cpp">
+      <Filter>InferenceHeuristics</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectAddressingInferenceHeuristic.cpp">
+      <Filter>InferenceHeuristics</Filter>
+    </ClCompile>
+    <ClCompile Include="IndirectAddressingInferenceHeuristic.cpp">
+      <Filter>InferenceHeuristics</Filter>
+    </ClCompile>
+    <ClCompile Include="InferenceHeuristic.cpp">
+      <Filter>InferenceHeuristics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Config.h">
+      <Filter>OtherFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphConfig.h">
+      <Filter>OtherFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>OtherFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Tools.h">
+      <Filter>OtherFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Edge.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="GdiTools.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphVideo.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjacencyInferenceHeuristic.h">
+      <Filter>InferenceHeuristics</Filter>
+    </ClInclude>
+    <ClInclude Include="BinarySequenceInferenceHeuristic.h">
+      <Filter>InferenceHeuristics</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectAddressingInferenceHeuristic.h">
+      <Filter>InferenceHeuristics</Filter>
+    </ClInclude>
+    <ClInclude Include="IndirectAddressingInferenceHeuristic.h">
+      <Filter>InferenceHeuristics</Filter>
+    </ClInclude>
+    <ClInclude Include="InferenceHeuristic.h">
+      <Filter>InferenceHeuristics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="def.def">
+      <Filter>Definitions</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\Configs\#sample1.Config.txt">
+      <Filter>mIRC</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\Installation.txt">
+      <Filter>mIRC</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\SocialGraph.mrc">
+      <Filter>mIRC</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\changelog_en.txt">
+      <Filter>mIRC\Junk</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\Changelog_lt.txt">
+      <Filter>mIRC\Junk</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\Graph-Saves\OldFrames\old video frames copied here by default.txt">
+      <Filter>mIRC\Junk</Filter>
+    </None>
+    <None Include="..\mIRC\SocialGraph\Graph-Saves\RenderedFrames\Rendered video stills goes here by default.txt">
+      <Filter>mIRC\Junk</Filter>
+    </None>
+  </ItemGroup>
+</Project>

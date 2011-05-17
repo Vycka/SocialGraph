@@ -9,7 +9,7 @@ public:
 	~GraphVideo();
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight,int activity);
 	void renderVideo();
-	void renderFrames(int &nextRender,int timestamp);
+	void renderFrames(double &nextRender,int timestamp);
 	void renderRelocateNode(Node *n);
 	void drawImage(std::wstring *fWPath,int szClock);
 	void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
@@ -19,6 +19,6 @@ public:
 	void decay(double d, int tNow);
 private:
 	int vidRendFrame;
-	int vidSecsPerFrame;
+	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
 };

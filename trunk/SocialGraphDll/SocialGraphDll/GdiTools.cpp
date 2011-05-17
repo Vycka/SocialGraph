@@ -24,7 +24,7 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	pTitle = new Gdiplus::PointF((Gdiplus::REAL)cfg->gBorderSize,(Gdiplus::REAL)(cfg->gBorderSize - cfg->gNodeRadius - 15));
 	sbTitle = new Gdiplus::SolidBrush(*cTitle);
 	sbNode = new Gdiplus::SolidBrush(*cNode);
-	fNick = new Gdiplus::Font(L"Tahoma",8);
+	fNick = new Gdiplus::Font(L"Tahoma",(float)cfg->iNickFontSize);
 	fCredits = new Gdiplus::Font(L"SansSerif",10);
 	sbLabel = new Gdiplus::SolidBrush(*cLabel);
 	pNodeBorder = new Gdiplus::Pen(*cNodeBorder,2);
