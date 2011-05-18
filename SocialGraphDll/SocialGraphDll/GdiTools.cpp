@@ -28,9 +28,15 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	fCredits = new Gdiplus::Font(L"SansSerif",10);
 	sbLabel = new Gdiplus::SolidBrush(*cLabel);
 	pNodeBorder = new Gdiplus::Pen(*cNodeBorder,2);
-
 	GetEncoderClsid(cfg->fWEncoderMime.c_str(),&encoderClsid);
 	g->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+
+	fVidTimelapseTime = new Gdiplus::Font(L"Lucida Console", 72, Gdiplus::FontStyleBold);
+	fVidTimelapseDate = new Gdiplus::Font(L"Lucida Console", 24, Gdiplus::FontStyleRegular);
+	fVidNick = new Gdiplus::Font(L"Comic Sans MS",(float)cfg->iNickFontSize);
+	//Courier New
+	//VID TIMELAPSE stuff
+	//TODO: Hardcoded stuff needs to go to the config one deay
 }
 
 GdiTools::~GdiTools(void)
@@ -59,4 +65,7 @@ GdiTools::~GdiTools(void)
 	delete fCredits;
 	delete sbLabel;
 	delete pNodeBorder;
+	delete fVidTimelapseTime;
+	delete fVidTimelapseDate;
+	delete fVidNick;
 }

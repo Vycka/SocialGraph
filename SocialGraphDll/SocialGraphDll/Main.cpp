@@ -271,6 +271,7 @@ ALIAS mReloadConfig(ALP)
 
 void main(int argc, char** arg)
 {
+	/*
 	if (argc != 2)
 	{
 		std::cout << "Missing config file..\n";	
@@ -288,13 +289,22 @@ void main(int argc, char** arg)
 	}
 
 	srand((unsigned int)time((time_t*)0));
+
+	*/
+
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
+	GraphConfig c("#Linkomanija.Config1080p.txt");
 	Graph *g = new Graph(&c);
 	g->printLists();
+	std::wstring ws = L"#Linkomanija.Image.png";
+	g->makeImage(1500,&ws,1305601200);
 	delete g;
+	//Graph *g = new Graph(&c);
+	//g->printLists();
+	//delete g;
 	Gdiplus::GdiplusShutdown(gdiplusToken);
 	
 
-	system("pause");
+	//system("pause");
 }

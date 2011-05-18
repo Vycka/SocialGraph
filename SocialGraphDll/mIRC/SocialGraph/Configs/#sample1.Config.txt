@@ -48,6 +48,7 @@ iNodeColor        255 255   0 255
 //Edge Alpha negalioja, nes alpha skaiciuoja scriptas (t.y. kokio stiprumo bus edge). tad ten svarbu kad siaip koks skaiciu butu
 iEdgeColor        102 102 255 255
 iBorderColor      102 102 102 255
+iEdgeColorChangeInactive 50 50 50 0
 
 iNickFontSize     8
 
@@ -62,6 +63,8 @@ fEncoderMime   "image/png"
 
 //o vo cia jau atsargiai reiktu keist
 //Graph - nekeist situ, jei nezinai ka daro, bo as ir pats nevisus tezinau
+gEdgeColorChangeInactivityMin 900
+gEdgeColorChangeInactivityMax 7200
 gTemporalDecayAmount        0.02
 //21600 = 1/4 paros
 gEdgeDecayMultiplyIdleSecs  21600

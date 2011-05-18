@@ -25,6 +25,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iNodeColor       = getCColor("iNodeColor");
 	iEdgeColor       = getCColor("iEdgeColor");
 	iBorderColor     = getCColor("iBorderColor");
+	iEdgeColorChangeInactive = getCColor("iEdgeColorChangeInactive");
 
 	//font/sizes stuff
 	iNickFontSize = getDouble("iNickFontSize");
@@ -39,6 +40,8 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	ftpFile   = getString("ftpFile");
 
 	//graph
+	gEdgeColorChangeInactivityMin = getInt("gEdgeColorChangeInactivityMin");
+	gEdgeColorChangeInactivityMax = getInt("gEdgeColorChangeInactivityMax");
 	gTemporalDecayAmount       = getDouble("gTemporalDecayAmount");
 	gSpringEmbedderIterations  = getInt("gSpringEmbedderIterations");
 	gK                         = getDouble("gK");

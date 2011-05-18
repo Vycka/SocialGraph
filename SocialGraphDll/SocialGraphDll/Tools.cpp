@@ -181,11 +181,11 @@ std::wstring getInQuotes(const std::wstring *s)
 	return std::wstring(*s,qBegin+1,qEnd-qBegin-1);
 }
 
-std::string convertTime(int t)
+std::string ctimeToDateStr(int t)
 {
 	std::string des;
-	tm newTime;
-	localtime_s(&newTime,(time_t*)&t);
+	struct tm newTime;
+	errno_t err = _localtime32_s(&newTime,(__time32_t*)&t);
 	char buff[16];
 	
 	_itoa(newTime.tm_year + 1900,buff,10);
@@ -200,7 +200,16 @@ std::string convertTime(int t)
 	if (newTime.tm_mday < 10)
 		des += "0";
 	des += buff;
-	des += " ";
+
+	return des;
+}
+
+std::string ctimeToTimeStr(int t)
+{
+	std::string des;
+	tm newTime;
+	errno_t err = _localtime32_s(&newTime,(__time32_t*)&t);
+	char buff[16];
 
 	_itoa(newTime.tm_hour,buff,10);
 	if (newTime.tm_hour < 10)

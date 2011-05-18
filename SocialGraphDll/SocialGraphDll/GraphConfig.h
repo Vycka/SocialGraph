@@ -12,14 +12,14 @@ public:
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor;
+		iEdgeColor,iBorderColor,iEdgeColorChangeInactive;
 	//img font stuff
 	double iNickFontSize;
 	//graph config
 	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
 		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
-	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations;
+	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax;
 	//ftp stuff
 	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;
 	int ftpPort;

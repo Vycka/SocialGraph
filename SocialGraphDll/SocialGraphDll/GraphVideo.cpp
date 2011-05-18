@@ -80,7 +80,7 @@ GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 	gt = new GdiTools(this->cfg);
 	this->cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
-	vidSecsPerFrame = 86400 / cfg->vidFramesPerDay;
+	vidSecsPerFrame = 86400.0 / cfg->vidFramesPerDay;
 	grq = new GraphRendererQueue;
 	renderVideo();
 }
@@ -195,7 +195,7 @@ void GraphVideo::renderVideo()
 void GraphVideo::renderFrames(double &nextRender, int timestamp)
 {
 	static bool firstFrame = true;
-	while (nextRender < timestamp)
+	while (nextRender <= timestamp)
 	{
 		wchar_t frameNr[20];
 		std::wstring dir = cfg->vidRenderPBegin;
@@ -281,9 +281,24 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	_itoa(msRendered,buff,10);
 	credits += buff;
 	credits += "ms.";
+
+	std::string tlTime = ctimeToTimeStr(szClock);
+	std::string tlDate = ctimeToDateStr(szClock);
+	std::wstring wtlTime, wtlDate;
+	wtlTime.assign(tlTime.begin(),tlTime.end());
+	wtlDate.assign(tlDate.begin(),tlDate.end());
+
+	gt->g->DrawString(wtlTime.c_str(),wtlTime.size()-3,gt->fVidTimelapseTime,Gdiplus::PointF((float)cfg->iOutputWidth-325,(float)40),gt->sbChannel);
+	gt->g->DrawString(wtlDate.c_str(),wtlDate.size(),gt->fVidTimelapseDate,Gdiplus::PointF((float)cfg->iOutputWidth-220,(float)10),gt->sbChannel);
+
 	wcredits.assign(credits.begin(),credits.end());
 	gt->g->DrawString(wcredits.c_str(),wcredits.size(),gt->fCredits,
 		Gdiplus::PointF((float)borderSize,(float)(height + borderSize * 2 - 5 - 30)),gt->sbTitle);
+
+	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorChangeInactive.r;
+	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorChangeInactive.g;
+	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorChangeInactive.b;
+	short int edgeInactivityMaxDiffA = cfg->iEdgeColor.a - cfg->iEdgeColorChangeInactive.a;
 
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
@@ -297,8 +312,27 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		int x2 = (int) ((width * (nodeB->getX() - minX) / (maxX - minX)) + borderSize);
 		int y2 = (int) ((height * (nodeB->getY() - minY) / (maxY - minY)) + borderSize);
 		
-		int alpha = 55 + (int)(200 * weight / maxWeight);
-		Gdiplus::Pen p(Gdiplus::Color(alpha,cfg->iEdgeColor.r,cfg->iEdgeColor.g,cfg->iEdgeColor.b),((float)(alpha / 85) + 1)); 
+
+		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
+		int edgeInactivity = szClock - edges[x]->getActivityTime();
+		double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
+		if (edgeInactivity >= cfg->gEdgeColorChangeInactivityMin)
+		{
+			if (edgeInactivity > cfg->gEdgeColorChangeInactivityMax)
+				edgeInactivity = cfg->gEdgeColorChangeInactivityMax;
+			edgeInactivity-= cfg->gEdgeColorChangeInactivityMin;
+			double eiMul = edgeInactivity / edgeInactivityMinMaxDiff;
+			eiDiffR = (int)(edgeInactivityMaxDiffR * eiMul);
+			eiDiffG = (int)(edgeInactivityMaxDiffG * eiMul);
+			eiDiffB = (int)(edgeInactivityMaxDiffB * eiMul);
+			eiDiffA = (int)(edgeInactivityMaxDiffA * eiMul);
+		}
+
+		int alpha = 70 + (int)(185.0 * (weight / maxWeight));
+		int alphaFinal = alpha-eiDiffA;
+		if (alphaFinal < 20)
+			alphaFinal = 20;
+		Gdiplus::Pen p(Gdiplus::Color(alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((alpha == 255 ? 254 : alpha) / 85) + 2)); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 	}
 	int nodeRadius = (int)cfg->gNodeRadius;
@@ -310,7 +344,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		int newNodeRadius = (int) (log((n->getWeight() + 1) / 10) + nodeRadius);
 		gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
-		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fNick,
+		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,
 			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
 	}
 
@@ -367,14 +401,18 @@ void GraphVideo::calcBounds()
 	}
 	else
 	{
+		
 		double dminX = minX - tminX;
 		double dmaxX = maxX - tmaxX;
 		double dminY = minY - tminY;
 		double dmaxY = maxY - tmaxY;
-		minX -= dminX / 20;
-		maxX -= dmaxX / 20;
-		minY -= dminY / 20;
-		maxY -= dmaxY / 20;
+		static double xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
+		static double xyDivX = 40.0;
+		static double xyDivY = xyDivX / xyAR;
+		minX -= dminX / xyDivX;
+		maxX -= dmaxX / xyDivX;
+		minY -= dminY / xyDivY;
+		maxY -= dmaxY / xyDivY;
 	}
 
 	// Increase size if too small.
@@ -631,7 +669,9 @@ void GraphVideo::decay(double d, int tNow)
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
 		//tipo extra saugiklis kad senesni edges greiciau mazetu
-		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
+		double mul = ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
+		mul *= mul;
+		double newDecay = (d * mul) + d;
 		edges[x]->appWeight(-newDecay);
 		if (edges[x]->getWeight() <= 0)
 		{
