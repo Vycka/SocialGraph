@@ -15,3 +15,5 @@ void execInMircInit(HWND *mh);
 void execInMircShutdown();
 std::string getInQuotes(const std::string *s);
 std::wstring getInQuotes(const std::wstring *s);
+std::string ctimeToDateStr(int t);
+std::string ctimeToTimeStr(int t);
