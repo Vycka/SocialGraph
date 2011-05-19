@@ -298,7 +298,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorChangeInactive.r;
 	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorChangeInactive.g;
 	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorChangeInactive.b;
-	short int edgeInactivityMaxDiffA = cfg->iEdgeColor.a - cfg->iEdgeColorChangeInactive.a;
 
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
@@ -316,23 +315,26 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
 		int edgeInactivity = szClock - edges[x]->getActivityTime();
 		double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
+		double eiMul = 0.0;
 		if (edgeInactivity >= cfg->gEdgeColorChangeInactivityMin)
 		{
 			if (edgeInactivity > cfg->gEdgeColorChangeInactivityMax)
 				edgeInactivity = cfg->gEdgeColorChangeInactivityMax;
 			edgeInactivity-= cfg->gEdgeColorChangeInactivityMin;
-			double eiMul = edgeInactivity / edgeInactivityMinMaxDiff;
+			eiMul = edgeInactivity / edgeInactivityMinMaxDiff;
 			eiDiffR = (int)(edgeInactivityMaxDiffR * eiMul);
 			eiDiffG = (int)(edgeInactivityMaxDiffG * eiMul);
 			eiDiffB = (int)(edgeInactivityMaxDiffB * eiMul);
-			eiDiffA = (int)(edgeInactivityMaxDiffA * eiMul);
 		}
 
-		int alpha = 70 + (int)(185.0 * (weight / maxWeight));
-		int alphaFinal = alpha-eiDiffA;
-		if (alphaFinal < 20)
-			alphaFinal = 20;
-		Gdiplus::Pen p(Gdiplus::Color(alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((alpha == 255 ? 254 : alpha) / 85) + 2)); 
+		int weightStrength = (int)(255.0 * (weight / maxWeight));
+		int alphaFinal = weightStrength + 80;
+		if (alphaFinal > cfg->iEdgeColor.a)
+			alphaFinal = cfg->iEdgeColor.a;
+		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorChangeInactive.a) * eiMul);
+		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
+			alphaFinal = cfg->iEdgeColorChangeInactive.a;
+		Gdiplus::Pen p(Gdiplus::Color(alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((weightStrength >= 255 ? 254 : weightStrength) / 85) + 2)); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 	}
 	int nodeRadius = (int)cfg->gNodeRadius;

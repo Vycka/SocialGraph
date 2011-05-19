@@ -45,10 +45,10 @@ iLabelColor       0     0   0 255
 iTitleColor       153 153 204 255
 iNodeBorderColor  102 102 255 255
 iNodeColor        255 255   0 255
-//Edge Alpha negalioja, nes alpha skaiciuoja scriptas (t.y. kokio stiprumo bus edge). tad ten svarbu kad siaip koks skaiciu butu
+//edge alpha will be dynamicly calculated by relation strength, however, it won't exceed specified value below
 iEdgeColor        102 102 255 255
 iBorderColor      102 102 102 255
-iEdgeColorChangeInactive 50 50 50 0
+iEdgeColorChangeInactive 50 50 50 20
 
 iNickFontSize     8
 
