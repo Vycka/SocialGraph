@@ -21,6 +21,7 @@ public:
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
 		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
 	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax;
+	double gMinMaxWeight;
 	//ftp stuff
 	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;
 	int ftpPort;

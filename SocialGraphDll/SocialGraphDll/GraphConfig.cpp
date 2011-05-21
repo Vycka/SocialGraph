@@ -61,6 +61,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	gMinPauseBeforeNextUpload  = getInt("gMinPauseBeforeNextUpload");
 	gEdgeDecayMultiplyIdleSecs = getInt("gEdgeDecayMultiplyIdleSecs");
 	gCacheGdiTools             = getInt("gCacheGdiTools");
+	gMinMaxWeight              = getDouble("gMinMaxWeight");
 
 	//inference heuristics
 	hAdjacency  = getDouble("hAdjacency");

@@ -82,6 +82,7 @@ gBorderSize                 50
 gNodeRadius                 5
 gEdgeThreshold              0
 gNodeBumpWeight             0.2
+gMinMaxWeight               5
 //neduok dieve gMinPauseBeforeNextRender  pavaryt < 20, bo gali but blogai
 gMinPauseBeforeNextRender   180
 gMinPauseBeforeNextUpload   180
@@ -127,5 +128,5 @@ vidSEIterationsPerFrame 1
 vidRendererThreads 1
 vidBeginRenderTime 0
 vidEndRenderTime 0
-//TODO replace name to proper one..
+
 vidNickFont "SansSerif"
