@@ -1,7 +1,6 @@
 #pragma once
 //#define HEURISTIC_NOTICES
 #define GRAPHNOTICES
-#define EDGE_CHANGELIST_DRAWCOUNT 10
 #include <map>
 #include <set>
 #include <vector>
