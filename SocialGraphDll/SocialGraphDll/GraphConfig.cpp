@@ -26,10 +26,14 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iEdgeColor       = getCColor("iEdgeColor");
 	iBorderColor     = getCColor("iBorderColor");
 	iEdgeColorChangeInactive = getCColor("iEdgeColorChangeInactive");
+	iEdgeNickListFontColor = getCColor("iEdgeChangeNickList");
+	iEdgeNickListLineAddColor = getCColor("iEdgeNickListLineAddColor");
+	iEdgeNickListLineDelColor =getCColor("iEdgeNickListLineDelColor");
 
-	//font/sizes stuff
+	//font/sizes/misc stuff
 	iNickFontSize = getDouble("iNickFontSize");
-
+	iEdgeActiveMinAlpha = getInt("iEdgeActiveMinAlpha");
+	
 	//ftp
 	ftpUpload = getBool("ftpUpload");
 	ftpHost   = getString("ftpHost");
@@ -74,11 +78,12 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	logFile                 = getString("logFile");
 	vidRenderPBegin         = getWString("vidRenderPBegin");
 	vidRenderPEnd           = getWString("vidRenderPEnd");
-	vidFramesPerDay         = getInt("vidFramesPerDay");
+	vidFramesPerDay         = getDouble("vidFramesPerDay");
 	vidSEIterationsPerFrame = getInt("vidSEIterationsPerFrame");
 	vidRendererThreads      = getInt("vidRendererThreads");
 	vidBeginRenderTime      = getInt("vidBeginRenderTime");
 	vidEndRenderTime        = getInt("vidEndRenderTime");
+	vidNickFont             = getWString("vidNickFont");
 
 	//...
 

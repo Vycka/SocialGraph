@@ -15,7 +15,7 @@ public:
 	Gdiplus::Bitmap *bmp;
 	Gdiplus::Graphics *g;
 
-	Gdiplus::Color *cBackground,*cChannel,*cLabel,*cTitle,*cNodeBorder,*cNode,*cEdge,*cBorder;
+	Gdiplus::Color *cBackground,*cChannel,*cLabel,*cTitle,*cNodeBorder,*cNode,*cEdge,*cBorder,*cEdgeListFont,*cEdgeListLineAdd,*cEdgeListLineDel;
 
 	Gdiplus::SolidBrush *sbBackground;
 	Gdiplus::Rect *rBackground;

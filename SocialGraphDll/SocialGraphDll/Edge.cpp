@@ -7,6 +7,7 @@ Edge::Edge(Node *source, Node *target, double weight, int secs)
 	this->target = target;
 	this->weight = weight;
 	this->lastActivity = secs;
+	changedInPause = false;
 }
 
 Edge::~Edge(void)
