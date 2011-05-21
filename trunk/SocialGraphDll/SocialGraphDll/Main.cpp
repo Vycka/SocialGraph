@@ -294,12 +294,12 @@ void main(int argc, char** arg)
 
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-	GraphConfig c("#Linkomanija.Config1080p.txt");
-	Graph *g = new Graph(&c);
-	g->printLists();
-	std::wstring ws = L"#Linkomanija.Image.png";
-	g->makeImage(1500,&ws,1305601200);
-	delete g;
+	//GraphConfig c("#Linkomanija.Config1080p.txt");
+	//Graph *g = new Graph(&c);
+	//g->printLists();
+	//std::wstring ws = L"#Linkomanija.Image.png";
+	//g->makeImage(1500,&ws,1305601200);
+	//delete g;
 	//Graph *g = new Graph(&c);
 	//g->printLists();
 	//delete g;

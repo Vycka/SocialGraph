@@ -1,9 +1,11 @@
 #pragma once
 //#define HEURISTIC_NOTICES
 #define GRAPHNOTICES
+#define EDGE_CHANGELIST_DRAWCOUNT 10
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <string>
 #include <Windows.h>
 #include <time.h>
@@ -16,6 +18,16 @@ class InferenceHeuristic;
 class Logger;
 
 struct GraphRendererQueue;
+
+struct GraphEdgeChangeList
+{
+	GraphEdgeChangeList() {};
+	GraphEdgeChangeList(int tNow, std::wstring n1, std::wstring n2, bool isAppearing) : tNow(tNow), n1(n1), n2(n2), isAppearing(isAppearing) {};
+	int tNow;
+	std::wstring n1, n2;
+	bool isAppearing;
+};
+
 
 class Graph
 {
@@ -54,6 +66,7 @@ public:
 	void saveOldFrame();
 	GraphConfig* getConfig();
 protected:
+	virtual void addEdgeChangeList(const GraphEdgeChangeList &gecl);
 	double minX,maxX,minY,maxY;
 	GdiTools *gt;
 	GraphConfig *cfg;
@@ -63,6 +76,7 @@ protected:
 	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
 	double maxWeight;
 	std::vector<Node*> visibleNodes;
+	std::list<GraphEdgeChangeList> edgeChangeList;
 private:
 	std::vector<InferenceHeuristic*> inferences;
 	std::set<std::string> ignoreNicks;

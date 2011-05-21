@@ -48,8 +48,12 @@ iNodeColor        255 255   0 255
 //edge alpha will be dynamicly calculated by relation strength, however, it won't exceed specified value below
 iEdgeColor        102 102 255 255
 iBorderColor      102 102 102 255
-iEdgeColorChangeInactive 50 50 50 20
+iEdgeColorChangeInactive 50 50 50 10
+iEdgeChangeNickList 0 0 0 64
+iEdgeNickListLineAddColor 102 102 255 255
+iEdgeNickListLineDelColor 50 50 50 50
 
+iEdgeActiveMinAlpha 90
 iNickFontSize     8
 
 //------------------------------------------------------
@@ -100,7 +104,7 @@ oPathBegin "\Graph-Saves\OldFrames\<channel>-"
 oPathEnd   ".png"
 
 
-//Everything below is not implanted so keep it untouched
+//Everything below is not implanted/unifinished/untested so keep it untouched
 
 //------------ LOGGING ----------
 
@@ -112,8 +116,16 @@ logFile "SocialGraph\Graph-Saves\<channel>.GraphLog.txt"
 //------------ VIDEO RENDERING ------------
 vidRenderPBegin "SocialGraph\Graph-Saves\RenderedFrames\<channel>-"
 vidRenderPEnd   ".png"
-vidFramesPerDay 1500
+
+//1798.2 == 29.97fps (24h==1min) (NTSC framerate) (recommended gC 0.005) (fastest)
+//3596.4 == 59.94fps (24h==1min) (Double NTSC framerate) (recommended gC 0.001) (less jitter)
+//7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate) (recommended gC 0.0001) (minimal/no jitter in 1080p)
+
+vidFramesPerDay 1798.2
 vidSEIterationsPerFrame 1
+//multithreaded version is bugged, dont change vidRendererThreads to more than 1 or less of course..
 vidRendererThreads 1
 vidBeginRenderTime 0
 vidEndRenderTime 0
+//TODO replace name to proper one..
+vidNickFont "SansSerif"

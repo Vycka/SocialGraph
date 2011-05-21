@@ -24,7 +24,9 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	pTitle = new Gdiplus::PointF((Gdiplus::REAL)cfg->gBorderSize,(Gdiplus::REAL)(cfg->gBorderSize - cfg->gNodeRadius - 15));
 	sbTitle = new Gdiplus::SolidBrush(*cTitle);
 	sbNode = new Gdiplus::SolidBrush(*cNode);
+
 	fNick = new Gdiplus::Font(L"Tahoma",(float)cfg->iNickFontSize);
+
 	fCredits = new Gdiplus::Font(L"SansSerif",10);
 	sbLabel = new Gdiplus::SolidBrush(*cLabel);
 	pNodeBorder = new Gdiplus::Pen(*cNodeBorder,2);
@@ -33,9 +35,13 @@ GdiTools::GdiTools(GraphConfig *cfg)
 
 	fVidTimelapseTime = new Gdiplus::Font(L"Lucida Console", 72, Gdiplus::FontStyleBold);
 	fVidTimelapseDate = new Gdiplus::Font(L"Lucida Console", 24, Gdiplus::FontStyleRegular);
-	fVidNick = new Gdiplus::Font(L"Comic Sans MS",(float)cfg->iNickFontSize);
-	//Courier New
-	//VID TIMELAPSE stuff
+	
+	cEdgeListFont = new Gdiplus::Color(cfg->iEdgeNickListFontColor.a,cfg->iEdgeNickListFontColor.r,cfg->iEdgeNickListFontColor.g,cfg->iEdgeNickListFontColor.b);
+	cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.a,cfg->iEdgeNickListLineAddColor.r,cfg->iEdgeNickListLineAddColor.g,cfg->iEdgeNickListLineAddColor.b);
+	cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.a,cfg->iEdgeNickListLineDelColor.r,cfg->iEdgeNickListLineDelColor.g,cfg->iEdgeNickListLineDelColor.b);
+	
+	fVidNick = new Gdiplus::Font(cfg->vidNickFont.c_str(),(float)cfg->iNickFontSize);
+
 	//TODO: Hardcoded stuff needs to go to the config one deay
 }
 
@@ -68,4 +74,7 @@ GdiTools::~GdiTools(void)
 	delete fVidTimelapseTime;
 	delete fVidTimelapseDate;
 	delete fVidNick;
+	delete cEdgeListFont;
+	delete cEdgeListLineAdd;
+	delete cEdgeListLineDel;
 }

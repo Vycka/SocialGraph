@@ -12,7 +12,8 @@ public:
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor,iEdgeColorChangeInactive;
+		iEdgeColor,iBorderColor,iEdgeColorChangeInactive,iEdgeNickListFontColor,iEdgeNickListLineAddColor,iEdgeNickListLineDelColor;
+	int iEdgeActiveMinAlpha;
 	//img font stuff
 	double iNickFontSize;
 	//graph config
@@ -35,7 +36,8 @@ public:
 	//logging/video
 	bool logSave;
 	int vidBeginRenderTime,vidEndRenderTime;
-	int vidFramesPerDay,vidSEIterationsPerFrame,vidRendererThreads;
-	std::wstring vidRenderPBegin,vidRenderPEnd;
+	double vidFramesPerDay;
+	int vidSEIterationsPerFrame,vidRendererThreads;
+	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;
 };

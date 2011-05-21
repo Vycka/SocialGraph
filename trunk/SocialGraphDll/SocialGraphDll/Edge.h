@@ -14,7 +14,8 @@ public:
 	double getWeight() { return weight; };
 	bool sameNicks(const std::string *ln1,const std::string *ln2);
 	int getActivityTime() { return lastActivity; };
-
+	void setChangedInPause(bool state) { this->changedInPause = state; };
+	bool getChangedInPause() { return changedInPause; };
 	void setSource(Node *source) { this->source = source; };
 	void setTarget(Node *target) { this->target = target; };
 	void setWeight(double weight) { this->weight = weight; };
@@ -25,5 +26,6 @@ private:
 	Node *source;
 	Node *target;
 	double weight;
+	bool changedInPause;
 	int lastActivity;
 };
