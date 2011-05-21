@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define VIDRENDER_MAX_FRAME_Q 60
+#define MAX_THREADS 16
+#define VIDRENDER_MAX_FRAME_Q 5
 #define VIDRENDER_BEGINFRAME 1000000
 #include "GraphVideo.h"
 #include "Tools.h"
@@ -24,39 +25,61 @@ struct GraphRendererFrame
 
 struct GraphRendererQueue
 {
-	GraphRendererQueue() : framesRendered(0), stopThreads(false), queueInUse(false) {};
-	int framesRendered;
-	bool stopThreads,queueInUse;
-	std::queue<GraphRendererFrame*> renderQueoe;
+	GraphRendererQueue() : framesRendered(0), stopThreads(false), lastThreadadded(0) {
+	for (int x = 0; x < MAX_THREADS; x++)
+		for (int y = 0; y < VIDRENDER_MAX_FRAME_Q; y++)
+			renderQueoe[x][y] = NULL;
+	};
+	int framesRendered, lastThreadadded;
+	bool stopThreads;
+	GraphRendererFrame *renderQueoe[MAX_THREADS][VIDRENDER_MAX_FRAME_Q];
 	CLSID encoderClsid;
+};
+
+struct GraphRendererThreadSync
+{
+	int threadId;
+	GraphRendererQueue *grq;
 };
 
 DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 {
-	execInMirc("/echo -sg SocialGraph: Video Renderer Thread Created");
-	GraphRendererQueue* gr = (GraphRendererQueue*)lp;
+	GraphRendererThreadSync *grts = (GraphRendererThreadSync*)lp;
+	GraphRendererQueue* gr = grts->grq;
+	std::stringstream ss;
+	ss << "/echo -sg SocialGraph: Video Renderer Thread Created: " << grts->threadId; 
+	execInMirc(ss.str().c_str());
 	while (true)
 	{
-		if (gr->renderQueoe.empty() || gr->queueInUse)
+		bool isThereFrameToRender = false;
+		int framePos = 0;
+		for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
+			if (gr->renderQueoe[grts->threadId][x])
+			{
+				framePos = x;
+				isThereFrameToRender = true;
+			}
+		if (!isThereFrameToRender)
 		{
 			//execInMirc("/echo -sg SocialGraph: Renderer Queue is Empty!");		
 			if (gr->stopThreads)
 			{
-				execInMirc("/echo -sg SocialGraph: Video Renderer Thread Exited");
+				std::stringstream ss;
+				ss << "/echo -sg SocialGraph: Video Renderer Thread Exited - " << grts->threadId;
+				execInMirc(ss.str().c_str());
 				return 0;
 			}
 			Sleep(1);
 		}
 		else
 		{
-			gr->queueInUse = true;
-			GraphRendererFrame *frame = gr->renderQueoe.front();
-			gr->renderQueoe.pop();
-			gr->queueInUse = false;
+
+			GraphRendererFrame *frame = gr->renderQueoe[grts->threadId][framePos];
 			frame->fbmp->Save(frame->fName.c_str(),&gr->encoderClsid);
 
 			delete frame->fbmp;
 			delete frame;
+			gr->renderQueoe[grts->threadId][framePos] = NULL;
 
 			if ((++gr->framesRendered % 250) == 0)
 			{
@@ -92,13 +115,20 @@ GraphVideo::~GraphVideo()
 
 void GraphVideo::renderVideo()
 {
+	int beginTime = (int)time(0);
 	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
 	//initialize multithreated renderer stuff
 	grq->encoderClsid = gt->encoderClsid;
-	HANDLE *grh = new HANDLE[cfg->vidRendererThreads];
+	grh = new HANDLE[cfg->vidRendererThreads];
+	GraphRendererThreadSync *grts = new GraphRendererThreadSync[cfg->vidRendererThreads];
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 	{
-		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,grq,NULL,NULL);
+		grts[x].threadId = x;
+		grts[x].grq = grq;
+		std::stringstream ss;
+		ss << "/.echo -sg SocialGraph: Starting thread: " << x;
+		execInMirc(ss.str().c_str());
+		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,&grts[x],NULL,NULL);
 		if (grh[x] == NULL)
 		{
 			execInMirc("/.echo SocialGraph: Unable to create renderer threads. Halting!");
@@ -189,7 +219,13 @@ void GraphVideo::renderVideo()
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 		CloseHandle(grh[x]);
 	delete [] grh;
+	delete [] grts;
 	execInMirc("/echo -sg SocialGraph: Video Rendering Finished");
+	
+	int diffTime = (int)time(0) - beginTime;
+	ss.str("");
+	ss << "/echo -sg SocialGraph: Frames rendered: " << grq->framesRendered-1 << " // Time took: " << diffTime << "seconds.";
+	execInMirc(ss.str().c_str());
 }
 
 void GraphVideo::renderFrames(double &nextRender, int timestamp)
@@ -248,7 +284,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	//remas
 	gt->g->DrawRectangle(gt->pBorder,*gt->rBackground);
 
-	double width = cfg->iOutputWidth - cfg->gBorderSize * 3;
+	double width = cfg->iOutputWidth - cfg->gBorderSize * 2;
 	double height = cfg->iOutputHeight - cfg->gBorderSize * 2;
 	double borderSize = cfg->gBorderSize;
 	gt->g->DrawString(cfg->nWChannel.c_str(),cfg->nWChannel.size(),gt->fChannel, *gt->pChannel ,gt->sbChannel);
@@ -367,15 +403,38 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		GraphRendererFrame *frame = new GraphRendererFrame;
 		frame->fName = *fWPath;
 		frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
-		while (grq->renderQueoe.size() >= VIDRENDER_MAX_FRAME_Q)
-			Sleep(1);
-		grq->renderQueoe.push(frame);
+
+		int writeThread = 0, writePos = 0;
+		bool posFound = false;
+		do
+		{
+			posFound = false;
+			while (!posFound)
+			{
+				grq->lastThreadadded = (grq->lastThreadadded + 1) % cfg->vidRendererThreads;
+				for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
+					if (!grq->renderQueoe[grq->lastThreadadded][x])
+					{
+						writeThread = grq->lastThreadadded;
+						writePos = x;
+						posFound = true;
+						break;
+					}
+			}
+		} while (!posFound);
+		SuspendThread(grh[writeThread]);
+		grq->renderQueoe[writeThread][writePos] = frame;
+		ResumeThread(grh[writeThread]);
 }
 
 void GraphVideo::calcBounds()
 {
 	double tminX,tminY,tmaxX,tmaxY;
 	static bool renderFirstTime = true;
+	static double xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
+	static double xyDivX = cfg->vidXYDivRatio;
+	static double xyDivY = xyDivX / xyAR;
+
 	if (visibleNodes.size() > 0)
 	{
 		tminX = visibleNodes[0]->getX();
@@ -422,28 +481,30 @@ void GraphVideo::calcBounds()
 		double dmaxX = maxX - tmaxX;
 		double dminY = minY - tminY;
 		double dmaxY = maxY - tmaxY;
-		static double xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
-		static double xyDivX = 50.0 * (cfg->vidFramesPerDay / 1500);
-		static double xyDivY = xyDivX / xyAR;
 		minX -= dminX / xyDivX;
 		maxX -= dmaxX / xyDivX;
 		minY -= dminY / xyDivY;
 		maxY -= dmaxY / xyDivY;
 	}
 
+	
 	// Increase size if too small.
 	double minSize = cfg->gMinDiagramSize;
 	if (maxX - minX < minSize)
 	{
 		double midX = (maxX + minX) / 2;
-		minX = midX - (minSize / 2);
-		maxX = midX + (minSize / 2);
+		double newMinX = midX - (minSize / 2);
+		double newMaxX = midX + (minSize / 2);
+		minX -= newMinX / xyDivX;
+		maxX += newMaxX / xyDivX;
 	}
 	if (maxY - minY < minSize)
 	{
 		double midY = (maxY + minY) / 2;
-		minY = midY - (minSize / 2);
-		maxY = midY + (minSize / 2);
+		double newMinY = midY - (minSize / 2);
+		double newMaxY = midY + (minSize / 2);
+		minY -= newMinY / xyDivY;
+		maxY += newMaxY / xyDivY;
 	}
 
 	for (unsigned int x = 0;x < edges.size();x++)
@@ -452,7 +513,8 @@ void GraphVideo::calcBounds()
 
 	if (maxWeight < cfg->gMinMaxWeight)
 		maxWeight = cfg->gMinMaxWeight;
-		
+	
+
 	// Jibble the boundaries to maintain the aspect ratio.
 	double xyRatio = ((maxX - minX) / (maxY - minY)) / (cfg->iOutputWidth / cfg->iOutputHeight);
 	if (xyRatio > 1)
