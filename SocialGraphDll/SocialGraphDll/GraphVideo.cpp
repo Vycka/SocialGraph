@@ -342,13 +342,13 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		const static double weightToAlphaDiv = maxWeightStrength / (maxWeightStrength - cfg->iEdgeActiveMinAlpha);
 
 		int weightStrength = (int)(maxWeightStrength * (weight / maxWeight));
-		int alphaFinal = (weightStrength / weightToAlphaDiv) + cfg->iEdgeActiveMinAlpha;
+		double alphaFinal = (weightStrength / weightToAlphaDiv) + cfg->iEdgeActiveMinAlpha;
 		if (alphaFinal > cfg->iEdgeColor.a)
 			alphaFinal = cfg->iEdgeColor.a;
 		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorChangeInactive.a) * eiMul);
 		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
 			alphaFinal = cfg->iEdgeColorChangeInactive.a;
-		Gdiplus::Pen p(Gdiplus::Color(alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((weightStrength >= 255 ? 254 : weightStrength) / 85) + 2)); 
+		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((weightStrength >= 255 ? 254 : weightStrength) / 85) + 2)); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 	}
 	int nodeRadius = (int)cfg->gNodeRadius;
