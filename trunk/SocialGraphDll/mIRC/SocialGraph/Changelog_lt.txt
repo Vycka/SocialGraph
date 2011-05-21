@@ -49,10 +49,11 @@
   + Add: gCacheGdiTools parametras, kad isjungt galetum GdiPlus Cache, jis tiem kurie nori kad botas valgytu maziau ramo, bet botas valgys daugiau cpu (defaultas 1)
   + Add: Grafiko keitimosi loginima
   + Add: Video kadru renderinima is grafiko keitimosi logo (su surenderintais kadrais galima poto padaryt video)
-  + Add: Generavimo laikas vidsutiniam desiniam kampe.
+  + Add: Generavimo laikas virsutiniam desiniam kampe.
+  + Add: Rysiu atsiradimo/dingimo changelog'o piesimas video renderinime.
   + Add: Neaktyvus rysiai nupilkinami vietoj to kad butu isvalyti is grafiko
   ! Change: neaktyvus rysiu naikinimo stiprumas kils kvadaru priklausomai nuo parametro, gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
-
+  + Add: gMinMaxWeight parametras - nustatantis, koks bus maziausias maxWeight, to pasekoj silpni santykiai nebus iskarto storos linijos, jei nebus nieko kito kanale kurie tarpusavy aktyviai sneketu.
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve
 Tvarkingesnis config failas (90% Done)
