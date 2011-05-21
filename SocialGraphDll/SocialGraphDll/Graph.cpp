@@ -929,7 +929,6 @@ GraphConfig* Graph::getConfig()
 
 void Graph::addEdgeChangeList(const GraphEdgeChangeList &gecl)
 {
-	//TODO: pakeist EDGE_CHANGELIST_DRAWCOUNT i configurable val..
 	if (gecl.isAppearing && !cfg->gEdgeNickListDrawInserts)
 		return;
 	if (!gecl.isAppearing && !cfg->gEdgeNickListDrawRemoves)

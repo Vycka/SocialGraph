@@ -21,4 +21,5 @@ private:
 	int vidRendFrame;
 	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
+	HANDLE *grh;
 };

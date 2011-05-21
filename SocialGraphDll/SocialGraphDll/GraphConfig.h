@@ -38,7 +38,7 @@ public:
 	//logging/video
 	bool logSave;
 	int vidBeginRenderTime,vidEndRenderTime;
-	double vidFramesPerDay;
+	double vidFramesPerDay,vidXYDivRatio;
 	int vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;

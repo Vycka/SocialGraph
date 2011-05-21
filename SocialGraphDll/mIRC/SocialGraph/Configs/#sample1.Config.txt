@@ -127,9 +127,12 @@ vidRenderPEnd   ".png"
 
 vidFramesPerDay 1798.2
 vidSEIterationsPerFrame 1
-//multithreaded version is bugged, dont change vidRendererThreads to more than 1 or less of course..
-vidRendererThreads 1
+//vidRendererThreads max value can be 16 (MAX_THREADS)
+vidRendererThreads 4
 vidBeginRenderTime 0
 vidEndRenderTime 0
+//vidXYDivRatio Recommended val: (35*finalFramsPerSec/30)
+//(finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
+vidXYDivRatio 35
 
 vidNickFont "SansSerif"

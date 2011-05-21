@@ -88,6 +88,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidBeginRenderTime      = getInt("vidBeginRenderTime");
 	vidEndRenderTime        = getInt("vidEndRenderTime");
 	vidNickFont             = getWString("vidNickFont");
+	vidXYDivRatio           = getDouble("vidXYDivRatio");
 
 	//...
 
