@@ -54,6 +54,7 @@
   + Add: Neaktyvus rysiai nupilkinami vietoj to kad butu isvalyti is grafiko
   ! Change: neaktyvus rysiu naikinimo stiprumas kils kvadaru priklausomai nuo parametro, gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
   + Add: gMinMaxWeight parametras - nustatantis, koks bus maziausias maxWeight, to pasekoj silpni santykiai nebus iskarto storos linijos, jei nebus nieko kito kanale kurie tarpusavy aktyviai sneketu.
+  * Fix: Multithreaded rendereris pagaliau pilnai sutvarkytas. (Ant AMD x6 1055T matomas 400% pagreitejimas)
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve
 Tvarkingesnis config failas (90% Done)
