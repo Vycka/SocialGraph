@@ -3,6 +3,7 @@
 #include "Graph.h"
 #include "Edge.h"
 #include "Tools.h"
+#include "Node.h"
 
 
 //sulygina paskutinius dvieju eiluciu autorius, jei rase ne tie patys nickai, pridedam i sarasa
@@ -26,17 +27,15 @@ void AdjacencyInferenceHeuristic::infer(const std::string *lnick,const std::stri
 		if (e)
 		{
 #ifdef HEURISTIC_NOTICES
-			char buff[15];
-			sprintf(buff,"%f",getWeighting());
-			std::string mmsg = "/echo @SocialGraph SocialGraph: Heuristic-Adjancy: ";
-			mmsg += *lnick;
-			mmsg += " ";
-			mmsg += lastNick;
-			mmsg += " ";
-			mmsg += buff;
-			execInMirc(&mmsg);
+			if (*lnick == *e->getSource()->getLNick())
+				this->sendInferenceChangeToMirc(*e->getSource()->getLNick(),*e->getTarget()->getLNick(),this->getName(),getWeighting());
+			else
+				this->sendInferenceChangeToMirc(*e->getTarget()->getLNick(),*e->getSource()->getLNick(),this->getName(),getWeighting());
 #endif
-			getGraph()->updateEdge(e,getWeighting());
+			if (*lnick == *e->getSource()->getLNick())
+				getGraph()->updateEdge(e,getWeighting(),e->getSource());
+			else
+				getGraph()->updateEdge(e,getWeighting(),e->getTarget());
 		}
 		lastNick = *lnick;
 	}

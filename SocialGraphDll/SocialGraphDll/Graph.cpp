@@ -189,10 +189,16 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 	Edge *edge = findEdge(ln1,ln2);
 	if (edge)
 	{
+		Node *inputFrom;
+		if (*edge->getSource()->getLNick() == *ln1)
+			inputFrom = edge->getSource();
+		else
+			inputFrom = edge->getTarget();
+
 		edge->appWeight(weight);
 		edge->updateActivityTime();
 		if (cfg->logSave)
-			logger->wAddEdge(edge,weight);
+			logger->wAddEdge(edge,weight,inputFrom);
 
 	}
 	else
@@ -205,19 +211,19 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		Edge *e = new Edge(source,target,weight);
 		edges.push_back(e);
 		if (cfg->logSave)
-			logger->wAddEdge(e,weight);
+			logger->wAddEdge(e,weight,source);
 	}
 	updateFrame();	
 }
 
-void Graph::updateEdge(Edge *e, double weight)
+void Graph::updateEdge(Edge *e, double weight, Node *inputFrom)
 {
 	if (weight == 0.0)
 		return;
 	e->appWeight(weight);
 	e->updateActivityTime();
 	if (cfg->logSave)
-		logger->wAddEdge(e,weight);
+		logger->wAddEdge(e,weight,inputFrom);
 	updateFrame();
 }
 
@@ -373,7 +379,7 @@ void Graph::loadFromFile(const char *fn)
 		Edge *e = new Edge(node1,node2,weight,secs + tPassed);
 		edges.push_back(e);
 		if (cfg->logSave)
-			logger->wAddEdge(e,weight);
+			logger->wAddEdge(e,weight,node1);
 	}
 
 	f >> n;

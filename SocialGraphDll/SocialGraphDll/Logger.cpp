@@ -41,12 +41,21 @@ void Logger::wDelNode(Node *n)
 	qFlush();
 }
 
-void Logger::wAddEdge(Edge *e,double weight)
+void Logger::wAddEdge(Edge *e,double weight,Node *inputFrom)
 {
 	int t = (int)time(NULL);
-	logQueue << t << ' ' << VID_ADDEDGE << ' ' << *e->getSource()->getLNick() << ' '
-		<< *e->getTarget()->getLNick() << ' ' << weight << ' '
-		<< e->getActivityTime() << std::endl; 
+	if (e->getSource() == inputFrom)
+	{
+		logQueue << t << ' ' << VID_ADDEDGE << ' ' << *e->getSource()->getLNick() << ' '
+			<< *e->getTarget()->getLNick() << ' ' << weight << ' '
+			<< e->getActivityTime() << std::endl; 
+	}
+	else
+	{
+		logQueue << t << ' ' << VID_ADDEDGE << ' ' << *e->getTarget()->getLNick() << ' '
+			<< *e->getSource()->getLNick() << ' ' << weight << ' '
+			<< e->getActivityTime() << std::endl; 
+	}
 	qFlush();
 }
 

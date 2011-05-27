@@ -29,15 +29,7 @@ void DirectAddressingInferenceHeuristic::infer(const std::string *lnick,const st
 	if (getGraph()->findNode(&tnick))
 	{
 #ifdef HEURISTIC_NOTICES
-		char buff[15];
-		sprintf(buff,"%f",getWeighting());
-		std::string mmsg = "/echo @SocialGraph SocialGraph: Heuristic-Direct: ";
-		mmsg += *lnick;
-		mmsg += " ";
-		mmsg += tnick;
-		mmsg += " ";
-		mmsg += buff;
-		execInMirc(&mmsg);
+				this->sendInferenceChangeToMirc(*lnick,tnick,this->getName(),getWeighting());
 #endif
 		getGraph()->addEdge(lnick,&tnick,getWeighting());
 	}

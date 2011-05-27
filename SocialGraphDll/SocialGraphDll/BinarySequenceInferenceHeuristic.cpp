@@ -29,17 +29,9 @@ void BinarySequenceInferenceHeuristic::infer(const std::string *lnick,const std:
 			std::string s1 = *iUniqNicks++;
 			std::string s2 = *iUniqNicks;
 #ifdef HEURISTIC_NOTICES
-			char buff[15];
-			sprintf(buff,"%f",getWeighting());
-			std::string mmsg = "/echo @SocialGraph SocialGraph: Heuristic-Binary: ";
-			mmsg += s1;
-			mmsg += " ";
-			mmsg += s2;
-			mmsg += " ";
-			mmsg += buff;
-			execInMirc(&mmsg);
+				this->sendInferenceChangeToMirc(*lnick,(s1 != *lnick ? s1 : s2),this->getName(),getWeighting());
 #endif
-			getGraph()->addEdge(&s1,&s2,getWeighting());
+			getGraph()->addEdge(lnick,(s1 != *lnick ? &s1 : &s2),getWeighting());
 		}
 	}
 }
