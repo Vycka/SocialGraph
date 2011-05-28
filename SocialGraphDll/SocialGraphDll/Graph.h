@@ -40,7 +40,7 @@ public:
 	void deleteNode(const std::string *lnick);
 	Node* findNode(const std::string *lnick);
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight = 0);
-	void updateEdge(Edge *e, double weight, Node *inputFrom);
+	void updateEdge(Edge *e, double weight,const Node *inputFrom);
 	Edge* findEdge(const std::string *ln1, const std::string *ln2);
 	void onMessage(const std::string *nick, const std::string *msg);
 	void onMessage(const char *nick, const char *msg);

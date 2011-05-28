@@ -41,7 +41,7 @@ void Logger::wDelNode(Node *n)
 	qFlush();
 }
 
-void Logger::wAddEdge(Edge *e,double weight,Node *inputFrom)
+void Logger::wAddEdge(Edge *e,double weight,const Node *inputFrom)
 {
 	int t = (int)time(NULL);
 	if (e->getSource() == inputFrom)
