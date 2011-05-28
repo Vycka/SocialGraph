@@ -729,6 +729,8 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		wLast = e->getWeight();
 		e->appWeight(weight);
 		e->updateActivityTime(activity);
+		if (!e->getChangedInPause())
+			e->updateActivityTimeForNick(*ln1,activity);
 	}
 	else	
 	{
@@ -754,6 +756,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		node1->appConEdges(1);
 		node2->appConEdges(1);
 		e = new Edge(node1,node2,weight,activity);
+		e->updateActivityTimeForSource(activity);
 		edges.push_back(e);
 	}
 	if (wLast <= cfg->gEdgeThreshold && e->getWeight() > cfg->gEdgeThreshold)

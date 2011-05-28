@@ -9,23 +9,29 @@ class Edge
 public:
 	Edge(Node *source, Node *target, double weight, int secs = (int)time(NULL));
 	~Edge(void);
-	Node* getSource() { return source; };
-	Node* getTarget() { return target; };
-	double getWeight() { return weight; };
+	inline Node* getSource() { return source; };
+	inline Node* getTarget() { return target; };
+	inline double getWeight() { return weight; };
 	bool sameNicks(const std::string *ln1,const std::string *ln2);
-	int getActivityTime() { return lastActivity; };
-	void setChangedInPause(bool state) { this->changedInPause = state; };
-	bool getChangedInPause() { return changedInPause; };
-	void setSource(Node *source) { this->source = source; };
-	void setTarget(Node *target) { this->target = target; };
-	void setWeight(double weight) { this->weight = weight; };
-	void appWeight(double weight) { this->weight += weight; };
-	void updateActivityTime(int secs = (int)time(NULL)) { lastActivity = secs; };
-
+	inline int getActivityTime() { return lastActivity; };
+	inline void setChangedInPause(bool state) { this->changedInPause = state; };
+	inline bool getChangedInPause() { return changedInPause; };
+	inline void setSource(Node *source) { this->source = source; };
+	inline void setTarget(Node *target) { this->target = target; };
+	inline void setWeight(double weight) { this->weight = weight; };
+	inline void appWeight(double weight) { this->weight += weight; };
+	//if source node doesn't match to a n, then it assumes that its target node
+	void updateActivityTimeForNode(const Node *n, int time = (int)time(NULL));
+	//if source nick doesn't match to a lnick, then it assumes that its target nick
+	void updateActivityTimeForNick(const std::string &lnick, int time = (int)time(NULL));
+	inline void updateActivityTimeForSource(int time = (int)time(NULL)) { this->sourceActivity = time; };
+	inline void updateActivityTimeForTarget(int time = (int)time(NULL)) { this->targetActivity = time; };
+	inline void updateActivityTime(int secs = (int)time(NULL)) { lastActivity = secs; };
 private:
 	Node *source;
 	Node *target;
 	double weight;
 	bool changedInPause;
 	int lastActivity;
+	int sourceActivity,targetActivity;
 };

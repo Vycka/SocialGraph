@@ -26,7 +26,7 @@ public:
 	void wFrame(int frame);
 	void wEnd();
 	void wAddNode(Node *n, double weight);
-	void wAddEdge(Edge *e, double weight,Node *inputFrom);
+	void wAddEdge(Edge *e, double weight,const Node *inputFrom);
 	void wDelNode(Node *n);
 	void wPause();
 	void wResume();
