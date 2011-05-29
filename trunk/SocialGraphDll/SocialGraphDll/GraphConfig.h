@@ -12,7 +12,7 @@ public:
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor,iEdgeColorChangeInactive,iEdgeNickListFontColor,iEdgeNickListLineAddColor,iEdgeNickListLineDelColor;
+		iEdgeColor,iBorderColor,iEdgeColorChangeInactive,iEdgeNickListFontColor,iEdgeNickListLineAddColor,iEdgeNickListLineDelColor,iChatDotColor;
 	int iEdgeActiveMinAlpha;
 	//img font stuff
 	double iNickFontSize;
@@ -38,7 +38,7 @@ public:
 	//logging/video
 	bool logSave;
 	int vidBeginRenderTime,vidEndRenderTime;
-	double vidFramesPerDay,vidXYDivRatio;
+	double vidFramesPerDay,vidXYDivRatio,vidEdgeChatDotSpeedPixelsPerFrame,vidEdgeChatDotRadius;
 	int vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;

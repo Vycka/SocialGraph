@@ -13,10 +13,24 @@
 #include <queue>
 #include <fstream>
 #include <iomanip>
-
+#include <math.h>
 #include <list>
 #include <map>
 
+struct GvEdgeChatDot
+{
+	GvEdgeChatDot(int timeAdded = 0,float percentMoved = 0.0) : timeAdded(timeAdded), percentMoved(percentMoved) {};
+	int timeAdded;
+	float percentMoved;
+};
+
+struct GvEdgeData
+{
+	int sourceFrames,targetFrames;
+	Gdiplus::Color sourceInactiveColor,targetInactiveColor;
+	std::vector<GvEdgeChatDot> sourceChatDots;
+	std::vector<GvEdgeChatDot> targetChatDots;
+};
 
 struct GraphRendererFrame
 {
@@ -143,7 +157,7 @@ void GraphVideo::renderVideo()
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
 	double weight;
-	bool pauseRender = false;
+	pauseRender = false;
 	std::fstream flog(cfg->logFile.c_str(),std::ios_base::in);
 	std::string buffer;
 	getline(flog,buffer,'\0');
@@ -173,8 +187,14 @@ void GraphVideo::renderVideo()
 			break;
 		case VID_ADDEDGE:
 			if (!pauseRender)
-				renderFrames(nextRender,lastTime);			
+				renderFrames(nextRender,lastTime);		
 			ss >> ln1 >> ln2 >> weight >> activity;
+			if (timestamp < activity)
+			{
+				std::stringstream ssEig;
+				ssEig << "/echo @SocialGraph Time Continuity Error: " << ss.str();
+				execInMirc(ssEig.str().c_str());
+			}
 			addEdge(&ln1,&ln2,weight,activity);
 			if (!pauseRender)
 			{
@@ -300,13 +320,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	//TODO fix credits font
 	gt->g->DrawString(wcredits.c_str(),wcredits.size(),gt->fVidNick,Gdiplus::PointF((float)(borderSize),(float)(cfg->iOutputHeight - 25)),gt->sbTitle);
 
-	/*std::stringstream ss;
-	ss << std::setw(20) << minX << std::setw(20) << maxX << std::setw(20) << minY <<  std::setw(20) << maxY;
-	std::wstring wDebug;
-	std::string debug = ss.str();
-	wDebug.assign(debug.begin(),debug.end());
-	gt->g->DrawString(wDebug.c_str(),wDebug.size(),gt->fVidNick,Gdiplus::PointF((float)(borderSize),(float)(cfg->iOutputHeight - 40)),gt->sbTitle);
-	*/
 	int eclWR = cfg->iOutputWidth - 105, eclWC = cfg->iOutputWidth - 135, eclWL = cfg->iOutputWidth - 136, eclClock = cfg->iOutputWidth - 243;
 	double eclH = 130;
 	for (std::list<GraphEdgeChangeList>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
@@ -326,8 +339,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			c = Gdiplus::Color(cfg->iEdgeColor.a,cfg->iEdgeColor.r,cfg->iEdgeColor.g,cfg->iEdgeColor.b);
 		else
 			c = Gdiplus::Color(cfg->iEdgeColorChangeInactive.a,cfg->iEdgeColorChangeInactive.r,cfg->iEdgeColorChangeInactive.g,cfg->iEdgeColorChangeInactive.b);
-		
-		
 
 		Gdiplus::Pen p(c,3);
 		int lineHeight = (int)(eclH + 8);
@@ -351,13 +362,13 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorChangeInactive.g;
 	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorChangeInactive.b;
 
-	for (unsigned int x = 0;x < edges.size();x++)
+	for (std::vector<Edge*>::iterator ei = edges.begin(); ei != edges.end(); ei++)
 	{
-		if (edges[x]->getWeight() < cfg->gEdgeThreshold)
+		if ((*ei)->getWeight() < cfg->gEdgeThreshold)
 			continue;
-		Node *nodeA = edges[x]->getSource();
-		Node *nodeB = edges[x]->getTarget();
-		double weight = edges[x]->getWeight();
+		Node *nodeA = (*ei)->getSource();
+		Node *nodeB = (*ei)->getTarget();
+		double weight = (*ei)->getWeight();
 		int x1 = (int) ((width * (nodeA->getX() - minX) / (maxX - minX)) + borderSize);
 		int y1 = (int) ((height * (nodeA->getY() - minY) / (maxY - minY)) + borderSize);
 		int x2 = (int) ((width * (nodeB->getX() - minX) / (maxX - minX)) + borderSize);
@@ -365,7 +376,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		
 
 		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
-		int edgeInactivity = szClock - edges[x]->getActivityTime();
+		int edgeInactivity = szClock - (*ei)->getActivityTime();
 		double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
 		double eiMul = 0.0;
 		if (edgeInactivity >= cfg->gEdgeColorChangeInactivityMin)
@@ -393,6 +404,54 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			alphaFinal = cfg->iEdgeColorChangeInactive.a;
 		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((weightStrength >= 255 ? 254 : weightStrength) / 85) + 2)); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
+
+		GvEdgeData *ged = (GvEdgeData*)(*ei)->getUserData();
+		float cdRadius = (float)cfg->vidEdgeChatDotRadius;
+		float cdHalfRadius = cdRadius / 2;
+		float cdQuarterRadius = cdRadius / 2;
+		for (unsigned int x = 0; x < ged->sourceChatDots.size(); x++)
+		{
+			GvEdgeChatDot *gecd = &ged->sourceChatDots[x];
+			if (gecd->percentMoved >= 100)
+			{
+				ged->sourceChatDots.erase(ged->sourceChatDots.begin() + x);
+				continue;
+			}
+			//m=(Yend-Ybegin)/(Xend-Xbegin)
+			//y = mx+Ybegin
+			double xRange = x2 - x1;
+			double m = (y2 - y1) / (xRange);
+			double edgeLen = sqrt(pow((double)x1-x2,2)+pow((double)y1-y2,2));
+			gecd->percentMoved += (float)((100.0 / edgeLen) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
+			if (gecd->percentMoved > 100.0)
+				gecd->percentMoved = 100.0;
+
+			double fx = (xRange / 100.0) * gecd->percentMoved;
+			float dotPosX = (float)((fx + x1));
+			float dotPosY = (float)((m * fx) + y1);
+			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX-cdHalfRadius-cdQuarterRadius,dotPosY-cdHalfRadius-cdQuarterRadius,cdRadius,cdRadius);
+		}
+		
+		for (unsigned int x = 0; x < ged->targetChatDots.size(); x++)
+		{
+			GvEdgeChatDot *gecd = &ged->targetChatDots[x];
+			if (gecd->percentMoved >= 100)
+			{
+				ged->targetChatDots.erase(ged->targetChatDots.begin() + x);
+				continue;
+			}
+			double xRange = x1 - x2;
+			double m = (y1 - y2) / (xRange);
+			double edgeLen = sqrt(pow((double)x1-x2,2)+pow((double)y1-y2,2));
+			gecd->percentMoved += (float)((100.0 / edgeLen) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
+			if (gecd->percentMoved > 100.0)
+				gecd->percentMoved = 100.0;
+
+			double fx = (xRange / 100.0) * gecd->percentMoved;
+			float dotPosX = (float)((fx + x2));
+			float dotPosY = (float)((m * fx) + y2);
+			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX-cdQuarterRadius,dotPosY-cdQuarterRadius,cdRadius,cdRadius);
+		}
 	}
 	int nodeRadius = (int)cfg->gNodeRadius;
 	for (unsigned int x = 0;x < visibleNodes.size();x++)
@@ -723,6 +782,7 @@ void GraphVideo::deleteUnusedNodes()
 void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double weight,int activity)
 {	
 	Edge *e = findEdge(ln1,ln2);
+	bool isInputFromSource = true;
 	double wLast = 0.0;
 	if (e)
 	{
@@ -731,6 +791,8 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		e->updateActivityTime(activity);
 		if (!e->getChangedInPause())
 			e->updateActivityTimeForNick(*ln1,activity);
+		if (e->getSource()->getLNick() != ln1)
+			isInputFromSource = false;
 	}
 	else	
 	{
@@ -757,7 +819,23 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		node2->appConEdges(1);
 		e = new Edge(node1,node2,weight,activity);
 		e->updateActivityTimeForSource(activity);
+		e->setUserData(new GvEdgeData);
 		edges.push_back(e);
+	}
+	if (!pauseRender && activity >= cfg->vidBeginRenderTime)
+	{
+		GvEdgeData *ged = (GvEdgeData*)e->getUserData();
+		if (isInputFromSource)
+		{
+			if (ged->sourceChatDots.empty() || ged->sourceChatDots.rbegin()->timeAdded != activity)
+				ged->sourceChatDots.push_back(GvEdgeChatDot(activity));
+		}
+		else
+		{
+			if (ged->targetChatDots.empty() || ged->targetChatDots.rbegin()->timeAdded != activity)
+				ged->targetChatDots.push_back(GvEdgeChatDot(activity));
+		}
+
 	}
 	if (wLast <= cfg->gEdgeThreshold && e->getWeight() > cfg->gEdgeThreshold)
 	{

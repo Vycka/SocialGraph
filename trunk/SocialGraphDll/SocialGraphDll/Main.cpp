@@ -40,7 +40,7 @@ void __stdcall LoadDll(LOADINFO* li)
 	srand((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	execInMircInit(&mHwnd);
-	execInMirc("/echo -sg SocialGraph: v1.03 Dll Loaded!");
+	execInMirc("/echo -sg SocialGraph: v1.04 BETA Dll Loaded!");
 }
 
 int __stdcall UnloadDll(int type)

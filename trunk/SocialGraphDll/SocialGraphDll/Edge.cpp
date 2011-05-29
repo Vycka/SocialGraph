@@ -9,10 +9,13 @@ Edge::Edge(Node *source, Node *target, double weight, int secs)
 	this->weight = weight;
 	this->lastActivity = secs;
 	changedInPause = false;
+	this->userData = NULL;
 }
 
 Edge::~Edge(void)
 {
+	if (userData)
+		delete userData;
 }
 
 bool Edge::sameNicks(const std::string *ln1, const std::string *ln2)

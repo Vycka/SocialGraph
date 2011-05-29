@@ -39,7 +39,8 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	cEdgeListFont = new Gdiplus::Color(cfg->iEdgeNickListFontColor.a,cfg->iEdgeNickListFontColor.r,cfg->iEdgeNickListFontColor.g,cfg->iEdgeNickListFontColor.b);
 	cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.a,cfg->iEdgeNickListLineAddColor.r,cfg->iEdgeNickListLineAddColor.g,cfg->iEdgeNickListLineAddColor.b);
 	cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.a,cfg->iEdgeNickListLineDelColor.r,cfg->iEdgeNickListLineDelColor.g,cfg->iEdgeNickListLineDelColor.b);
-	
+	cChatDotColor = new Gdiplus::Color(cfg->iChatDotColor.a,cfg->iChatDotColor.r,cfg->iChatDotColor.g,cfg->iChatDotColor.b);
+	sbChatDotColor = new Gdiplus::SolidBrush(*cChatDotColor);
 	fVidNick = new Gdiplus::Font(cfg->vidNickFont.c_str(),(float)cfg->iNickFontSize);
 
 	//TODO: Hardcoded stuff needs to go to the config one deay
@@ -77,4 +78,6 @@ GdiTools::~GdiTools(void)
 	delete cEdgeListFont;
 	delete cEdgeListLineAdd;
 	delete cEdgeListLineDel;
+	delete cChatDotColor;
+	delete sbChatDotColor;
 }

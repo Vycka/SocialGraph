@@ -29,6 +29,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iEdgeNickListFontColor = getCColor("iEdgeChangeNickList");
 	iEdgeNickListLineAddColor = getCColor("iEdgeNickListLineAddColor");
 	iEdgeNickListLineDelColor =getCColor("iEdgeNickListLineDelColor");
+	iChatDotColor    = getCColor("iChatDotColor");
 
 	//font/sizes/misc stuff
 	iNickFontSize = getDouble("iNickFontSize");
@@ -89,6 +90,8 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidEndRenderTime        = getInt("vidEndRenderTime");
 	vidNickFont             = getWString("vidNickFont");
 	vidXYDivRatio           = getDouble("vidXYDivRatio");
+	vidEdgeChatDotSpeedPixelsPerFrame  = getDouble("vidEdgeChatDotSpeedPixelsPerFrame");
+	vidEdgeChatDotRadius    = getDouble("vidEdgeChatDotRadius");
 
 	//...
 

@@ -2,6 +2,9 @@
 #include <string>
 #include <time.h>
 
+#define LPUSERDATA void*
+#define USERDATA void
+
 class Node;
 
 class Edge
@@ -27,6 +30,8 @@ public:
 	inline void updateActivityTimeForSource(int time = (int)time(NULL)) { this->sourceActivity = time; };
 	inline void updateActivityTimeForTarget(int time = (int)time(NULL)) { this->targetActivity = time; };
 	inline void updateActivityTime(int secs = (int)time(NULL)) { lastActivity = secs; };
+	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
+	inline LPUSERDATA getUserData() { return userData; };
 private:
 	Node *source;
 	Node *target;
@@ -34,4 +39,5 @@ private:
 	bool changedInPause;
 	int lastActivity;
 	int sourceActivity,targetActivity;
+	LPUSERDATA userData;
 };
