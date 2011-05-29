@@ -4,12 +4,17 @@
 #include <map>
 
 
+
 class Graph;
 class GdiTools;
 
 struct CColor
 {
-	unsigned char r,g,b,a;
+	//unsigned long argb()
+	//{
+	//	return *((unsigned long*)(this));
+	//}
+	unsigned char a,r,g,b; // a,r,g,b variable declaration ordeer or it will mess up argb()
 };
 
 struct CReplace {

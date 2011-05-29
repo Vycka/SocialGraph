@@ -52,6 +52,7 @@ iEdgeColorChangeInactive 50 50 50 10
 iEdgeChangeNickList 0 0 0 64
 iEdgeNickListLineAddColor 102 102 255 255
 iEdgeNickListLineDelColor 50 50 50 50
+iChatDotColor     255 255   0 255
 
 iEdgeActiveMinAlpha 90
 iNickFontSize     8
@@ -121,9 +122,9 @@ logFile "SocialGraph\Graph-Saves\<channel>.GraphLog.txt"
 vidRenderPBegin "SocialGraph\Graph-Saves\RenderedFrames\<channel>-"
 vidRenderPEnd   ".png"
 
-//1798.2 == 29.97fps (24h==1min) (NTSC framerate) (recommended gC 0.005) (fastest)
-//3596.4 == 59.94fps (24h==1min) (Double NTSC framerate) (recommended gC 0.001) (less jitter)
-//7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate) (recommended gC 0.0001) (minimal/no jitter in 1080p)
+//1798.2 == 29.97fps (24h==1min) (NTSC framerate) (recommended gC 0.005 or 0.001)
+//3596.4 == 59.94fps (24h==1min) (Double NTSC framerate) (recommended gC 0.001)
+//7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate) (recommended gC 0.0001)
 
 vidFramesPerDay 1798.2
 vidSEIterationsPerFrame 1
@@ -131,8 +132,11 @@ vidSEIterationsPerFrame 1
 vidRendererThreads 4
 vidBeginRenderTime 0
 vidEndRenderTime 0
-//vidXYDivRatio Recommended val: (35*finalFramsPerSec/30)
+//vidXYDivRatio Recommended val: (70*(finalFramsPerSec/30))
 //(finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
-vidXYDivRatio 35
+vidXYDivRatio 70
+
+vidEdgeChatDotSpeedPixelsPerFrame 4
+vidEdgeChatDotRadius 4
 
 vidNickFont "SansSerif"

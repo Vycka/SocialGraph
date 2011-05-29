@@ -22,4 +22,5 @@ private:
 	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
 	HANDLE *grh;
+	bool pauseRender;
 };

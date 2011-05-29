@@ -1,5 +1,5 @@
 #pragma once
-#define HEURISTIC_NOTICES
+//#define HEURISTIC_NOTICES
 #define GRAPHNOTICES
 #include <map>
 #include <set>
