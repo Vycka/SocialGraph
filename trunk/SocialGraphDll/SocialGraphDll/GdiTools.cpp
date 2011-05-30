@@ -6,14 +6,14 @@ GdiTools::GdiTools(GraphConfig *cfg)
 {
 	bmp = new Gdiplus::Bitmap(cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
 	g = new Gdiplus::Graphics(bmp);
-	cBackground = new Gdiplus::Color(cfg->iBackgroundColor.a,cfg->iBackgroundColor.r,cfg->iBackgroundColor.g,cfg->iBackgroundColor.b);
-	cChannel = new Gdiplus::Color(cfg->iChannelColor.a,cfg->iChannelColor.r,cfg->iChannelColor.g,cfg->iChannelColor.b);
-	cLabel = new Gdiplus::Color(cfg->iLabelColor.a,cfg->iLabelColor.r,cfg->iLabelColor.g,cfg->iLabelColor.b);
-	cTitle = new Gdiplus::Color(cfg->iTitleColor.a,cfg->iTitleColor.r,cfg->iTitleColor.g,cfg->iTitleColor.b);
-	cNodeBorder = new Gdiplus::Color(cfg->iNodeBorderColor.a,cfg->iNodeBorderColor.r,cfg->iNodeBorderColor.g,cfg->iNodeBorderColor.b);
-	cNode = new Gdiplus::Color(cfg->iNodeColor.a,cfg->iNodeColor.r,cfg->iNodeColor.g,cfg->iNodeColor.b);
-	cEdge = new Gdiplus::Color(cfg->iEdgeColor.a,cfg->iEdgeColor.r,cfg->iEdgeColor.g,cfg->iEdgeColor.b);
-	cBorder = new Gdiplus::Color(cfg->iBorderColor.a,cfg->iBorderColor.r,cfg->iBorderColor.g,cfg->iBorderColor.b);
+	cBackground = new Gdiplus::Color(cfg->iBackgroundColor.argb());
+	cChannel = new Gdiplus::Color(cfg->iChannelColor.argb());
+	cLabel = new Gdiplus::Color(cfg->iLabelColor.argb());
+	cTitle = new Gdiplus::Color(cfg->iTitleColor.argb());
+	cNodeBorder = new Gdiplus::Color(cfg->iNodeBorderColor.argb());
+	cNode = new Gdiplus::Color(cfg->iNodeColor.argb());
+	cEdge = new Gdiplus::Color(cfg->iEdgeColor.argb());
+	cBorder = new Gdiplus::Color(cfg->iBorderColor.argb());
 	sbBackground = new Gdiplus::SolidBrush(*cBackground);
 	rBackground = new Gdiplus::Rect(0,0,cfg->iOutputWidth - 1,cfg->iOutputHeight -1);
 	pBorder = new Gdiplus::Pen(*cBorder,1.0);
@@ -36,10 +36,10 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	fVidTimelapseTime = new Gdiplus::Font(L"Lucida Console", 72, Gdiplus::FontStyleBold);
 	fVidTimelapseDate = new Gdiplus::Font(L"Lucida Console", 24, Gdiplus::FontStyleRegular);
 	
-	cEdgeListFont = new Gdiplus::Color(cfg->iEdgeNickListFontColor.a,cfg->iEdgeNickListFontColor.r,cfg->iEdgeNickListFontColor.g,cfg->iEdgeNickListFontColor.b);
-	cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.a,cfg->iEdgeNickListLineAddColor.r,cfg->iEdgeNickListLineAddColor.g,cfg->iEdgeNickListLineAddColor.b);
-	cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.a,cfg->iEdgeNickListLineDelColor.r,cfg->iEdgeNickListLineDelColor.g,cfg->iEdgeNickListLineDelColor.b);
-	cChatDotColor = new Gdiplus::Color(cfg->iChatDotColor.a,cfg->iChatDotColor.r,cfg->iChatDotColor.g,cfg->iChatDotColor.b);
+	cEdgeListFont = new Gdiplus::Color(cfg->iEdgeNickListFontColor.argb());
+	cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.argb());
+	cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.argb());
+	cChatDotColor = new Gdiplus::Color(cfg->iChatDotColor.argb());
 	sbChatDotColor = new Gdiplus::SolidBrush(*cChatDotColor);
 	fVidNick = new Gdiplus::Font(cfg->vidNickFont.c_str(),(float)cfg->iNickFontSize);
 

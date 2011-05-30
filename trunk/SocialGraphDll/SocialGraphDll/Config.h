@@ -10,11 +10,11 @@ class GdiTools;
 
 struct CColor
 {
-	//unsigned long argb()
-	//{
-	//	return *((unsigned long*)(this));
-	//}
-	unsigned char a,r,g,b; // a,r,g,b variable declaration ordeer or it will mess up argb()
+	unsigned long argb()
+	{
+		return *((unsigned long*)(this));
+	}
+	unsigned char b,g,r,a; //do not change b,g,r,a variable declaration order or it will mess up argb() function
 };
 
 struct CReplace {
