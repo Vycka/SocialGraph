@@ -303,8 +303,7 @@ void main(int argc, char** arg)
 	//Graph *g = new Graph(&c);
 	//g->printLists();
 	//delete g;
-	Gdiplus::GdiplusShutdown(gdiplusToken);
-	
+
 
 	//system("pause");
 }
