@@ -112,7 +112,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 {
 	//overridinam kaikuriuos configus ir renderinam
-	srand(12345); // kad nesikeistu perrenderinant randomas :)
+	srand32(12345); // kad nesikeistu perrenderinant randomas :)
 	this->cfg->gCacheGdiTools = true;
 	this->cfg->gSpringEmbedderIterations = this->cfg->vidSEIterationsPerFrame;
 	gt = new GdiTools(this->cfg);
@@ -403,7 +403,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
 			alphaFinal = cfg->iEdgeColorChangeInactive.a;
 
-		float finalThickness = ((float)((weightStrength >= 255 ? 254.0 : weightStrength) / 85) + 2);
+		float finalThickness = ((float)((weightStrength > 254.0 ? 254.0 : weightStrength) / 85) + 2);
 
 		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),finalThickness); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
@@ -633,12 +633,12 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 	for (int it = 0; it < gSpringEmbedderIterations; it++) {
 			
 			// Calculate forces acting on nodes due to node-node repulsions...
-		for (unsigned int a = 0; a < visibleNodes.size(); a++)
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
 		{
-			for (unsigned int b = a + 1; b < visibleNodes.size(); b++)
+			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); bi++)
 			{
-				Node *nodeA = visibleNodes[a];
-				Node *nodeB = visibleNodes[b];
+				Node *nodeA = *ai;
+				Node *nodeB = *bi;
 					
 				double deltaX = nodeB->getX() - nodeA->getX();
 				double deltaY = nodeB->getY() - nodeA->getY();
@@ -647,8 +647,8 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 										
 				if (distanceSquared < 0.01)
 				{
-					deltaX = (rand() % 1000) / 10000 + 0.1;
-					deltaY = (rand() % 1000) / 10000 + 0.1;
+					deltaX = (rand32(1000)) / 10000 + 0.1;
+					deltaY = (rand32(1000)) / 10000 + 0.1;
 					distanceSquared = deltaX * deltaX + deltaY * deltaY;
 				}
 				
@@ -682,8 +682,8 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 			// the Nodes.
 			if (distanceSquared < 0.01)
 			{
-				deltaX = (rand() % 1000) / 10000 + 0.1;
-				deltaY = (rand() % 1000) / 10000 + 0.1;
+				deltaX = (rand32(1000)) / 10000 + 0.1;
+				deltaY = (rand32(1000)) / 10000 + 0.1;
 				distanceSquared = deltaX * deltaX + deltaY * deltaY;
 			}
 				

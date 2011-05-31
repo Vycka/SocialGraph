@@ -17,3 +17,7 @@ std::string getInQuotes(const std::string *s);
 std::wstring getInQuotes(const std::wstring *s);
 std::string ctimeToDateStr(int t);
 std::string ctimeToTimeStr(int t);
+void srand32(unsigned int seed);
+unsigned int rand32();
+unsigned int rand32(unsigned int range);
+unsigned int rand32(unsigned int min, unsigned int max);

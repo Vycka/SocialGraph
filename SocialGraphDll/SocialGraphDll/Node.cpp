@@ -12,6 +12,7 @@ Node::Node(const std::string *nick,const std::string *lnick,double weight, doubl
 	fx = 0;
 	fy = 0;
 	cEdges = 0;
+	//nodeVisible = false;
 }
 
 Node::Node(const std::string *nick,double weight,double px, double py)
@@ -29,6 +30,7 @@ Node::Node(std::fstream *f)
 	cEdges = 0;	
 	strToLower(&nick,&lnick);
 	wnick.assign(nick.begin(),nick.end());
+	//nodeVisible = false;
 }
 
 Node::~Node(void)

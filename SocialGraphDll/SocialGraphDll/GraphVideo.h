@@ -19,6 +19,7 @@ public:
 	void decay(double d, int tNow);
 private:
 	int vidRendFrame;
+	std::set<Node*> visibleDisconnectedNodes;
 	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
 	HANDLE *grh;

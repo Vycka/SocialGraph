@@ -15,7 +15,10 @@ HANDLE hMap = NULL;
 DWORD ftpExtendedErrorSize;
 char ftpExtendedError[512];
 
-
+//rand32 stuff
+static unsigned int rx32 = 123456789, ry32 = 362436069, rz32 = 521288629;
+//static unsigned int rx32 = 0, ry32 = 1, rz32 = 0;
+//rand32 stuff end
 
 void strToLower(const std::string *src,std::string *des)
 {
@@ -227,4 +230,32 @@ std::string ctimeToTimeStr(int t)
 	des += buff;
 
 	return des;
+}
+
+unsigned int rand32(void) //xorshf96 alg..
+{          //period 2^96-1
+	rx32 ^= rx32 << 16;
+	rx32 ^= rx32 >> 5;
+	rx32 ^= rx32 << 1;
+
+	unsigned int t = rx32;
+	rx32 = ry32;
+	ry32 = rz32;
+
+	rz32 = t ^ rx32 ^ ry32;
+	return rz32;
+}
+
+void srand32(unsigned int seed)
+{
+	rx32 = seed;
+}
+
+unsigned int rand32(unsigned int range)
+{
+	return rand32() % range;
+}
+unsigned int rand32(unsigned int min, unsigned int max)
+{
+	return min + (rand32() % (max-min+1));
 }

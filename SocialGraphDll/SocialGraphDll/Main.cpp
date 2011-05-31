@@ -37,7 +37,7 @@ void __stdcall LoadDll(LOADINFO* li)
 	li->mKeep = true;
 	mVer = li->mVersion;
 	mHwnd = li->mHwnd;
-	srand((unsigned int)time((time_t*)0));
+	rand32((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	execInMircInit(&mHwnd);
 	execInMirc("/echo -sg SocialGraph: v1.04 BETA Dll Loaded!");

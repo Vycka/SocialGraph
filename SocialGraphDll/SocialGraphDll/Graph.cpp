@@ -186,25 +186,26 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		return;
 
 	//jei yra toks edge, padidinam weight, jei ner, kuriam/kraunam
-	Edge *edge = findEdge(ln1,ln2);
-	if (edge)
+	Edge *e = findEdge(ln1,ln2);
+	double wLast = 0.0;
+	if (e)
 	{
 		Node *inputFrom;
-		if (*edge->getSource()->getLNick() == *ln1)
+		if (*e->getSource()->getLNick() == *ln1)
 		{
-			inputFrom = edge->getSource();
-			edge->updateActivityTimeForSource();
+			inputFrom = e->getSource();
+			e->updateActivityTimeForSource();
 		}
 		else
 		{
-			inputFrom = edge->getTarget();
-			edge->updateActivityTimeForTarget();
+			inputFrom = e->getTarget();
+			e->updateActivityTimeForTarget();
 		}
-		edge->updateActivityTime();
-		edge->appWeight(weight);
+		e->updateActivityTime();
+		e->appWeight(weight);
 
 		if (cfg->logSave)
-			logger->wAddEdge(edge,weight,inputFrom);
+			logger->wAddEdge(e,weight,inputFrom);
 
 	}
 	else
@@ -214,10 +215,22 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		Node *target = findNode(ln2);
 		source->appConEdges(1);
 		target->appConEdges(1);
-		Edge *e = new Edge(source,target,weight);
+
+		e = new Edge(source,target,weight);
 		edges.push_back(e);
 		if (cfg->logSave)
 			logger->wAddEdge(e,weight,source);
+	}
+	
+	if (wLast <= cfg->gEdgeThreshold && e->getWeight() > cfg->gEdgeThreshold)
+	{
+		if (e->getChangedInPause())
+		{
+			e->setChangedInPause(false);
+			return;
+		}
+		GraphEdgeChangeList gecl((int)time(0),e->getSource()->getWNick(),e->getTarget()->getWNick(),true);
+		addEdgeChangeList(gecl);
 	}
 	updateFrame();	
 }
@@ -452,16 +465,23 @@ void Graph::decay(double d, int tNow)
 	}
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
+		Edge *e = edges[x];
 		//tipo extra saugiklis kad senesni edges greiciau mazetu
-		double mul = ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
+		double mul = ((tNow -e->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
 		mul *= mul;
 		double newDecay = (d * mul) + d;
-		edges[x]->appWeight(-newDecay);
-		if (edges[x]->getWeight() <= 0)
+		double wLast = e->getWeight();
+		e->appWeight(-newDecay);
+		if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
 		{
-			edges[x]->getSource()->appConEdges(-1);
-			edges[x]->getTarget()->appConEdges(-1);
-			delete edges[x];
+			GraphEdgeChangeList gecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),false);
+			addEdgeChangeList(gecl);
+		}
+		if (e->getWeight() <= 0)
+		{
+			e->getSource()->appConEdges(-1);
+			e->getTarget()->appConEdges(-1);
+			delete e;
 			edges.erase(edges.begin()+x);
 			x--;
 		}
@@ -593,12 +613,12 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 	for (int it = 0; it < gSpringEmbedderIterations; it++) {
 			
 			// Calculate forces acting on nodes due to node-node repulsions...
-		for (unsigned int a = 0; a < visibleNodes.size(); a++)
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
 		{
-			for (unsigned int b = a + 1; b < visibleNodes.size(); b++)
+			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); bi++)
 			{
-				Node *nodeA = visibleNodes[a];
-				Node *nodeB = visibleNodes[b];
+				Node *nodeA = *ai;
+				Node *nodeB = *bi;
 					
 				double deltaX = nodeB->getX() - nodeA->getX();
 				double deltaY = nodeB->getY() - nodeA->getY();
@@ -607,8 +627,8 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 										
 				if (distanceSquared < 0.01)
 				{
-					deltaX = (rand() % 1000) / 10000 + 0.1;
-					deltaY = (rand() % 1000) / 10000 + 0.1;
+					deltaX = (rand32(1000)) / 10000 + 0.1;
+					deltaY = (rand32(1000)) / 10000 + 0.1;
 					distanceSquared = deltaX * deltaX + deltaY * deltaY;
 				}
 				
@@ -642,8 +662,8 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 			// the Nodes.
 			if (distanceSquared < 0.01)
 			{
-				deltaX = (rand() % 1000) / 10000 + 0.1;
-				deltaY = (rand() % 1000) / 10000 + 0.1;
+				deltaX = (rand32(1000)) / 10000 + 0.1;
+				deltaY = (rand32(1000)) / 10000 + 0.1;
 				distanceSquared = deltaX * deltaX + deltaY * deltaY;
 			}
 				
