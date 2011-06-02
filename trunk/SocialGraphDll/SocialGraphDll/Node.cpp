@@ -13,6 +13,7 @@ Node::Node(const std::string *nick,const std::string *lnick,double weight, doubl
 	fy = 0;
 	cEdges = 0;
 	//nodeVisible = false;
+	userData = NULL;
 }
 
 Node::Node(const std::string *nick,double weight,double px, double py)
@@ -31,10 +32,13 @@ Node::Node(std::fstream *f)
 	strToLower(&nick,&lnick);
 	wnick.assign(nick.begin(),nick.end());
 	//nodeVisible = false;
+	userData = NULL;
 }
 
 Node::~Node(void)
 {
+	if (userData)
+		delete userData;
 }
 
 void Node::setNick(const std::string* nick,const std::string *lnick)
