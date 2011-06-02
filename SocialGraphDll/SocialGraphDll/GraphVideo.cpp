@@ -32,6 +32,12 @@ struct GvEdgeData
 	std::vector<GvEdgeChatDot> targetChatDots;
 };
 
+struct GvNodeData
+{
+	GvNodeData() : disconnectedStillVisible(false) {};
+	bool disconnectedStillVisible;
+};
+
 struct GraphRendererFrame
 {
 	std::wstring fName;
@@ -119,6 +125,8 @@ GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 	this->cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
 	vidSecsPerFrame = 86400.0 / cfg->vidFramesPerDay;
+	firstFrameRendered = false;
+	nodeDeg = 0;
 	grq = new GraphRendererQueue;
 	renderVideo();
 }
@@ -174,6 +182,7 @@ void GraphVideo::renderVideo()
 		cfg->vidEndRenderTime = 0x7FFFFFFF;
 	while (ss.good() && timestamp < cfg->vidEndRenderTime)
 	{
+		Node *n = NULL;
 		ss >> timestamp >> key;
 		switch (key)
 		{
@@ -181,7 +190,9 @@ void GraphVideo::renderVideo()
 			if (!pauseRender)
 				renderFrames(nextRender,lastTime);	
 			ss >> n1 >> weight;
-			addNode(&n1,weight);	
+			n = addNode(&n1,weight);
+			if (!n->getUserData())
+				n->setUserData(new GvNodeData);
 			if (!pauseRender)
 				renderFrames(nextRender,timestamp);
 			break;
@@ -251,7 +262,6 @@ void GraphVideo::renderVideo()
 
 void GraphVideo::renderFrames(double &nextRender, int timestamp)
 {
-	static bool firstFrame = true;
 	while (nextRender <= timestamp)
 	{
 		wchar_t frameNr[20];
@@ -259,15 +269,15 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 		_itow(vidRendFrame++,frameNr,10);
 		dir += frameNr;
 		dir += cfg->vidRenderPEnd;
-		if (firstFrame)
+		if (!firstFrameRendered)
 		{
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 			updateVisibleNodeList();
 			//doLayout(iterations); first time dont do layout :P, so you will get a nice circle
 			calcBounds();
+			margeVisibleAndDisconnectedNodes();
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
 			drawImage(&dir,(int)nextRender);
-			firstFrame = false;
 		}
 		else
 			makeImage(cfg->vidSEIterationsPerFrame,&dir,(int)nextRender);
@@ -278,7 +288,6 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 
 void GraphVideo::renderRelocateNode(Node *n)
 {
-	static int nodeDeg = 0;
 	double radian;
 	const static double pirad = 3.14159265 / 180;
 	if (n->getConEdges() == 0)
@@ -419,6 +428,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			if (gecd->percentMoved >= 100)
 			{
 				ged->sourceChatDots.erase(ged->sourceChatDots.begin() + x);
+				x--;
 				continue;
 			}
 			//m=(Yend-Ybegin)/(Xend-Xbegin)
@@ -442,6 +452,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			if (gecd->percentMoved >= 100)
 			{
 				ged->targetChatDots.erase(ged->targetChatDots.begin() + x);
+				x--;
 				continue;
 			}
 			double xRange = x1 - x2;
@@ -463,7 +474,8 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		int x1 = (int) ((width * (n->getX() - minX) / (maxX - minX)) + borderSize);
 		int y1 = (int) ((height * (n->getY() - minY) / (maxY - minY)) + borderSize);
 		int newNodeRadius = (int) (log((n->getWeight() + 1) / 10) + nodeRadius);
-		gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
+		if (!((GvNodeData*)n->getUserData())->disconnectedStillVisible)
+			gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,
 			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
@@ -494,12 +506,13 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		SuspendThread(grh[writeThread]);
 		grq->renderQueoe[writeThread][writePos] = frame;
 		ResumeThread(grh[writeThread]);
+		if (!firstFrameRendered)
+			firstFrameRendered = true;
 }
 
 void GraphVideo::calcBounds()
 {
 	double tminX,tminY,tmaxX,tmaxY;
-	static bool renderFirstTime = true;
 	static double xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
 	static double xyDivX = cfg->vidXYDivRatio;
 	static double xyDivY = xyDivX / xyAR;
@@ -539,13 +552,12 @@ void GraphVideo::calcBounds()
 			tminY = visibleNodes[x]->getY();
 	}
 
-	if (renderFirstTime)
+	if (!firstFrameRendered)
 	{
 		minX = tminX;
 		maxX = tmaxX;
 		minY = tminY;
 		maxY = tmaxY;
-		renderFirstTime = false;
 	}
 	else
 	{
@@ -568,16 +580,16 @@ void GraphVideo::calcBounds()
 		double midX = (maxX + minX) / 2;
 		double deltaMinX = minX - (midX - (minSize / 2));
 		double deltaMaxX = maxX - (midX + (minSize / 2));
-		minX -= deltaMinX / xyDivX;
-		maxX -= deltaMaxX / xyDivX; 
+		minX -= deltaMinX / xyDivX2;
+		maxX -= deltaMaxX / xyDivX2; 
 	}
 	if (maxY - minY < minSize)
 	{
 		double midY = (maxY + minY) / 2;
 		double deltaMinY = minY - (midY - (minSize / 2));
 		double deltaMaxY = maxY - (midY + (minSize / 2));
-		minY -= deltaMinY / xyDivY;
-		maxY -= deltaMaxY / xyDivY;
+		minY -= deltaMinY / xyDivY2;
+		maxY -= deltaMaxY / xyDivY2;
 	}
 
 	for (unsigned int x = 0;x < edges.size();x++)
@@ -616,8 +628,20 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 {
 	QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 	updateVisibleNodeList();
+
+	for (unsigned int x = 0; x < visibleDisconnectedNodes.size(); x++)
+	{
+		Node *n = visibleDisconnectedNodes[x];
+		if (!isNodeInFrame(n,(maxX / cfg->iOutputWidth) * cfg->gBorderSize * 4))
+		{
+			((GvNodeData*)n->getUserData())->disconnectedStillVisible = false;
+			visibleDisconnectedNodes.erase(visibleDisconnectedNodes.begin() + x);
+			x--;
+		}
+	}
 	doLayout(iterations);
 	calcBounds();
+	margeVisibleAndDisconnectedNodes();
 	QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
 	drawImage(output,tNow);
 }
@@ -626,6 +650,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 {
 	double k = cfg->gK;
 	double c = cfg->gC;
+	double cDC = cfg->vidCDisconnected;
 	// Repulsive forces between nodes that are further apart than this are ignored.
 	double maxRepulsiveForceDistance = cfg->gMaxRepulsiveForceDistance;
 				
@@ -646,11 +671,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 				double distanceSquared = deltaX * deltaX + deltaY * deltaY;
 										
 				if (distanceSquared < 0.01)
-				{
-					deltaX = (rand32(1000)) / 10000 + 0.1;
-					deltaY = (rand32(1000)) / 10000 + 0.1;
-					distanceSquared = deltaX * deltaX + deltaY * deltaY;
-				}
+					distanceSquared = (rand32(2000) / 10000) + 0.1;
 				
 				double distance = sqrt(distanceSquared);
 				
@@ -664,7 +685,39 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 				}
 			}
 		}
-			
+		
+
+		//Repeat calculations for visible but disconnected nodes
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
+		{
+			for (std::vector<Node*>::iterator bi = visibleDisconnectedNodes.begin(); bi != visibleDisconnectedNodes.end(); bi++)
+			{
+				Node *nodeA = *ai;
+				Node *nodeB = *bi;
+				
+				if (ai == bi)
+				{
+					execInMirc("/echo @SocialGraph: Logical error: Identical nodes in the Visible/Disconnected loop!");
+					continue;
+				}
+
+				double deltaX = nodeB->getX() - nodeA->getX();
+				double deltaY = nodeB->getY() - nodeA->getY();
+					
+				double distanceSquared = deltaX * deltaX + deltaY * deltaY;
+										
+				if (distanceSquared < 0.01)
+					distanceSquared = (rand32(2000) / 10000) + 0.1;
+				
+				double distance = sqrt(distanceSquared);
+				
+				double repulsiveForce = (k * k / distance);
+					
+				nodeB->setFX(nodeB->getFX() + (repulsiveForce * deltaX / distance));
+				nodeB->setFY(nodeB->getFY() + (repulsiveForce * deltaY / distance));
+			}
+		}
+
 		// Calculate forces acting on nodes due to edge attractions.
 		for (unsigned int e = 0; e < edges.size(); e++)
 		{
@@ -681,11 +734,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 			// infinity.  Pretend there is an arbitrary distance between
 			// the Nodes.
 			if (distanceSquared < 0.01)
-			{
-				deltaX = (rand32(1000)) / 10000 + 0.1;
-				deltaY = (rand32(1000)) / 10000 + 0.1;
-				distanceSquared = deltaX * deltaX + deltaY * deltaY;
-			}
+				distanceSquared = (rand32(2000) / 10000) + 0.1;
 				
 			double distance = sqrt(distanceSquared);
 				
@@ -711,9 +760,9 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 		}
 			
 		// Now move each node to its new location...
-		for (unsigned int a = 0; a < visibleNodes.size(); a++)
+		for (std::vector<Node*>::iterator it = visibleNodes.begin(); it != visibleNodes.end(); it++)
 		{
-			Node *node = visibleNodes[a];
+			Node *node = *it;
 			
 			double xMovement = c * node->getFX();
 			double yMovement = c * node->getFY();
@@ -740,7 +789,37 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 			node->setFX(0);
 			node->setFY(0);
 		}
+		
+		//move visible disconnected nodes to the new location
+		for (std::vector<Node*>::iterator it = visibleDisconnectedNodes.begin(); it != visibleDisconnectedNodes.end(); it++)
+		{
+			Node *node = *it;
 			
+			double xMovement = cDC * node->getFX();
+			double yMovement = cDC * node->getFY();
+			
+			// Limit movement values to stop nodes flying into oblivion.
+			double max = cfg->vidMaxNodeMovementDisconnected;
+			if (xMovement > max) 
+				xMovement = max;
+			
+			else if (xMovement < -max) 
+				xMovement = -max;
+			
+			if (yMovement > max) 
+				yMovement = max;
+			
+			else if (yMovement < -max)
+				yMovement = -max;
+			
+			
+			node->setX(node->getX() + xMovement);
+			node->setY(node->getY() + yMovement);
+			
+			// Reset the forces
+			node->setFX(0);
+			node->setFY(0);
+		}
 	}
 }
 
@@ -750,7 +829,8 @@ void GraphVideo::deleteUnusedNodes()
 	std::list <Node*> nodesToErase;
 	for (std::map<std::string,Node*>::iterator iNodes = nodes.begin();iNodes != nodes.end();iNodes++)
 	{	
-		if (iNodes->second->getWeight() > cfg->gTemporalDecayAmount)
+		//method called only in pausedRender, so after this one nodes weight will be updated from next LOG_INIT
+		if (iNodes->second->getWeight() > cfg->gTemporalDecayAmount || ((GvNodeData*)iNodes->second->getUserData())->disconnectedStillVisible)
 		{
 			iNodes->second->setWeight(0);
 			continue;
@@ -773,6 +853,7 @@ void GraphVideo::deleteUnusedNodes()
 		std::map<std::string,Node*>::iterator iNode = nodes.find(*(*iErase)->getLNick());
 		delete iNode->second;
 		nodes.erase(iNode);
+
 	}
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
@@ -815,8 +896,22 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 			execInMirc(&mmsg);
 			node2 = addNode(ln2,ln2,0);
 		}
-		renderRelocateNode(node1);
-		renderRelocateNode(node2);
+		if (((GvNodeData*)node1->getUserData())->disconnectedStillVisible)
+		{
+			((GvNodeData*)node1->getUserData())->disconnectedStillVisible = false;
+			deleteDisconnectedVisibleNode(node1);
+		}	
+		if (((GvNodeData*)node2->getUserData())->disconnectedStillVisible)
+		{
+			((GvNodeData*)node2->getUserData())->disconnectedStillVisible = false;
+			deleteDisconnectedVisibleNode(node2);
+		}
+
+		if (!isNodeInFrame(node1))
+			renderRelocateNode(node1);
+		if (!isNodeInFrame(node2))
+			renderRelocateNode(node2);
+
 		node1->appConEdges(1);
 		node2->appConEdges(1);
 		e = new Edge(node1,node2,weight,activity);
@@ -879,9 +974,84 @@ void GraphVideo::decay(double d, int tNow)
 		{
 			e->getSource()->appConEdges(-1);
 			e->getTarget()->appConEdges(-1);
+			if (tNow >= cfg->vidBeginRenderTime)
+			{
+				if (e->getSource()->getConEdges() == 0)
+				{
+					Node *n = e->getSource();
+					visibleDisconnectedNodes.push_back(n);
+					((GvNodeData*)n->getUserData())->disconnectedStillVisible = true;
+
+				}
+				if (e->getTarget()->getConEdges() == 0)
+				{
+					Node *n = e->getTarget();
+					visibleDisconnectedNodes.push_back(n);
+					((GvNodeData*)n->getUserData())->disconnectedStillVisible = true;
+
+				}
+			}
 			delete e;
 			edges.erase(edges.begin()+x);
 			x--;
 		}
 	}
+}
+
+void GraphVideo::deleteDisconnectedVisibleNode(Node *n)
+{
+	for (std::vector<Node*>::iterator i = visibleDisconnectedNodes.begin(); i != visibleDisconnectedNodes.end(); i++)
+		if (n == *i)
+		{
+			visibleDisconnectedNodes.erase(i);
+			return;
+		}
+}
+
+void GraphVideo::margeVisibleAndDisconnectedNodes()
+{
+	visibleNodes.insert(visibleNodes.end(),visibleDisconnectedNodes.begin(),visibleDisconnectedNodes.end());
+}
+
+void GraphVideo::clear()
+{
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+		delete i->second;
+	for (unsigned int x = 0;x < edges.size();x++)
+		delete edges[x];
+
+
+	nodes.clear();
+	edges.clear();
+	visibleNodes.clear();
+	visibleDisconnectedNodes.clear();
+	std::stringstream ss;
+	ss << "/echo @SocialGraph Video: called clear():" << this->lastFrame;
+	execInMirc(ss.str().c_str());
+}
+
+void GraphVideo::deleteNode(const std::string *lnick)
+{
+
+	std::map<std::string,Node*>::iterator iNode = nodes.find(*lnick);
+	if (iNode == nodes.end())
+	{
+		return;
+	}
+
+	if (((GvNodeData*)iNode->second->getUserData())->disconnectedStillVisible)
+		return;
+
+	for (unsigned int x = 0;x < edges.size();x++)
+		if (edges[x]->getSource() == iNode->second || edges[x]->getTarget() == iNode->second)
+		{
+			edges[x]->getSource()->appConEdges(-1);
+			edges[x]->getTarget()->appConEdges(-1);
+			delete edges[x];
+			edges.erase(edges.begin()+x);
+			x--;
+		}
+	//ant galo naikinam node
+	delete iNode->second;
+	nodes.erase(iNode);
 }

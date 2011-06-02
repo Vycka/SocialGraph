@@ -56,6 +56,7 @@
   + Add: gMinMaxWeight parametras - nustatantis, koks bus maziausias maxWeight, to pasekoj silpni santykiai nebus iskarto storos linijos, jei nebus nieko kito kanale kurie tarpusavy aktyviai sneketu.
   * Fix: Multithreaded rendereris pagaliau pilnai sutvarkytas. (Ant AMD x6 1055T matomas 400% pagreitejimas)
   + Add: Lekiantys taskiukai ant liniju, kurie parodys kaip pasnekovai tarpusavy snekasi.
+  + Add: Atjungti vartotojai nuo grafo nepradings iskart, o isleks pirma uz paveiksliuko ribu.
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve
 Tvarkingesnis config failas (90% Done)

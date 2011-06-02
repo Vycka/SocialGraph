@@ -17,11 +17,17 @@ public:
 	void calcBounds();
 	void deleteUnusedNodes();
 	void decay(double d, int tNow);
+	void deleteDisconnectedVisibleNode(Node *n);
+	void margeVisibleAndDisconnectedNodes();
+	void clear();
+	void deleteNode(const std::string *lnick);
 private:
 	int vidRendFrame;
-	std::set<Node*> visibleDisconnectedNodes;
+	std::vector<Node*> visibleDisconnectedNodes;
 	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
 	HANDLE *grh;
 	bool pauseRender;
+	bool firstFrameRendered;
+	int nodeDeg;
 };

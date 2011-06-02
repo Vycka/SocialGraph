@@ -31,9 +31,9 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 300; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 100; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
 	minY = 0;
-	maxY = 300;
+	maxY = 100;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
@@ -110,6 +110,9 @@ void Graph::clear()
 	for (unsigned int x = 0;x < edges.size();x++)
 		delete edges[x];
 
+	std::stringstream ss;
+	ss << "/echo @SocialGraph Graph: called clear():" << this->lastFrame;
+	execInMirc(ss.str().c_str());
 
 	nodes.clear();
 	edges.clear();
@@ -364,7 +367,7 @@ void Graph::loadFromFile(const char *fn)
 	std::fstream f(fn,std::ios_base::in);
 	if (!f.good())
 	{
-		std::string mmsg = "/echo -sg SocialGraph: Unable to open GraphData file: ";
+		std::string mmsg = "/echo @SocialGraph SocialGraph: Unable to open GraphData file: ";
 		mmsg += fn;
 		execInMirc(&mmsg);
 		return;
@@ -413,7 +416,7 @@ void Graph::loadFromFile(const char *fn)
 	{
 		lastFrame = 0;
 		clear();
-		std::string mmsg = "/echo -sg SocialGraph: Unable to read GraphData file correctly (file might be corrupted): ";
+		std::string mmsg = "/echo @SocialGraph SocialGraph: Unable to read GraphData file correctly (file might be corrupted): ";
 		mmsg += fn;
 		execInMirc(&mmsg);
 	}
@@ -565,7 +568,7 @@ void Graph::updateFrame()
 		std::string mmsg = "/.signal SocialGraph genFrame " + cfg->nChannel + " " + std::string(buff);
 		execInMirc(&mmsg);
 #ifdef GRAPHNOTICES
-		mmsg = "/echo -sg SocialGraph: Next Frame Generated: #";
+		mmsg = "/echo @SocialGraph SocialGraph: Next Frame Generated: #";
 		mmsg += buff + std::string(" Channel: ") + cfg->nChannel;
 		execInMirc(&mmsg);
 #endif
@@ -626,11 +629,7 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 				double distanceSquared = deltaX * deltaX + deltaY * deltaY;
 										
 				if (distanceSquared < 0.01)
-				{
-					deltaX = (rand32(1000)) / 10000 + 0.1;
-					deltaY = (rand32(1000)) / 10000 + 0.1;
-					distanceSquared = deltaX * deltaX + deltaY * deltaY;
-				}
+					distanceSquared = (rand32(2000) / 10000) + 0.1;
 				
 				double distance = sqrt(distanceSquared);
 				
@@ -925,7 +924,7 @@ void Graph::upload()
 	char buff[16];
 
 #ifdef GRAPHNOTICES
-	std::string mmsg = "/echo -sg SocialGraph: Uploading Frame: #";
+	std::string mmsg = "/echo @SocialGraph SocialGraph: Uploading Frame: #";
 	mmsg += _itoa(lastFrame,buff,10) + std::string(" Channel: ") + cfg->nChannel;
 	execInMirc(&mmsg);
 #endif
@@ -934,7 +933,7 @@ void Graph::upload()
 		cfg->fImageOutput.c_str(),cfg->ftpDir.c_str(),cfg->ftpFile.c_str());
 	if (err)
 	{
-		std::string s("/echo -sg SocialGraph: Error uploading to FTP - Channel: " + cfg->nChannel + ", Error Code: ");
+		std::string s("/echo @SocialGraph SocialGraph: Error uploading to FTP - Channel: " + cfg->nChannel + ", Error Code: ");
 		_itoa(err,buff,10);
 		s += buff + std::string(", Extended Err: ") + ftpGetExtendedError(); 
 		execInMirc(&s);
@@ -947,7 +946,7 @@ void Graph::saveOldFrame()
 			if (!CopyFile(cfg->fImageOutput.c_str(),std::string(cfg->oPathBegin+_itoa(lastFrame,buff,10)+cfg->oPathEnd).c_str(),true))
 			{
 #ifdef GRAPHNOTICES
-				std::string mmsg = "/echo -sg SocialGraph: Error Saving old frame. Error Code: ";
+				std::string mmsg = "/echo @SocialGraph SocialGraph: Error Saving old frame. Error Code: ";
 				mmsg += _itoa(GetLastError(),buff,10);
 				execInMirc(&mmsg);
 #endif

@@ -42,4 +42,5 @@ public:
 	int vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;
+	double vidCDisconnected,vidMaxNodeMovementDisconnected;
 };

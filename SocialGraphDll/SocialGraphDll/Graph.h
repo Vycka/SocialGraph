@@ -8,10 +8,10 @@
 #include <string>
 #include <Windows.h>
 #include <time.h>
+#include "Node.h"
 
 class GdiTools;
 class GraphConfig;
-class Node;
 class Edge;
 class InferenceHeuristic;
 class Logger;
@@ -34,10 +34,10 @@ public:
 	Graph(const GraphConfig *cfg,bool videoRendering = false);
 	~Graph(void);
 	void initGraphForLogging();
-	void clear();
+	virtual void clear();
 	Node* addNode(const std::string *nick,const std::string *lnick,double weight = 0.0);
 	Node* addNode(const std::string *nick,double weight = 0.0);
-	void deleteNode(const std::string *lnick);
+	virtual void deleteNode(const std::string *lnick);
 	Node* findNode(const std::string *lnick);
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight = 0);
 	void updateEdge(Edge *e, double weight,const Node *inputFrom);
@@ -64,6 +64,7 @@ public:
 	void upload();
 	void saveOldFrame();
 	GraphConfig* getConfig();
+	inline bool isNodeInFrame(Node *n, double extraBorder = 0) { return (n->getX() >= minX - extraBorder && n->getY() >= minY - extraBorder && n->getX() <= maxX + extraBorder && n->getY() <= maxY + extraBorder ? true : false); };
 protected:
 	virtual void addEdgeChangeList(const GraphEdgeChangeList &gecl);
 	double minX,maxX,minY,maxY;

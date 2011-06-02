@@ -92,6 +92,8 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidXYDivRatio           = getDouble("vidXYDivRatio");
 	vidEdgeChatDotSpeedPixelsPerFrame  = getDouble("vidEdgeChatDotSpeedPixelsPerFrame");
 	vidEdgeChatDotRadius    = getDouble("vidEdgeChatDotRadius");
+	vidCDisconnected       = getDouble("vidCDisconnected");
+	vidMaxNodeMovementDisconnected = getDouble("vidMaxNodeMovementDisconnected");
 
 	//...
 

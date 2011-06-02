@@ -3,6 +3,12 @@
 #include <string>
 #include <fstream>
 #include "Tools.h"
+#ifndef LPUSERDATA
+#define LPUSERDATA void*
+#endif
+#ifndef USERDATA
+#define USERDATA void
+#endif
 
 class Edge;
 
@@ -32,6 +38,8 @@ public:
 	inline double getWeight() { return weight; };
 	inline const wchar_t* getWNick() { return wnick.c_str(); };
 	inline int getConEdges() { return cEdges; };
+	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
+	inline LPUSERDATA getUserData() { return userData; };
 	//inline bool getNodeVisible() { return nodeVisible; };
 	
 
@@ -39,6 +47,7 @@ public:
 	friend Edge;
 private:
 	//bool nodeVisible;
+	LPUSERDATA userData;
 	std::string nick,lnick;
 	std::wstring wnick;
 	double weight,x,y,fx,fy;
