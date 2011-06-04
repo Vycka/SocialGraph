@@ -51,10 +51,10 @@ iBorderColor      102 102 102 255
 iEdgeColorChangeInactive 50 50 50 10
 iEdgeChangeNickList 0 0 0 64
 iEdgeNickListLineAddColor 102 102 255 255
-iEdgeNickListLineDelColor 50 50 50 50
-iChatDotColor     255 255   0 255
+iEdgeNickListLineDelColor 50 50 50 70
+iChatDotColor     105 105 191 255
 
-iEdgeActiveMinAlpha 90
+iEdgeActiveMinAlpha 110
 iNickFontSize     8
 
 //------------------------------------------------------
@@ -135,9 +135,8 @@ vidEndRenderTime 0
 //vidXYDivRatio Recommended val: (70*(finalFramsPerSec/30))
 //(finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
 vidXYDivRatio 70
-vidEdgeChatDotSpeedPixelsPerFrame 4
-vidEdgeChatDotRadius 4
 vidNickFont "SansSerif"
-
-vidMaxNodeMovementDisconnected 0.03
-vidCDisconnected              0.01
+vidEdgeChatDotSpeedPixelsPerFrame 6
+vidEdgeChatDotRadius 3
+vidMaxNodeMovementDisconnected 0.02
+vidCDisconnected              0.006

@@ -64,7 +64,7 @@ public:
 	void upload();
 	void saveOldFrame();
 	GraphConfig* getConfig();
-	inline bool isNodeInFrame(Node *n, double extraBorder = 0) { return (n->getX() >= minX - extraBorder && n->getY() >= minY - extraBorder && n->getX() <= maxX + extraBorder && n->getY() <= maxY + extraBorder ? true : false); };
+	//inline bool isNodeInFrame(Node *n, double extraBorderX = 0.0, double extraBorderY = 0.0) { return (n->getX() >= minX - extraBorderX && n->getY() >= minY - extraBorderY && n->getX() <= maxX + extraBorderX && n->getY() <= maxY + extraBorderY ? true : false); };
 protected:
 	virtual void addEdgeChangeList(const GraphEdgeChangeList &gecl);
 	double minX,maxX,minY,maxY;
