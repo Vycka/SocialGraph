@@ -1,5 +1,5 @@
 #pragma once
-//#define COMP_EXE
+#define COMP_EXE
 #include <string>
 #include <Windows.h>
 

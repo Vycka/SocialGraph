@@ -31,9 +31,9 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 100; //big numbers here so node relocator places them nicely, before real mins/maxes be calculated
+	maxX = 15;
 	minY = 0;
-	maxY = 100;
+	maxY = 15;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
