@@ -500,11 +500,8 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			{
 				nData->fadeOutSteps++;
 
-				unsigned char labelAlpha = cfg->iLabelColor.a - (cfg->iLabelColor.a - (cfg->iLabelColor.a / nData->fadeOutSteps));
-				unsigned char nodeBorderAlpha = cfg->iNodeBorderColor.a - (cfg->iNodeBorderColor.a - (cfg->iNodeBorderColor.a / nData->fadeOutSteps));
-
-				CColor ccLabel(labelAlpha,cfg->iLabelColor.r,cfg->iLabelColor.g,cfg->iLabelColor.b);
-				CColor ccNodeBorder(nodeBorderAlpha,cfg->iNodeBorderColor.r,cfg->iNodeBorderColor.g,cfg->iNodeBorderColor.b);
+				CColor ccLabel(cfg->iLabelColor.a / nData->fadeOutSteps,cfg->iLabelColor.r,cfg->iLabelColor.g,cfg->iLabelColor.b);
+				CColor ccNodeBorder(cfg->iNodeBorderColor.a / nData->fadeOutSteps,cfg->iNodeBorderColor.r,cfg->iNodeBorderColor.g,cfg->iNodeBorderColor.b);
 
 				Gdiplus::Pen fadeOutpNodeBorder(ccNodeBorder.argb(),1.0);
 				Gdiplus::SolidBrush fadeOutsbLabel(ccLabel.argb());
