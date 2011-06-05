@@ -24,6 +24,7 @@ public:
 	inline int getNodeFinalCoordX(Node *n) { return (int)((nodeCoordCalcWidth * (n->getX() - minX) / (maxX - minX)) + nodeCoordCalcBorderX); };
 	inline int getNodeFinalCoordY(Node *n) { return (int)((nodeCoordCalcHeight * (n->getY() - minY) / (maxY - minY)) + nodeCoordCalcBorderY); };
 	bool isNodeInFrame(Node *n);
+	bool isNodeWithinBorder(Node *n);
 private:
 	int vidRendFrame;
 	std::vector<Node*> visibleDisconnectedNodes;
