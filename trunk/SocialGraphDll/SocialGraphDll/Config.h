@@ -14,6 +14,7 @@ struct CColor
 	{
 		return *((unsigned long*)(this));
 	}
+	CColor(unsigned char a = 0, unsigned char r = 0, unsigned char g = 0, unsigned char b = 0) : a(a), r(r), g(g), b(b) {};
 	unsigned char b,g,r,a; //do not change b,g,r,a variable declaration order or it will mess up argb() function
 };
 

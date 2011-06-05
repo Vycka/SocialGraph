@@ -37,8 +37,13 @@ struct GvEdgeData
 
 struct GvNodeData
 {
-	GvNodeData() : disconnectedStillVisible(false) {};
+	GvNodeData() : disconnectedStillVisible(false), lastKnownRadius(5), fadeOutSteps(0), fadeOutEnabled(false) {};
 	bool disconnectedStillVisible;
+	float lastKnownRadius;
+	int fadeOutSteps;
+	bool fadeOutEnabled;
+	inline void fadeOutBegin() { fadeOutSteps = 0; fadeOutEnabled = true; };
+	inline void fadeOutCancel() { fadeOutEnabled = false; };
 };
 
 struct GraphRendererFrame
@@ -481,45 +486,78 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	for (unsigned int x = 0;x < visibleNodes.size();x++)
 	{
 		Node *n = visibleNodes[x];
+		GvNodeData* nData = ((GvNodeData*)n->getUserData());
+		
 
 		int x1 = getNodeFinalCoordX(n);
 		int y1 = getNodeFinalCoordY(n);
 
-		int newNodeRadius = (int) (log((n->getWeight() + 1) / 10) + nodeRadius);
-		if (!((GvNodeData*)n->getUserData())->disconnectedStillVisible)
-			gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
-		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
-		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,
-			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
+		nData->lastKnownRadius = (float)(log((n->getWeight() + 1) / 10) + nodeRadius);
+
+		if (nData->disconnectedStillVisible)
+		{
+			if (nData->fadeOutEnabled)
+			{
+				nData->fadeOutSteps++;
+
+				unsigned char labelAlpha = cfg->iLabelColor.a - (cfg->iLabelColor.a - (cfg->iLabelColor.a / nData->fadeOutSteps));
+				unsigned char nodeBorderAlpha = cfg->iNodeBorderColor.a - (cfg->iNodeBorderColor.a - (cfg->iNodeBorderColor.a / nData->fadeOutSteps));
+
+				CColor ccLabel(labelAlpha,cfg->iLabelColor.r,cfg->iLabelColor.g,cfg->iLabelColor.b);
+				CColor ccNodeBorder(nodeBorderAlpha,cfg->iNodeBorderColor.r,cfg->iNodeBorderColor.g,cfg->iNodeBorderColor.b);
+
+				Gdiplus::Pen fadeOutpNodeBorder(ccNodeBorder.argb(),1.0);
+				Gdiplus::SolidBrush fadeOutsbLabel(ccLabel.argb());
+
+				//lol 1x
+				gt->g->DrawEllipse(&fadeOutpNodeBorder,x1 -nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
+				gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,Gdiplus::PointF((float)x1+nData->lastKnownRadius-1,(float)y1+nData->lastKnownRadius-1),&fadeOutsbLabel);
+			}
+			else
+			{
+				//lol 2x
+				gt->g->DrawEllipse(gt->pNodeBorder,x1 -nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
+				gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,Gdiplus::PointF((float)x1+nData->lastKnownRadius-1,(float)y1+nData->lastKnownRadius-1),gt->sbLabel);
+			}
+
+		}
+		else
+		{
+			gt->g->FillEllipse(gt->sbNode,x1 - nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
+			//lol 3x
+			gt->g->DrawEllipse(gt->pNodeBorder,x1 -nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
+			gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fVidNick,Gdiplus::PointF((float)x1+nData->lastKnownRadius-1,(float)y1+nData->lastKnownRadius-1),gt->sbLabel);
+		}
+		//need better solution here one day :/
 	}
 
-		GraphRendererFrame *frame = new GraphRendererFrame;
-		frame->fName = *fWPath;
-		frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
-
-		int writeThread = 0, writePos = 0;
-		bool posFound = false;
-		do
+	GraphRendererFrame *frame = new GraphRendererFrame;
+	frame->fName = *fWPath;
+	frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
+	
+	int writeThread = 0, writePos = 0;
+	bool posFound = false;
+	do
+	{
+		posFound = false;
+		while (!posFound)
 		{
-			posFound = false;
-			while (!posFound)
-			{
-				grq->lastThreadadded = (grq->lastThreadadded + 1) % cfg->vidRendererThreads;
-				for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
-					if (!grq->renderQueoe[grq->lastThreadadded][x])
-					{
-						writeThread = grq->lastThreadadded;
-						writePos = x;
-						posFound = true;
-						break;
-					}
-			}
-		} while (!posFound);
-		SuspendThread(grh[writeThread]);
-		grq->renderQueoe[writeThread][writePos] = frame;
-		ResumeThread(grh[writeThread]);
-		if (!firstFrameRendered)
-			firstFrameRendered = true;
+			grq->lastThreadadded = (grq->lastThreadadded + 1) % cfg->vidRendererThreads;
+			for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
+				if (!grq->renderQueoe[grq->lastThreadadded][x])
+				{
+					writeThread = grq->lastThreadadded;
+					writePos = x;
+					posFound = true;
+					break;
+				}
+		}
+	} while (!posFound);
+	SuspendThread(grh[writeThread]);
+	grq->renderQueoe[writeThread][writePos] = frame;
+	ResumeThread(grh[writeThread]);
+	if (!firstFrameRendered)
+		firstFrameRendered = true;
 }
 
 void GraphVideo::calcBounds()
@@ -646,12 +684,18 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 	for (unsigned int x = 0; x < visibleDisconnectedNodes.size(); x++)
 	{
 		Node *n = visibleDisconnectedNodes[x];
-	
-		if (!isNodeInFrame(n))
+		GvNodeData *nData = (GvNodeData*)n->getUserData();
+		if (!isNodeInFrame(n) || nData->fadeOutSteps > cfg->videDisconnectedFadeOutFrames)
 		{
-			((GvNodeData*)n->getUserData())->disconnectedStillVisible = false;
+			
+			nData->disconnectedStillVisible = false;
+			nData->fadeOutCancel();
 			visibleDisconnectedNodes.erase(visibleDisconnectedNodes.begin() + x);
 			x--;
+		}
+		else if (!isNodeWithinBorder(n) && !nData->fadeOutEnabled)
+		{
+			nData->fadeOutBegin();
 		}
 	}
 	mergeVisibleAndDisconnectedNodes();
@@ -998,19 +1042,26 @@ void GraphVideo::decay(double d, int tNow)
 			e->getTarget()->appConEdges(-1);
 			if (tNow >= cfg->vidBeginRenderTime)
 			{
+
+				//Here's the only place where disconnectedStillVisible can become true.
+				//cancel fadeout here if it was active
+
 				if (e->getSource()->getConEdges() == 0)
 				{
 					Node *n = e->getSource();
+					GvNodeData *nData = (GvNodeData*)n->getUserData();
 					visibleDisconnectedNodes.push_back(n);
-					((GvNodeData*)n->getUserData())->disconnectedStillVisible = true;
+					nData->disconnectedStillVisible = true;
+					nData->fadeOutCancel();
 
 				}
 				if (e->getTarget()->getConEdges() == 0)
 				{
 					Node *n = e->getTarget();
+					GvNodeData *nData = (GvNodeData*)n->getUserData();
 					visibleDisconnectedNodes.push_back(n);
-					((GvNodeData*)n->getUserData())->disconnectedStillVisible = true;
-
+					nData->disconnectedStillVisible = true;
+					nData->fadeOutCancel();
 				}
 			}
 			delete e;
@@ -1080,8 +1131,20 @@ bool GraphVideo::isNodeInFrame(Node *n)
 {
 	int x = getNodeFinalCoordX(n);
 	int y = getNodeFinalCoordY(n);
-	//TODO: add real node radius ln(weight) to calculation.
-	if (x + cfg->gNodeRadius + 20 > 0  && x < cfg->iOutputWidth && y + 15 > 0 && y < cfg->iOutputHeight)
+	GvNodeData* nData = ((GvNodeData*)n->getUserData());
+	if (x + nData->lastKnownRadius > 0  && x < cfg->iOutputWidth && y + nData->lastKnownRadius > 0 && y < cfg->iOutputHeight)
+		return true;
+	return false;
+}
+
+bool GraphVideo::isNodeWithinBorder(Node *n)
+{
+	//return false;
+	int x = getNodeFinalCoordX(n);
+	int y = getNodeFinalCoordY(n);
+	GvNodeData* nData = ((GvNodeData*)n->getUserData());
+	if (x + nData->lastKnownRadius > cfg->gBorderSize && x < cfg->iOutputWidth - cfg->gBorderSize &&
+		y + nData->lastKnownRadius > cfg->gBorderSize && y < cfg->iOutputHeight - cfg->gBorderSize)
 		return true;
 	return false;
 }

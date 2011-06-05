@@ -94,6 +94,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidEdgeChatDotRadius    = getDouble("vidEdgeChatDotRadius");
 	vidCDisconnected       = getDouble("vidCDisconnected");
 	vidMaxNodeMovementDisconnected = getDouble("vidMaxNodeMovementDisconnected");
+	videDisconnectedFadeOutFrames = getInt("videDisconnectedFadeOutFrames");
 
 	//...
 
