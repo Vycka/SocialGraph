@@ -427,7 +427,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
 			alphaFinal = cfg->iEdgeColorChangeInactive.a;
 
-		float finalThickness = ((float)((weightStrength > 254.0 ? 254.0 : weightStrength) / 85) + 2);
+		float finalThickness = (float)((weightStrength / 75) + 2); // 255/75=3.4
 
 		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),finalThickness); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
@@ -435,25 +435,22 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		GvEdgeData *ged = (GvEdgeData*)(*ei)->getUserData();
 		float cdRadius = (float)cfg->vidEdgeChatDotRadius;
 		float cdHalfRadius = cdRadius / 2;
-		float thicknessCorrection = (finalThickness / 2);
+		float thicknessCorrection = pow(finalThickness / 2,2);  //TODO: simplify all this in the future....
 		double edgeLength = sqrt(pow((double)x1-x2,2)+pow((double)y1-y2,2));
 		for (unsigned int x = 0; x < ged->sourceChatDots.size(); x++)
 		{
 			GvEdgeChatDot *gecd = &ged->sourceChatDots[x];
+
+			double xRange = x2 - x1;
+			double m = (y2 - y1) / (xRange);
+			
+			gecd->percentMoved += (float)((100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
 			if (gecd->percentMoved >= 100)
 			{
 				ged->sourceChatDots.erase(ged->sourceChatDots.begin() + x);
 				x--;
 				continue;
 			}
-			//m=(Yend-Ybegin)/(Xend-Xbegin)
-			//y = mx+Ybegin
-			double xRange = x2 - x1;
-			double m = (y2 - y1) / (xRange);
-			
-			gecd->percentMoved += (float)((100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
-			if (gecd->percentMoved > 100.0)
-				gecd->percentMoved = 100.0;
 
 			double fx = (xRange / 100.0) * gecd->percentMoved;
 			float dotPosX = (float)((fx + x1));
@@ -464,17 +461,16 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		for (unsigned int x = 0; x < ged->targetChatDots.size(); x++)
 		{
 			GvEdgeChatDot *gecd = &ged->targetChatDots[x];
+
+			double xRange = x1 - x2;
+			double m = (y1 - y2) / (xRange);
+			gecd->percentMoved += (float)((100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
 			if (gecd->percentMoved >= 100)
 			{
 				ged->targetChatDots.erase(ged->targetChatDots.begin() + x);
 				x--;
 				continue;
 			}
-			double xRange = x1 - x2;
-			double m = (y1 - y2) / (xRange);
-			gecd->percentMoved += (float)((100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
-			if (gecd->percentMoved > 100.0)
-				gecd->percentMoved = 100.0;
 
 			double fx = (xRange / 100.0) * gecd->percentMoved;
 			float dotPosX = (float)((fx + x2));
@@ -1095,9 +1091,9 @@ void GraphVideo::clear()
 	edges.clear();
 	visibleNodes.clear();
 	visibleDisconnectedNodes.clear();
-	std::stringstream ss;
-	ss << "/echo @SocialGraph Video: called clear():" << this->lastFrame;
-	execInMirc(ss.str().c_str());
+	//std::stringstream ss;
+	//ss << "/echo @SocialGraph Video: called clear():" << this->lastFrame;
+	//execInMirc(ss.str().c_str());
 }
 
 void GraphVideo::deleteNode(const std::string *lnick)
