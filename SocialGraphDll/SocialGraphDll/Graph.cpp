@@ -110,9 +110,9 @@ void Graph::clear()
 	for (unsigned int x = 0;x < edges.size();x++)
 		delete edges[x];
 
-	std::stringstream ss;
-	ss << "/echo @SocialGraph Graph: called clear():" << this->lastFrame;
-	execInMirc(ss.str().c_str());
+	//std::stringstream ss;
+	//ss << "/echo @SocialGraph Graph: called clear():" << this->lastFrame;
+	//execInMirc(ss.str().c_str());
 
 	nodes.clear();
 	edges.clear();
