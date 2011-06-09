@@ -140,4 +140,4 @@ vidEdgeChatDotSpeedPixelsPerFrame 6
 vidEdgeChatDotRadius 3
 vidMaxNodeMovementDisconnected 0.02
 vidCDisconnected              0.006
-videDisconnectedFadeOutFrames 20
+vidDisconnectedFadeOutFrames 20

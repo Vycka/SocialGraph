@@ -43,7 +43,7 @@ struct GvNodeData
 	int fadeOutSteps;
 	bool fadeOutEnabled;
 	inline void fadeOutBegin() { fadeOutSteps = 0; fadeOutEnabled = true; };
-	inline void fadeOutCancel() { fadeOutEnabled = false; };
+	inline void fadeOutCancel() { fadeOutSteps = 0; fadeOutEnabled = false; };
 };
 
 struct GraphRendererFrame
@@ -393,10 +393,10 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		Node *nodeA = (*ei)->getSource();
 		Node *nodeB = (*ei)->getTarget();
 		double weight = (*ei)->getWeight();
-		int x1 = getNodeFinalCoordX(nodeA);
-		int y1 = getNodeFinalCoordY(nodeA);
-		int x2 = getNodeFinalCoordX(nodeB);
-		int y2 = getNodeFinalCoordY(nodeB);
+		float x1 = (float)getNodeFinalCoordX(nodeA);
+		float y1 = (float)getNodeFinalCoordY(nodeA);
+		float x2 = (float)getNodeFinalCoordX(nodeB);
+		float y2 = (float)getNodeFinalCoordY(nodeB);
 		
 
 		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
@@ -432,10 +432,12 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),finalThickness); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 
+
 		GvEdgeData *ged = (GvEdgeData*)(*ei)->getUserData();
 		float cdRadius = (float)cfg->vidEdgeChatDotRadius;
 		float cdHalfRadius = cdRadius / 2;
-		float thicknessCorrection = pow(finalThickness / 2,2);  //TODO: simplify all this in the future....
+		const static float thicknessCorrectionTable[6] = {1, 1, 1, 2, 3, 3}; //workaround
+		float thicknessCorrection = thicknessCorrectionTable[(int)finalThickness];  //TODO: simplify all this in the future....
 		double edgeLength = sqrt(pow((double)x1-x2,2)+pow((double)y1-y2,2));
 		for (unsigned int x = 0; x < ged->sourceChatDots.size(); x++)
 		{
@@ -678,7 +680,7 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 	{
 		Node *n = visibleDisconnectedNodes[x];
 		GvNodeData *nData = (GvNodeData*)n->getUserData();
-		if (!isNodeInFrame(n) || nData->fadeOutSteps > cfg->videDisconnectedFadeOutFrames)
+		if (!isNodeInFrame(n) || nData->fadeOutSteps > cfg->vidDisconnectedFadeOutFrames)
 		{
 			
 			nData->disconnectedStillVisible = false;
@@ -1106,6 +1108,7 @@ void GraphVideo::deleteNode(const std::string *lnick)
 	if (((GvNodeData*)iNode->second->getUserData())->disconnectedStillVisible)
 		return;
 
+	//bool edgeFound = false;
 	for (unsigned int x = 0;x < edges.size();x++)
 		if (edges[x]->getSource() == iNode->second || edges[x]->getTarget() == iNode->second)
 		{
@@ -1114,7 +1117,9 @@ void GraphVideo::deleteNode(const std::string *lnick)
 			delete edges[x];
 			edges.erase(edges.begin()+x);
 			x--;
+			//edgeFound = true;
 		}
+	
 	//ant galo naikinam node
 	delete iNode->second;
 	nodes.erase(iNode);
