@@ -43,5 +43,5 @@ public:
 	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;
 	double vidCDisconnected,vidMaxNodeMovementDisconnected;
-	int videDisconnectedFadeOutFrames;
+	int vidDisconnectedFadeOutFrames;
 };
