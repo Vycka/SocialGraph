@@ -926,7 +926,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		e->updateActivityTime(activity);
 		if (!e->getChangedInPause())
 			e->updateActivityTimeForNick(*ln1,activity);
-		if (e->getSource()->getLNick() != ln1)
+		if (*e->getSource()->getLNick() != *ln1)
 			isInputFromSource = false;
 	}
 	else	
@@ -985,12 +985,12 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		GvEdgeData *ged = (GvEdgeData*)e->getUserData();
 		if (isInputFromSource)
 		{
-			if (ged->sourceChatDots.empty() || ged->sourceChatDots.rbegin()->timeAdded != activity)
+			if (ged->sourceChatDots.empty() || ged->sourceChatDots.rbegin()->percentMoved != 0) //dont add extra dots if they get overlapped pixel-by-pixel anyway
 				ged->sourceChatDots.push_back(GvEdgeChatDot(activity));
 		}
 		else
 		{
-			if (ged->targetChatDots.empty() || ged->targetChatDots.rbegin()->timeAdded != activity)
+			if (ged->targetChatDots.empty() || ged->targetChatDots.rbegin()->percentMoved != 0)
 				ged->targetChatDots.push_back(GvEdgeChatDot(activity));
 		}
 
