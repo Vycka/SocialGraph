@@ -45,7 +45,7 @@
   + Add: Multichannel supportas!!!
   + Add: Klaidu check'ai config skaityme tad necrashins daugiau mirco blogas configas, o pasakys kur problema
 
-20xx-xx-xx v1.1: Stable (not released)
+2011-07-xx v1.1: Stable (not released)
   + Add: gCacheGdiTools parametras, kad isjungt galetum GdiPlus Cache, jis tiem kurie nori kad botas valgytu maziau ramo, bet botas valgys daugiau cpu (defaultas 1)
   + Add: Grafiko keitimosi loginima
   + Add: Video kadru renderinima is grafiko keitimosi logo (su surenderintais kadrais galima poto padaryt video)
@@ -63,4 +63,4 @@ Tvarkingesnis config failas (90% Done)
 unusedNodes cleanupas (jei butu ilgi uptimes) (70% - padarem rankiniu budu kvieciama /sgDeleteUnusedNodes, dabar liko sugalvot, kaip tai visiskai automatizuot)
 daugiau infos ant img (kiek nodes, kiek edges, dar kanors)
 jokio mrc isikisimo, dll stebi zinutes ir gaudo kurias reikia pats
-bbz kolkas daugiau
+Dar kasnors.

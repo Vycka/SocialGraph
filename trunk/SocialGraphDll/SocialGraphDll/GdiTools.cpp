@@ -25,7 +25,7 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	sbTitle = new Gdiplus::SolidBrush(*cTitle);
 	sbNode = new Gdiplus::SolidBrush(*cNode);
 
-	fNick = new Gdiplus::Font(L"Tahoma",(float)cfg->iNickFontSize);
+	fNick = new Gdiplus::Font(cfg->iNickFont.c_str(),(float)cfg->iNickFontSize);
 
 	fCredits = new Gdiplus::Font(L"SansSerif",10);
 	sbLabel = new Gdiplus::SolidBrush(*cLabel);

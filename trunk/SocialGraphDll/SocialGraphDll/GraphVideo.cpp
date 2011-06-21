@@ -127,8 +127,17 @@ GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 {
 	//overridinam kaikuriuos configus ir renderinam
 	srand32(12345); // kad nesikeistu perrenderinant randomas :)
-	this->cfg->gCacheGdiTools = true;
-	this->cfg->gSpringEmbedderIterations = this->cfg->vidSEIterationsPerFrame;
+	
+	cfg->gCacheGdiTools = true;
+	
+	//TODO: those overrides need to be cleaned up one day (Hopefully before stable v2.0 release)
+	cfg->gSpringEmbedderIterations = cfg->vidSEIterationsPerFrame;
+	cfg->gC = cfg->vidC;
+	cfg->gMaxNodeMovement = cfg->vidMaxNodeMovement;
+	cfg->iOutputWidth = cfg->vidOutputWidth;
+	cfg->iOutputHeight = cfg->vidOutputHeight;
+	cfg->iNickFontSize = cfg->vidNickFontSize;
+
 	gt = new GdiTools(this->cfg);
 	this->cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
@@ -1004,7 +1013,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		e->setUserData(new GvEdgeData);
 		edges.push_back(e);
 	}
-	if (!pauseRender && activity >= cfg->vidBeginRenderTime)
+	if (cfg->vidEdgeChatDotEnabled && !pauseRender && activity >= cfg->vidBeginRenderTime)
 	{
 		GvEdgeData *ged = (GvEdgeData*)e->getUserData();
 		if (isInputFromSource)

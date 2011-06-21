@@ -45,10 +45,18 @@
   + Add: Multichannel Support!!!
   + Add: Error checking in config files. so bad config now does not crash mirc and reports where is error instead(hopefully).
 
-2009-06-xx v1.04: Stable (not released)
+2011-07-xx v1.1: Stable (not released)
   + Add: gCacheGdiTools param to turn of GdiTools Cache for those who want that bot would use as less memory as possible (but it will use more cpu) (default 1 - so no change here)
   + Add: Graph changes logging (needed to video rendering)
-  + Add: Stills renderer based from graph log (with those stills you cane make video then)
+  + Add: Stills renderer (VideoGraph) based from graph log (with those stills you cane make video then)
+  + Add: Generation time in upper right corner (good for timelapse stuff in videos).
+  + Add: Relations changelist drawing in upper right corner below timelapse time.
+  + Add: Inactive relation edges will be greyed out, if they stay on graph inactive.
+  ! Change: inactive edges decay value will be squared based from inactivity vs gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
+  + Add: gMinMaxWeight parameter - minimum assumed weight, so just appeared relation edges wont be very thick, if there are no other thick relations.
+  * Fix: Multithreaded VideoGraph renderer fixed (On my AMD x6 1055T I meassured 400% Speedup.)
+  + Add: Flying dots on relation edges in GraphVideo, they will represent, who addressed who.
+  + Add: Nodes in graph video, which looses all relation edges, won't disappear instantly, instead they will fly off the screen and fade out, once they reach gBorder
 
 TODO File:
 ability to keep last n graphs in ftp serv
