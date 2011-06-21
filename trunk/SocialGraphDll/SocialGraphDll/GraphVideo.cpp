@@ -24,7 +24,7 @@ struct GvEdgeChatDot
 {
 	GvEdgeChatDot(int timeAdded = 0,float percentMoved = 0.0) : timeAdded(timeAdded), percentMoved(percentMoved) {};
 	int timeAdded;
-	float percentMoved;
+	double percentMoved;
 };
 
 struct GvEdgeData
@@ -397,6 +397,9 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		float y1 = (float)getNodeFinalCoordY(nodeA);
 		float x2 = (float)getNodeFinalCoordX(nodeB);
 		float y2 = (float)getNodeFinalCoordY(nodeB);
+		float lenX = abs(x1 - x2);
+		float lenY = abs(y1 - y2);
+		float ratioXYYX = (lenX > lenY ? lenY / lenX : lenX / lenY);
 		
 
 		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
@@ -436,9 +439,14 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		GvEdgeData *ged = (GvEdgeData*)(*ei)->getUserData();
 		float cdRadius = (float)cfg->vidEdgeChatDotRadius;
 		float cdHalfRadius = cdRadius / 2;
-		const static float thicknessCorrectionTable[6] = {1, 1, 1, 2, 3, 3}; //workaround
-		float thicknessCorrection = thicknessCorrectionTable[(int)finalThickness];  //TODO: simplify all this in the future....
+		//const static float thicknessCorrectionTable[6] = {1, 1, 1, 2, 4, 5}; //workaround
+		float thicknessCorrection = finalThickness / 2;  //TODO: simplify all this in the future....
 		double edgeLength = sqrt(pow((double)x1-x2,2)+pow((double)y1-y2,2));
+
+		//std::wstringstream wFT;
+		//wFT << finalThickness << " || " << thicknessCorrection;
+		//gt->g->DrawString(wFT.str().c_str(),wFT.str().size(),gt->fNick,Gdiplus::PointF((x1+x2) / 2, (y1+y2) / 2),gt->sbChatDotColor);
+
 		for (unsigned int x = 0; x < ged->sourceChatDots.size(); x++)
 		{
 			GvEdgeChatDot *gecd = &ged->sourceChatDots[x];
@@ -457,7 +465,14 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			double fx = (xRange / 100.0) * gecd->percentMoved;
 			float dotPosX = (float)((fx + x1));
 			float dotPosY = (float)((m * fx) + y1);
-			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX - cdHalfRadius - thicknessCorrection,dotPosY - cdHalfRadius - thicknessCorrection,cdRadius,cdRadius);
+
+			double dotPercentVector = gecd->percentMoved + ((100.0 / edgeLength) * thicknessCorrection);
+			double vfx = (xRange / 100.0) * dotPercentVector;
+			float vDotPosX = (float)((m * vfx) + y1) - dotPosY;
+			float vDotPosY = (float)(((vfx + x1)) - dotPosX) * -1;
+
+			//gt->g->DrawLine(gt->pBorder,dotPosX,dotPosY,dotPosX + vDotPosX,dotPosY + vDotPosY);
+			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX - cdHalfRadius + vDotPosX,dotPosY - cdHalfRadius + vDotPosY,cdRadius,cdRadius);
 		}
 		
 		for (unsigned int x = 0; x < ged->targetChatDots.size(); x++)
@@ -466,7 +481,8 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 			double xRange = x1 - x2;
 			double m = (y1 - y2) / (xRange);
-			gecd->percentMoved += (float)((100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame);
+			gecd->percentMoved += (100.0 / edgeLength) * cfg->vidEdgeChatDotSpeedPixelsPerFrame;
+
 			if (gecd->percentMoved >= 100)
 			{
 				ged->targetChatDots.erase(ged->targetChatDots.begin() + x);
@@ -477,7 +493,15 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			double fx = (xRange / 100.0) * gecd->percentMoved;
 			float dotPosX = (float)((fx + x2));
 			float dotPosY = (float)((m * fx) + y2);
-			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX - cdHalfRadius + thicknessCorrection,dotPosY - cdHalfRadius + thicknessCorrection,cdRadius,cdRadius);
+
+			double dotPercentVector = gecd->percentMoved + ((100.0 / edgeLength) * thicknessCorrection);
+			double vfx = (xRange / 100.0) * dotPercentVector;
+			float vDotPosX = (float)((m * vfx) + y2) - dotPosY;
+			float vDotPosY = (float)(((vfx + x2)) - dotPosX) * -1;
+
+
+			gt->g->FillEllipse(gt->sbChatDotColor,dotPosX - cdHalfRadius + vDotPosX,dotPosY - cdHalfRadius + vDotPosY,cdRadius,cdRadius);
+			//gt->g->DrawLine(gt->pBorder,dotPosX,dotPosY,dotPosX + vDotPosX,dotPosY + vDotPosY);
 		}
 	}
 	int nodeRadius = (int)cfg->gNodeRadius;
