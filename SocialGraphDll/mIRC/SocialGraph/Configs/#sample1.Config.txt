@@ -29,7 +29,7 @@ iOutputHeight  720
 
 
 ## root directory is the same, as in what active directory "mirc.exe" is launched.
-## So, if you extracted SocialGraph.dll not to the "<mircActiveRootDir>\Socialgraph\", you will need to save all output paths in this config.
+## So, if you extracted SocialGraph.dll not to the "<mircActiveRootDir>\Socialgraph\", you will need to change all output paths in this config.
 
 ## File name, to where active still will be saved.
 fImageOutput  "SocialGraph\Graph-Saves\<channel>.Image.png"
@@ -67,7 +67,7 @@ gEdgeNickListDrawInserts 1
 gEdgeNickListDrawRemoves 0
 gEdgeNickListDrawLogSize 10
 
-## after how much seconds edges will start to grey out, and after how many seconds greying out finishes?
+## after how much seconds edges will start to grey out, and after how many seconds greying out reaches maximum?
 gEdgeColorChangeInactivityMin 900
 gEdgeColorChangeInactivityMax 7200
 
@@ -77,14 +77,14 @@ gEdgeColorChangeInactivityMax 7200
 ## image/bmp image/jpeg image/gif image/tiff image/png 
 fEncoderMime   "image/png"
 
-## Andvenced parameters for sraph spring embedder physics simulation.
+## Andvenced parameters for graph spring embedder physics simulation.
 ## Should not be touched unless you know what you are doing.
 gTemporalDecayAmount        0.02
 ## 21600 = 6hours
 gEdgeDecayMultiplyIdleSecs  21600
 gSpringEmbedderIterations   1500
 gK                          2
-## GraphVideo has own gC and gM.. values.
+## GraphVideo has its own gC and gM.. values.
 gC                          0.01
 gMaxRepulsiveForceDistance  6
 gMaxNodeMovement            0.5
@@ -95,7 +95,7 @@ gEdgeThreshold              0
 gNodeBumpWeight             0.2
 gMinMaxWeight               5
 
-## Minimum pauses between frame generations and uploads.
+## Minimum pauses between frame generations and between uploads.
 gMinPauseBeforeNextRender   30
 gMinPauseBeforeNextUpload   30
 
@@ -119,7 +119,7 @@ oPathEnd   ".png"
 
 
 ## ------------Graph Logging (Usable for graph video rendering) ----------
-## Should graph logging be enabled?
+## Should the graph logging be enabled?
 ## Logged information later can be used with video rendering to generate video.
 logSave 0
 logFile "SocialGraph\Graph-Saves\<channel>.GraphLog.txt"
@@ -139,7 +139,7 @@ vidOutputHeight  1080
 ## 7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate)
 
 ## In what number of frames represent one day.
-## Default value (1798.2) assumes, that you render your video in NTSC framerate, and will want, that 1 miunte of the videou would represent 24hours of the activity.
+## Default value (1798.2) assumes, that you render your video in NTSC framerate, and you want that 1 miunte of the video would represent 24hours of the activity.
 vidFramesPerDay 1798.2017982017982017982017982018
 
 ## How many spring embedder iteration to do for each frame
@@ -149,7 +149,7 @@ vidSEIterationsPerFrame 1
 ## vidRendererThreads has to be at least 1 and no more than 16 (MAX_THREADS). 
 vidRendererThreads 4
 
-## Initial ctime end end time, to render from log file, but because of the really basic implamentation of this, all graphlog file still be parsed
+## Initial ctime and end time, to render from log file, but because of the really basic implamentation of this, all graphlog file still be parsed
 ## So its better just to start logging to the new file once you plan to generate new video
 ## 0 means infinity to both directions, so if Begin time is 0, graph will be rendered from beggining, 0 in end time means, that graph will be rendered to the end of the log.
 vidBeginRenderTime 0
@@ -161,7 +161,7 @@ vidEndRenderTime 0
 ## Trivia: This algorithm is in overall bad for video rendering, but good for stills, so in video rendering it needs to be reprogrammed one day.
 vidXYDivRatio 70
 
-## what font use for nicknames when rendering video
+## what font to use for nicknames when rendering video
 vidNickFont "SansSerif"
 vidNickFontSize 12
 
@@ -180,3 +180,6 @@ vidCDisconnected               0.0065
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20
+
+
+## END OF CONFIG FILE
