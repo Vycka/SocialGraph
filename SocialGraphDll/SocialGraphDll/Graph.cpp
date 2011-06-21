@@ -179,6 +179,10 @@ void Graph::deleteNode(const std::string *lnick)
 
 Node *Graph::findNode(const std::string *lnick)
 {
+	//onde day this one will be useful, once I get rid all of the lNick dependencies..
+	//std::string des;
+	//::strToLower(lnick,&des);
+
 	std::map<std::string,Node*>::iterator iNode = nodes.find(*lnick);
 	return (iNode != nodes.end() ? iNode->second : NULL);
 }
