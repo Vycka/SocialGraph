@@ -14,6 +14,7 @@ public:
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
 		iEdgeColor,iBorderColor,iEdgeColorChangeInactive,iEdgeNickListFontColor,iEdgeNickListLineAddColor,iEdgeNickListLineDelColor,iChatDotColor;
 	int iEdgeActiveMinAlpha;
+	std::wstring iNickFont;
 	//img font stuff
 	double iNickFontSize;
 	//graph config
@@ -38,10 +39,12 @@ public:
 	//logging/video
 	bool logSave;
 	int vidBeginRenderTime,vidEndRenderTime;
+	bool vidEdgeChatDotEnabled;
 	double vidFramesPerDay,vidXYDivRatio,vidEdgeChatDotSpeedPixelsPerFrame,vidEdgeChatDotRadius;
 	int vidSEIterationsPerFrame,vidRendererThreads;
 	std::wstring vidRenderPBegin,vidRenderPEnd,vidNickFont;
 	std::string logFile;
-	double vidCDisconnected,vidMaxNodeMovementDisconnected;
-	int vidDisconnectedFadeOutFrames;
+	double vidMaxNodeMovement,vidC,vidCDisconnected,vidMaxNodeMovementDisconnected;
+	int vidDisconnectedFadeOutFrames,vidOutputWidth,vidOutputHeight,vidNickFontSize;
+
 };

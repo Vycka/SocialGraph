@@ -32,6 +32,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iChatDotColor    = getCColor("iChatDotColor");
 
 	//font/sizes/misc stuff
+	iNickFont     = getWString("iNickFont");
 	iNickFontSize = getDouble("iNickFontSize");
 	iEdgeActiveMinAlpha = getInt("iEdgeActiveMinAlpha");
 	
@@ -90,12 +91,17 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidEndRenderTime        = getInt("vidEndRenderTime");
 	vidNickFont             = getWString("vidNickFont");
 	vidXYDivRatio           = getDouble("vidXYDivRatio");
+	vidEdgeChatDotEnabled   = getBool("vidEdgeChatDotEnabled");
 	vidEdgeChatDotSpeedPixelsPerFrame  = getDouble("vidEdgeChatDotSpeedPixelsPerFrame");
 	vidEdgeChatDotRadius    = getDouble("vidEdgeChatDotRadius");
-	vidCDisconnected       = getDouble("vidCDisconnected");
+	vidCDisconnected        = getDouble("vidCDisconnected");
 	vidMaxNodeMovementDisconnected = getDouble("vidMaxNodeMovementDisconnected");
 	vidDisconnectedFadeOutFrames = getInt("vidDisconnectedFadeOutFrames");
-
+	vidMaxNodeMovement      = getDouble("vidDisconnectedFadeOutFrames");
+	vidC                    = getDouble("vidC");
+	vidOutputWidth          = getInt("vidOutputWidth");
+	vidOutputHeight         = getInt("vidOutputHeight");
+	vidNickFontSize         = getInt("vidNickFontSize");
 	//...
 
 	//clear list 
