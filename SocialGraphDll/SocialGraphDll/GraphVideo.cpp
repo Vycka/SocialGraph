@@ -76,7 +76,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 	GraphRendererThreadSync *grts = (GraphRendererThreadSync*)lp;
 	GraphRendererQueue* gr = grts->grq;
 	std::stringstream ss;
-	ss << "/echo -sg SocialGraph: Video Renderer Thread Created: " << grts->threadId; 
+	ss << "/echo -sg SocialGraph: Video Renderer Thread Created: " << grts->threadId + 1; 
 	execInMirc(ss.str().c_str());
 	while (true)
 	{
@@ -94,7 +94,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 			if (gr->stopThreads)
 			{
 				std::stringstream ss;
-				ss << "/echo -sg SocialGraph: Video Renderer Thread Exited - " << grts->threadId;
+				ss << "/echo -sg SocialGraph: Video Renderer Thread Exited - " << grts->threadId + 1;
 				execInMirc(ss.str().c_str());
 				return 0;
 			}
@@ -123,7 +123,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 	return 0;
 }
 
-GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
+GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 {
 	//overridinam kaikuriuos configus ir renderinam
 	srand32(12345); // kad nesikeistu perrenderinant randomas :)
@@ -137,8 +137,10 @@ GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 	cfg->iOutputWidth = cfg->vidOutputWidth;
 	cfg->iOutputHeight = cfg->vidOutputHeight;
 	cfg->iNickFontSize = cfg->vidNickFontSize;
+	cfg->gBorderSize   = cfg->vidBorderSize;
+	cfg->gNodeRadius   = cfg->vidNodeRadius;
 
-	gt = new GdiTools(this->cfg);
+	gt = new GdiTools(cfg);
 	this->cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
 	vidSecsPerFrame = 86400.0 / cfg->vidFramesPerDay;
@@ -150,6 +152,14 @@ GraphVideo::GraphVideo(GraphConfig *cfg) : Graph(cfg,true)
 	nodeCoordCalcHeight = (int)(cfg->iOutputHeight - cfg->gBorderSize * VIDRENDER_BORDER_MUL_H * 2);
 	nodeCoordCalcBorderX = (int)(cfg->gBorderSize * VIDRENDER_BORDER_MUL_W);
 	nodeCoordCalcBorderY = (int)(cfg->gBorderSize * VIDRENDER_BORDER_MUL_H);
+
+	xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
+	xyDivX = cfg->vidXYDivRatio;
+	xyDivY = xyDivX / xyAR;
+	xyDivX2 = xyDivX * 4;
+	xyDivY2 = xyDivY * 4;
+	xyDivX3 = xyDivX / 4;
+	xyDivY3 = xyDivY / 4;
 }
 
 GraphVideo::~GraphVideo()
@@ -591,13 +601,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 void GraphVideo::calcBounds()
 {
 	double tminX,tminY,tmaxX,tmaxY;
-	static double xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
-	static double xyDivX = cfg->vidXYDivRatio;
-	static double xyDivY = xyDivX / xyAR;
-	static double xyDivX2 = xyDivX * 4;
-	static double xyDivY2 = xyDivY * 4;
-	static double xyDivX3 = xyDivX / 4;
-	static double xyDivY3 = xyDivY / 4;
 
 	if (visibleNodes.size() > 0)
 	{

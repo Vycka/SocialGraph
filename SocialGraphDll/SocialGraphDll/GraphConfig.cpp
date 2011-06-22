@@ -102,6 +102,8 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidOutputWidth          = getInt("vidOutputWidth");
 	vidOutputHeight         = getInt("vidOutputHeight");
 	vidNickFontSize         = getInt("vidNickFontSize");
+	vidNodeRadius           = getInt("vidNodeRadius");
+	vidBorderSize           = getInt("vidBorderSize");
 	//...
 
 	//clear list 

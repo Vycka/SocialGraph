@@ -104,7 +104,7 @@ std::string Config::getParam(const char *key)
 	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
 	if (cfgIter == cfgList.end())
 	{
-		std::string err = "/echo -sg SocialGraph: Bad/Missing config variable: " + std::string(key) + "\r\nConfig File: " + this->configFile;
+		std::string err = "/echo -sg SocialGraph: Bad/Missing config variable: " + std::string(key) + " \r\nConfig File: " + this->configFile;
 		execInMirc(&err);
 		badConfig = true;
 		return std::string("\" \"");
