@@ -114,7 +114,7 @@ hIndirect    0.15
 ## Final target will be "oPathBegin+Frame+oPathEnd"
 
 oSaveOldFrames 0
-oPathBegin "\Graph-Saves\OldFrames\<channel>-"
+oPathBegin "SocialGraph\Graph-Saves\OldFrames\<channel>-"
 oPathEnd   ".png"
 
 
@@ -170,13 +170,19 @@ vidEdgeChatDotEnabled 1
 vidEdgeChatDotSpeedPixelsPerFrame 6
 vidEdgeChatDotRadius 3
 
-## gC and gMaxNodeMovement values for active nodes.
-vidMaxNodeMovement 0.02
-vidC               0.0055
+## gC and gMaxNodeMovement and values for active nodes.
+vidMaxNodeMovement 0.007
+vidC               0.006
+
+## gBorder for video
+vidBorderSize 65
+
+## gNodeRadius for video
+vidNodeRadius 8
 
 ## gC and gMaxNodeMovement values for disconnected nodes.
-vidMaxNodeMovementDisconnected 0.02
-vidCDisconnected               0.0065
+vidMaxNodeMovementDisconnected 0.013
+vidCDisconnected               0.006
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20

@@ -5,7 +5,7 @@
 class GraphVideo : public Graph
 {
 public:
-	GraphVideo(GraphConfig *cfg);
+	GraphVideo(GraphConfig *config);
 	~GraphVideo();
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight,int activity);
 	void renderVideo();
@@ -36,4 +36,11 @@ private:
 	int nodeDeg;
 	int nodeCoordCalcWidth, nodeCoordCalcHeight;
 	int nodeCoordCalcBorderX, nodeCoordCalcBorderY;
+	double xyAR;
+	double xyDivX;
+	double xyDivY;
+	double xyDivX2;
+	double xyDivY2;
+	double xyDivX3;
+	double xyDivY3;
 };
