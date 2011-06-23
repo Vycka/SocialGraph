@@ -31,9 +31,9 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 	lastRender = 0;
 	lastUpload = 0;
 	minX = 0;
-	maxX = 15;
+	maxX = 12;
 	minY = 0;
-	maxY = 15;
+	maxY = 12;
 
 	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
 	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));

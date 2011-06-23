@@ -1,6 +1,8 @@
 #pragma once
 #include "graph.h"
 
+struct GraphRendererThreadSync;
+struct GraphRendererQueue;
 
 class GraphVideo : public Graph
 {
@@ -31,6 +33,7 @@ private:
 	double vidSecsPerFrame;
 	GraphRendererQueue *grq;
 	HANDLE *grh;
+	GraphRendererThreadSync *grts;
 	bool pauseRender;
 	bool firstFrameRendered;
 	int nodeDeg;
