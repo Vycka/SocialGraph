@@ -171,8 +171,8 @@ vidEdgeChatDotSpeedPixelsPerFrame 6
 vidEdgeChatDotRadius 3
 
 ## gC and gMaxNodeMovement and values for active nodes.
-vidMaxNodeMovement 0.007
-vidC               0.006
+vidMaxNodeMovement 0.003
+vidC               0.0045
 
 ## gBorder for video
 vidBorderSize 65
@@ -181,8 +181,8 @@ vidBorderSize 65
 vidNodeRadius 8
 
 ## gC and gMaxNodeMovement values for disconnected nodes.
-vidMaxNodeMovementDisconnected 0.013
-vidCDisconnected               0.006
+vidMaxNodeMovementDisconnected 0.008
+vidCDisconnected               0.005
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20

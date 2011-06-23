@@ -16,7 +16,6 @@ class Edge;
 class InferenceHeuristic;
 class Logger;
 
-struct GraphRendererQueue;
 
 struct GraphEdgeChangeList
 {

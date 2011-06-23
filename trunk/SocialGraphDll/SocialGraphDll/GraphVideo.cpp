@@ -75,9 +75,6 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 {
 	GraphRendererThreadSync *grts = (GraphRendererThreadSync*)lp;
 	GraphRendererQueue* gr = grts->grq;
-	std::stringstream ss;
-	ss << "/echo -sg SocialGraph: Video Renderer Thread Created: " << grts->threadId + 1; 
-	execInMirc(ss.str().c_str());
 	while (true)
 	{
 		bool isThereFrameToRender = false;
@@ -134,19 +131,27 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	cfg->gSpringEmbedderIterations = cfg->vidSEIterationsPerFrame;
 	cfg->gC = cfg->vidC;
 	cfg->gMaxNodeMovement = cfg->vidMaxNodeMovement;
-	cfg->iOutputWidth = cfg->vidOutputWidth;
+	cfg->iOutputWidth  = cfg->vidOutputWidth;
 	cfg->iOutputHeight = cfg->vidOutputHeight;
 	cfg->iNickFontSize = cfg->vidNickFontSize;
 	cfg->gBorderSize   = cfg->vidBorderSize;
 	cfg->gNodeRadius   = cfg->vidNodeRadius;
+	if (cfg->vidRendererThreads > 16 || cfg->vidRendererThreads < 1)
+	{
+		cfg->vidRendererThreads = 4;
+		execInMirc("/echo -sg SocialGraph: Bad vidRendererThreads value, defaulting it to 4");
+	}
 
 	gt = new GdiTools(cfg);
-	this->cfg->logSave = false;
+	cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
 	vidSecsPerFrame = 86400.0 / cfg->vidFramesPerDay;
 	firstFrameRendered = false;
 	nodeDeg = 0;
 	grq = new GraphRendererQueue;
+	grh = new HANDLE[cfg->vidRendererThreads];
+	grts = new GraphRendererThreadSync[cfg->vidRendererThreads];
+	grq->encoderClsid = gt->encoderClsid;
 	
 	nodeCoordCalcWidth = (int)(cfg->iOutputWidth - cfg->gBorderSize * VIDRENDER_BORDER_MUL_W * 2);
 	nodeCoordCalcHeight = (int)(cfg->iOutputHeight - cfg->gBorderSize * VIDRENDER_BORDER_MUL_H * 2);
@@ -165,6 +170,8 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 GraphVideo::~GraphVideo()
 {
 	delete grq;
+	delete [] grh;
+	delete [] grts;
 }
 
 void GraphVideo::renderVideo()
@@ -172,26 +179,24 @@ void GraphVideo::renderVideo()
 	int beginTime = (int)time(0);
 	execInMirc("/.echo -sg SocialGraph: Starting Video Frames Rendering...");
 	//initialize multithreated renderer stuff
-	grq->encoderClsid = gt->encoderClsid;
-	grh = new HANDLE[cfg->vidRendererThreads];
-	GraphRendererThreadSync *grts = new GraphRendererThreadSync[cfg->vidRendererThreads];
+	
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 	{
 		grts[x].threadId = x;
 		grts[x].grq = grq;
-		//std::stringstream ss;
-		//ss << "/.echo -sg SocialGraph: Starting thread: " << x;
-		//execInMirc(ss.str().c_str());
 		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,&grts[x],NULL,NULL);
 		if (grh[x] == NULL)
 		{
 			execInMirc("/.echo SocialGraph: Unable to create renderer threads. Halting!");
 			grq->stopThreads = true;
+			WaitForMultipleObjects(x,grh,true,-1);
 			for (int y = 0; y < x;y++)
 				CloseHandle(grh[y]);
-			delete [] grh;
 			return;
 		}
+		std::stringstream ss;
+		ss << "/echo -sg SocialGraph: Video Renderer Thread Created: " << grts[x].threadId + 1; 
+		execInMirc(ss.str().c_str());
 	}
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
@@ -277,12 +282,11 @@ void GraphVideo::renderVideo()
 		}
 		lastTime = timestamp;
 	}
+
 	grq->stopThreads = true;
 	WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 		CloseHandle(grh[x]);
-	delete [] grh;
-	delete [] grts;
 	execInMirc("/echo -sg SocialGraph: Video Rendering Finished");
 	
 	int diffTime = (int)time(0) - beginTime;
