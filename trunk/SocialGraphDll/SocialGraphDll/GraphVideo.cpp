@@ -1148,19 +1148,23 @@ void GraphVideo::deleteNode(const std::string *lnick)
 	if (((GvNodeData*)iNode->second->getUserData())->disconnectedStillVisible)
 		return;
 
-	//bool edgeFound = false;
-	for (unsigned int x = 0;x < edges.size();x++)
-		if (edges[x]->getSource() == iNode->second || edges[x]->getTarget() == iNode->second)
+
+	//if node has any connected edges, set edges weight to 0 and let decay() handle the rest.
+	//Otherwise node might get deleted without becoming disconnected and flying off
+	//TODO: TEST THIS HOTFIX!!!
+	if (iNode->second->getConEdges())
+	{
+		for (std::vector<Edge*>::iterator i = edges.begin(); i != edges.end(); i++)
 		{
-			edges[x]->getSource()->appConEdges(-1);
-			edges[x]->getTarget()->appConEdges(-1);
-			delete edges[x];
-			edges.erase(edges.begin()+x);
-			x--;
-			//edgeFound = true;
+			Edge *e = *i;
+			if (e->getSource() == iNode->second || e->getTarget() == iNode->second)
+				e->setWeight(0);
 		}
-	
-	//ant galo naikinam node
+		return;
+	}
+
+
+	//delete node
 	delete iNode->second;
 	nodes.erase(iNode);
 }
