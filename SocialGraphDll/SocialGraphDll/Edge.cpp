@@ -47,3 +47,10 @@ void Edge::updateActivityTimeForNick(const std::string &lnick, int time)
 	else //extra if's are for debug. in theory they should not be needed, and if last statment wont be triggered, it will be removed, if it will be triggered, then hunting for logical bugs begins..
 		execInMirc("/echo -sg SocialGraph: ActForNick: can't find nick!");
 }
+
+void Edge::updateActivityTime(int secs)
+{
+	lastActivity = secs;
+	if (changeListLink)
+		changeListLink->setTimeLast(secs);
+}
