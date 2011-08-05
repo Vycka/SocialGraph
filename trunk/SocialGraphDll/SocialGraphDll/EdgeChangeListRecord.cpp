@@ -5,7 +5,7 @@ EdgeChangeListRecord::EdgeChangeListRecord()
 {
 }
 
-EdgeChangeListRecord::EdgeChangeListRecord(int time, std::wstring n1, std::wstring n2, Edge *e)
+EdgeChangeListRecord::EdgeChangeListRecord(int time, std::wstring n1, std::wstring n2, Edge *e, CColor lastKnownColor)
 {
 	tBegin = time;
 	tLast = time;
@@ -13,6 +13,7 @@ EdgeChangeListRecord::EdgeChangeListRecord(int time, std::wstring n1, std::wstri
 	this->n2 = n2;
 	edge = e;
 	edge->setChangeListLink(this);
+	this->lastKnownColor = lastKnownColor;
 }
 
 EdgeChangeListRecord::~EdgeChangeListRecord()

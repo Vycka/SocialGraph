@@ -3,8 +3,8 @@
 #define VIDRENDER_MAX_FRAME_Q 5
 #define VIDRENDER_BEGINFRAME 1000000
 //border size is multiplied to compensate incremental min/max xy calculation, so nodes won't appear outside the image
-#define VIDRENDER_BORDER_MUL_W 2.5
-#define VIDRENDER_BORDER_MUL_H 1.7
+//#define VIDRENDER_BORDER_MUL_W 2.5
+//#define VIDRENDER_BORDER_MUL_H 1.7
 #include "GraphVideo.h"
 #include "Tools.h"
 #include "Math.h"
@@ -154,10 +154,10 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	grts = new GraphRendererThreadSync[cfg->vidRendererThreads];
 	grq->encoderClsid = gt->encoderClsid;
 	
-	nodeCoordCalcWidth = (int)(cfg->iOutputWidth - cfg->gBorderSize * VIDRENDER_BORDER_MUL_W * 2);
-	nodeCoordCalcHeight = (int)(cfg->iOutputHeight - cfg->gBorderSize * VIDRENDER_BORDER_MUL_H * 2);
-	nodeCoordCalcBorderX = (int)(cfg->gBorderSize * VIDRENDER_BORDER_MUL_W);
-	nodeCoordCalcBorderY = (int)(cfg->gBorderSize * VIDRENDER_BORDER_MUL_H);
+	nodeCoordCalcWidth = (int)(cfg->iOutputWidth - cfg->gBorderSize * 2);
+	nodeCoordCalcHeight = (int)(cfg->iOutputHeight - cfg->gBorderSize * 2);
+	nodeCoordCalcBorderX = (int)(cfg->gBorderSize);
+	nodeCoordCalcBorderY = (int)(cfg->gBorderSize);
 
 	xyAR = cfg->iOutputWidth / cfg->iOutputHeight;
 	xyDivX = cfg->vidXYDivRatio;
@@ -370,6 +370,18 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 	int eclWR = cfg->iOutputWidth - 105, eclWC = cfg->iOutputWidth - 135, eclWL = cfg->iOutputWidth - 136, eclClock = cfg->iOutputWidth - 243;
 	double eclH = 130;
+
+	double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
+
+	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorInactive.r;
+	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorInactive.g;
+	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorInactive.b;
+
+	short int edgeChangeListMaxDiffR = cfg->iEdgeChangeListColor.r - cfg->iEdgeChangeListColorInactive.r;
+	short int edgeChangeListMaxDiffG = cfg->iEdgeChangeListColor.g - cfg->iEdgeChangeListColorInactive.g;
+	short int edgeChangeListMaxDiffB = cfg->iEdgeChangeListColor.b - cfg->iEdgeChangeListColorInactive.b;
+	short int edgeChangeListMaxDiffA = cfg->iEdgeChangeListColor.a - cfg->iEdgeChangeListColorInactive.a;
+
 	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
 	{
 
@@ -382,15 +394,38 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		gt->g->DrawString(l->getNickSource().c_str(),l->getNickSource().size(),gt->fCredits,Gdiplus::PointF((float)eclWL,(float)eclH),&sfL,gt->sbLabel);
 		gt->g->DrawString(l->getNickTarget().c_str(),l->getNickTarget().size(),gt->fCredits,Gdiplus::PointF((float)eclWR,(float)eclH),&sfR,gt->sbLabel);
 		gt->g->DrawString(wstNow.c_str(),wstNow.size(),gt->fCredits,Gdiplus::PointF((float)eclClock,(float)eclH),&sfL,gt->sbTitle);
-		Gdiplus::Color c;
+		
+		int lineHeight = (int)(eclH + 9);
 		if (l->getEdge())
-			c = Gdiplus::Color(cfg->iEdgeColor.a,cfg->iEdgeColor.r,cfg->iEdgeColor.g,cfg->iEdgeColor.b);
+		{
+			Gdiplus::Color c(cfg->iEdgeChangeListColor.argb());
+			int changeListInactivity = szClock - l->getTimeLast();
+			if (changeListInactivity > cfg->gEdgeColorChangeInactivityMin)
+			{
+				if (changeListInactivity < edgeInactivityMinMaxDiff)
+				{
+					double inactivityMultiplier = (1.0 / edgeInactivityMinMaxDiff) * changeListInactivity;
+					c = Gdiplus::Color((unsigned char)(cfg->iEdgeChangeListColor.a - (edgeChangeListMaxDiffA * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.r - (edgeChangeListMaxDiffR * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.g - (edgeChangeListMaxDiffG * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.b - (edgeChangeListMaxDiffB * inactivityMultiplier)));
+				}
+				else
+					c = Gdiplus::Color(cfg->iEdgeChangeListColorInactive.argb());
+			}
+			Gdiplus::Pen p(c,3);
+			gt->g->DrawLine(&p,eclWC+2,lineHeight,eclWC+26,lineHeight);
+		}
 		else
-			c = Gdiplus::Color(cfg->iEdgeColorChangeInactive.a,cfg->iEdgeColorChangeInactive.r,cfg->iEdgeColorChangeInactive.g,cfg->iEdgeColorChangeInactive.b);
+		{
+			Gdiplus::Color c(cfg->iEdgeChangeListColorInactive.argb());
+			Gdiplus::Pen p(c,3);
+			gt->g->DrawLine(&p,eclWC+2,lineHeight,eclWC+9,lineHeight);
+			gt->g->DrawLine(&p,eclWC+19,lineHeight,eclWC+26,lineHeight);
+			gt->g->DrawLine(&p,eclWC+11,lineHeight+5,eclWC+17,lineHeight-5);
+		}
 
-		Gdiplus::Pen p(c,3);
-		int lineHeight = (int)(eclH + 8);
-		gt->g->DrawLine(&p,eclWC+2,lineHeight,eclWC+26,lineHeight);
+		
 
 		//eclH += cfg->iNickFontSize + 3;
 		eclH += 15;
@@ -406,17 +441,14 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	gt->g->DrawString(wtlTime.c_str(),wtlTime.size()-3,gt->fVidTimelapseTime,Gdiplus::PointF((float)cfg->iOutputWidth-325,(float)40),gt->sbChannel);
 	gt->g->DrawString(wtlDate.c_str(),wtlDate.size(),gt->fVidTimelapseDate,Gdiplus::PointF((float)cfg->iOutputWidth-220,(float)10),gt->sbChannel);
 
-	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorChangeInactive.r;
-	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorChangeInactive.g;
-	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorChangeInactive.b;
-
 	for (std::vector<Edge*>::iterator ei = edges.begin(); ei != edges.end(); ei++)
 	{
-		if ((*ei)->getWeight() < cfg->gEdgeThreshold)
+		Edge *edge = *ei;
+		if (edge->getWeight() < cfg->gEdgeThreshold)
 			continue;
-		Node *nodeA = (*ei)->getSource();
-		Node *nodeB = (*ei)->getTarget();
-		double weight = (*ei)->getWeight();
+		Node *nodeA = edge->getSource();
+		Node *nodeB = edge->getTarget();
+		double weight = edge->getWeight();
 		float x1 = (float)getNodeFinalCoordX(nodeA);
 		float y1 = (float)getNodeFinalCoordY(nodeA);
 		float x2 = (float)getNodeFinalCoordX(nodeB);
@@ -428,7 +460,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 		int eiDiffR = 0,eiDiffG = 0,eiDiffB = 0,eiDiffA = 0;
 		int edgeInactivity = szClock - (*ei)->getActivityTime();
-		double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
 		double eiMul = 0.0;
 		if (edgeInactivity >= cfg->gEdgeColorChangeInactivityMin)
 		{
@@ -450,17 +481,21 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		double alphaFinal = (weightStrength / weightToAlphaDiv) + cfg->iEdgeActiveMinAlpha;
 		if (alphaFinal > cfg->iEdgeColor.a)
 			alphaFinal = cfg->iEdgeColor.a;
-		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorChangeInactive.a) * eiMul);
-		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
-			alphaFinal = cfg->iEdgeColorChangeInactive.a;
+		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorInactive.a) * eiMul);
+		if (alphaFinal < cfg->iEdgeColorInactive.a)
+			alphaFinal = cfg->iEdgeColorInactive.a;
 
 		float finalThickness = (float)((weightStrength / 75) + 2); // 255/75=3.4
 
-		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),finalThickness); 
+		Gdiplus::Color finalColor((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB);
+		Gdiplus::Pen p(finalColor,finalThickness); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 
+		//if (edge->getChangeListLink())
+		//	edge->getChangeListLink()->setLastKnownColor(CColor(finalColor.GetA(),finalColor.GetR(),finalColor.GetG(),finalColor.GetB()));
 
-		GvEdgeData *ged = (GvEdgeData*)(*ei)->getUserData();
+
+		GvEdgeData *ged = (GvEdgeData*)edge->getUserData();
 		float cdRadius = (float)cfg->vidEdgeChatDotRadius;
 		float cdHalfRadius = cdRadius / 2;
 		//const static float thicknessCorrectionTable[6] = {1, 1, 1, 2, 4, 5}; //workaround
@@ -647,7 +682,14 @@ void GraphVideo::calcBounds()
 	}
 	else
 	{
-		
+		if (tminX < minX)
+			minX = tminX;
+		if (tmaxX > maxX)
+			maxX = tmaxX;
+		if (tminY < minY)
+			minY = tminY;
+		if (tmaxY > maxY)
+			maxY = tmaxY;
 		double dminX = minX - tminX;
 		double dmaxX = maxX - tmaxX;
 		double dminY = minY - tminY;

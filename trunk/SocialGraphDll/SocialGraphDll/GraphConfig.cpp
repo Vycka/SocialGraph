@@ -25,10 +25,9 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iNodeColor       = getCColor("iNodeColor");
 	iEdgeColor       = getCColor("iEdgeColor");
 	iBorderColor     = getCColor("iBorderColor");
-	iEdgeColorChangeInactive = getCColor("iEdgeColorChangeInactive");
-	iEdgeNickListFontColor = getCColor("iEdgeChangeNickList");
-	iEdgeNickListLineAddColor = getCColor("iEdgeNickListLineAddColor");
-	iEdgeNickListLineDelColor =getCColor("iEdgeNickListLineDelColor");
+	iEdgeColorInactive = getCColor("iEdgeColorInactive");
+	iEdgeChangeListColor = getCColor("iEdgeChangeListColor");
+	iEdgeChangeListColorInactive = getCColor("iEdgeChangeListColorInactive");
 	iChatDotColor    = getCColor("iChatDotColor");
 
 	//font/sizes/misc stuff
