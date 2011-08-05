@@ -30,11 +30,11 @@ public:
 	void updateActivityTimeForNick(const std::string &lnick, int time = (int)time(NULL));
 	inline void updateActivityTimeForSource(int time = (int)time(NULL)) { this->sourceActivity = time; };
 	inline void updateActivityTimeForTarget(int time = (int)time(NULL)) { this->targetActivity = time; };
-	void updateActivityTime(int secs = (int)time(NULL));
 	inline EdgeChangeListRecord* getChangeListLink() { return changeListLink; };
 	inline void setChangeListLink(EdgeChangeListRecord *ecl) { changeListLink = ecl; };
 	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
 	inline LPUSERDATA getUserData() { return userData; };
+	void updateActivityTime(int secs = (int)time(NULL));
 private:
 	Node *source;
 	Node *target;

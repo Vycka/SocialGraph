@@ -18,10 +18,10 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	rBackground = new Gdiplus::Rect(0,0,cfg->iOutputWidth - 1,cfg->iOutputHeight -1);
 	pBorder = new Gdiplus::Pen(*cBorder,1.0);
 	fChannel = new Gdiplus::Font(L"SansSerif",64, Gdiplus::FontStyleBold);
-	pChannel = new Gdiplus::PointF((Gdiplus::REAL)(cfg->gBorderSize + 20.0),80.0f);
+	pChannel = new Gdiplus::PointF((float)(cfg->gBorderSize + 20.0),(float)cfg->gBorderSize + 30);
 	sbChannel = new Gdiplus::SolidBrush(*cChannel);
 	fTitle = new Gdiplus::Font(L"SansSerif",18, Gdiplus::FontStyleBold);
-	pTitle = new Gdiplus::PointF((Gdiplus::REAL)cfg->gBorderSize,(Gdiplus::REAL)(cfg->gBorderSize - cfg->gNodeRadius - 15));
+	pTitle = new Gdiplus::PointF((float)cfg->gBorderSize,(Gdiplus::REAL)(cfg->gBorderSize));
 	sbTitle = new Gdiplus::SolidBrush(*cTitle);
 	sbNode = new Gdiplus::SolidBrush(*cNode);
 
@@ -36,9 +36,9 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	fVidTimelapseTime = new Gdiplus::Font(L"Lucida Console", 72, Gdiplus::FontStyleBold);
 	fVidTimelapseDate = new Gdiplus::Font(L"Lucida Console", 24, Gdiplus::FontStyleRegular);
 	
-	cEdgeListFont = new Gdiplus::Color(cfg->iEdgeNickListFontColor.argb());
-	cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.argb());
-	cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.argb());
+	//cEdgeListTimeColor = new Gdiplus::Color(cfg->iEdgeNickListTimeColor.argb());
+	//cEdgeListLineAdd = new Gdiplus::Color(cfg->iEdgeNickListLineAddColor.argb());
+	//cEdgeListLineDel = new Gdiplus::Color(cfg->iEdgeNickListLineDelColor.argb());
 	cChatDotColor = new Gdiplus::Color(cfg->iChatDotColor.argb());
 	sbChatDotColor = new Gdiplus::SolidBrush(*cChatDotColor);
 	fVidNick = new Gdiplus::Font(cfg->vidNickFont.c_str(),(float)cfg->iNickFontSize);
@@ -75,9 +75,6 @@ GdiTools::~GdiTools(void)
 	delete fVidTimelapseTime;
 	delete fVidTimelapseDate;
 	delete fVidNick;
-	delete cEdgeListFont;
-	delete cEdgeListLineAdd;
-	delete cEdgeListLineDel;
 	delete cChatDotColor;
 	delete sbChatDotColor;
 }

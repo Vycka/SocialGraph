@@ -47,11 +47,10 @@ iNodeBorderColor  102 102 255 255
 iNodeColor        255 255   0 255
 ## edge alpha will be dynamicly calculated by relation strength, however it won't exceed specified value below
 iEdgeColor        102 102 255 255
+iEdgeColorInactive 50 50 50 10
 iBorderColor      102 102 102 255
-iEdgeColorChangeInactive 50 50 50 10
-iEdgeChangeNickList 0 0 0 64
-iEdgeNickListLineAddColor 102 102 255 255
-iEdgeNickListLineDelColor 50 50 50 70
+iEdgeChangeListColor 102 102 255 255
+iEdgeChangeListColorInactive 50 50 102 32
 iChatDotColor     105 105 191 255
 
 ## Minimum alpha for active edges.
@@ -67,6 +66,7 @@ gEdgeChangeListEnabled 1
 gEdgeChangeListDrawLogSize 10
 
 ## after how much seconds edges will start to grey out, and after how many seconds greying out reaches maximum?
+## These parameters also apply to Changelist lines.
 gEdgeColorChangeInactivityMin 900
 gEdgeColorChangeInactivityMax 7200
 
@@ -154,11 +154,11 @@ vidRendererThreads 4
 vidBeginRenderTime 0
 vidEndRenderTime 0
 
-## vidXYDivRatio Recommended val: (70*(finalFramsPerSec/30))
+## vidXYDivRatio Recommended val: (100*(finalFramsPerSec/30))
 ## (finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
 ## The bigger vidXYDivRatio, the less jerky graphvideo will be, however, because of it boundries will be moved slower and objects can get out of the picture frame.
 ## Trivia: This algorithm is in overall bad for video rendering, but good for stills, so in video rendering it needs to be reprogrammed one day.
-vidXYDivRatio 70
+vidXYDivRatio 100
 
 ## what font to use for nicknames when rendering video
 vidNickFont "SansSerif"
@@ -170,18 +170,18 @@ vidEdgeChatDotSpeedPixelsPerFrame 6
 vidEdgeChatDotRadius 3
 
 ## gC and gMaxNodeMovement and values for active nodes.
-vidMaxNodeMovement 0.003
-vidC               0.0045
+vidMaxNodeMovement 0.0025
+vidC               0.0035
 
 ## gBorder for video
-vidBorderSize 65
+vidBorderSize 10
 
 ## gNodeRadius for video
 vidNodeRadius 8
 
 ## gC and gMaxNodeMovement values for disconnected nodes.
-vidMaxNodeMovementDisconnected 0.008
-vidCDisconnected               0.005
+vidMaxNodeMovementDisconnected 0.004
+vidCDisconnected               0.004
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20

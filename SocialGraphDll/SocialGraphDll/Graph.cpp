@@ -859,9 +859,9 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 	gt->g->DrawString(wcredits.c_str(),wcredits.size(),gt->fCredits,
 		Gdiplus::PointF((float)borderSize,(float)(height + borderSize * 2 - 5 - 30)),gt->sbTitle);
 
-	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorChangeInactive.r;
-	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorChangeInactive.g;
-	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorChangeInactive.b;
+	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorInactive.r;
+	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorInactive.g;
+	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorInactive.b;
 
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
@@ -899,9 +899,9 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 		double alphaFinal = (weightStrength / weightToAlphaDiv) + cfg->iEdgeActiveMinAlpha;
 		if (alphaFinal > cfg->iEdgeColor.a)
 			alphaFinal = cfg->iEdgeColor.a;
-		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorChangeInactive.a) * eiMul);
-		if (alphaFinal < cfg->iEdgeColorChangeInactive.a)
-			alphaFinal = cfg->iEdgeColorChangeInactive.a;
+		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorInactive.a) * eiMul);
+		if (alphaFinal < cfg->iEdgeColorInactive.a)
+			alphaFinal = cfg->iEdgeColorInactive.a;
 		Gdiplus::Pen p(Gdiplus::Color((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB),((float)((weightStrength >= 255 ? 254 : weightStrength) / 85) + 2)); 
  		gt->g->DrawLine(&p,x1,y1,x2,y2);
 
@@ -974,6 +974,6 @@ void Graph::addEdgeChangeList(int time,const wchar_t *sourceNick,const wchar_t *
 		delete *edgeChangeList.begin();
 		edgeChangeList.pop_front();
 	}
-	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(time, sourceNick, targetNick, edge);
+	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(time, sourceNick, targetNick, edge,cfg->iEdgeColor);
 	edgeChangeList.push_back(nEcl);
 }
