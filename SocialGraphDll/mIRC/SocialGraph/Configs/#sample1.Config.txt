@@ -63,9 +63,8 @@ iNickFontSize     8
 
 ## Nick relation changelist only works in video rendering at this moment. It will be implamented for stills in the future releases.
 ## Select here, which information and how many lines of it to draw?
-gEdgeNickListDrawInserts 1
-gEdgeNickListDrawRemoves 0
-gEdgeNickListDrawLogSize 10
+gEdgeChangeListEnabled 1
+gEdgeChangeListDrawLogSize 10
 
 ## after how much seconds edges will start to grey out, and after how many seconds greying out reaches maximum?
 gEdgeColorChangeInactivityMin 900

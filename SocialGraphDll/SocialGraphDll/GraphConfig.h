@@ -21,8 +21,9 @@ public:
 	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
 		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
-	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeNickListDrawLogSize;
-	bool gEdgeNickListDrawInserts, gEdgeNickListDrawRemoves;
+	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeChangeListDrawLogSize;
+	//bool gEdgeNickListDrawInserts, gEdgeNickListDrawRemoves;
+	bool gEdgeChangeListEnabled;
 	double gMinMaxWeight;
 	//ftp stuff
 	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;

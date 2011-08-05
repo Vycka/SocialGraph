@@ -236,8 +236,7 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 			e->setChangedInPause(false);
 			return;
 		}
-		GraphEdgeChangeList gecl((int)time(0),e->getSource()->getWNick(),e->getTarget()->getWNick(),true);
-		addEdgeChangeList(gecl);
+		addEdgeChangeList((int)time(0),e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
 	}
 	updateFrame();	
 }
@@ -479,11 +478,13 @@ void Graph::decay(double d, int tNow)
 		double newDecay = (d * mul) + d;
 		double wLast = e->getWeight();
 		e->appWeight(-newDecay);
-		if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
-		{
-			GraphEdgeChangeList gecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),false);
-			addEdgeChangeList(gecl);
-		}
+		
+		//SHOULD NOT BE NEEDED WITH NEW CHANGELIST SYSTEM
+		//if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
+		//{
+		//	EdgeChangeListRecord ecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
+		//	addEdgeChangeList(ecl);
+		//}
 		if (e->getWeight() <= 0)
 		{
 			e->getSource()->appConEdges(-1);
@@ -963,14 +964,16 @@ GraphConfig* Graph::getConfig()
 	return cfg;
 }
 
-void Graph::addEdgeChangeList(const GraphEdgeChangeList &gecl)
+void Graph::addEdgeChangeList(int time,const wchar_t *sourceNick,const wchar_t *targetNick,Edge *edge)
 {
-	if (gecl.isAppearing && !cfg->gEdgeNickListDrawInserts)
-		return;
-	if (!gecl.isAppearing && !cfg->gEdgeNickListDrawRemoves)
+	if (!cfg->gEdgeChangeListEnabled)
 		return;
 
-	if (edgeChangeList.size() > (unsigned int)cfg->gEdgeNickListDrawLogSize)
+	if (edgeChangeList.size() > (unsigned int)cfg->gEdgeChangeListDrawLogSize)
+	{
+		delete *edgeChangeList.begin();
 		edgeChangeList.pop_front();
-	edgeChangeList.push_back(gecl);
+	}
+	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(time, sourceNick, targetNick, edge);
+	edgeChangeList.push_back(nEcl);
 }

@@ -9,22 +9,17 @@
 #include <Windows.h>
 #include <time.h>
 #include "Node.h"
+#include "EdgeChangeListRecord.h"
+
 
 class GdiTools;
 class GraphConfig;
-class Edge;
 class InferenceHeuristic;
 class Logger;
+class Edge;
 
 
-struct GraphEdgeChangeList
-{
-	GraphEdgeChangeList() {};
-	GraphEdgeChangeList(int tNow, std::wstring n1, std::wstring n2, bool isAppearing) : tNow(tNow), n1(n1), n2(n2), isAppearing(isAppearing) {};
-	int tNow;
-	std::wstring n1, n2;
-	bool isAppearing;
-};
+//TODO CLASS GraphEdgeChangeList
 
 
 class Graph
@@ -65,7 +60,7 @@ public:
 	GraphConfig* getConfig();
 	//inline bool isNodeInFrame(Node *n, double extraBorderX = 0.0, double extraBorderY = 0.0) { return (n->getX() >= minX - extraBorderX && n->getY() >= minY - extraBorderY && n->getX() <= maxX + extraBorderX && n->getY() <= maxY + extraBorderY ? true : false); };
 protected:
-	virtual void addEdgeChangeList(const GraphEdgeChangeList &gecl);
+	void addEdgeChangeList(int time,const wchar_t *sourceNick,const wchar_t *targetNick,Edge *edge);
 	double minX,maxX,minY,maxY;
 	GdiTools *gt;
 	GraphConfig *cfg;
@@ -75,7 +70,7 @@ protected:
 	__int64 qpcTicksPerMs,qpcTickBeforeRender,qpcTickAfterRender;
 	double maxWeight;
 	std::vector<Node*> visibleNodes;
-	std::list<GraphEdgeChangeList> edgeChangeList;
+	std::list<EdgeChangeListRecord*> edgeChangeList;
 private:
 	std::vector<InferenceHeuristic*> inferences;
 	std::set<std::string> ignoreNicks;
