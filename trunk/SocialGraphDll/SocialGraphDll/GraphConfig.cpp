@@ -46,9 +46,10 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	ftpFile   = getString("ftpFile");
 
 	//graph
-	gEdgeNickListDrawInserts   = getBool("gEdgeNickListDrawInserts");
-	gEdgeNickListDrawRemoves   = getBool("gEdgeNickListDrawRemoves");
-	gEdgeNickListDrawLogSize   = getInt("gEdgeNickListDrawLogSize");
+	//gEdgeNickListDrawInserts   = getBool("gEdgeNickListDrawInserts");
+	//gEdgeNickListDrawRemoves   = getBool("gEdgeNickListDrawRemoves");
+	gEdgeChangeListEnabled       = getBool("gEdgeChangeListEnabled");
+	gEdgeChangeListDrawLogSize   = getInt("gEdgeChangeListDrawLogSize");
 	gEdgeColorChangeInactivityMin = getInt("gEdgeColorChangeInactivityMin");
 	gEdgeColorChangeInactivityMax = getInt("gEdgeColorChangeInactivityMax");
 	gTemporalDecayAmount       = getDouble("gTemporalDecayAmount");

@@ -66,6 +66,7 @@
     <ClCompile Include="InferenceHeuristic.cpp">
       <Filter>InferenceHeuristics</Filter>
     </ClCompile>
+    <ClCompile Include="EdgeChangeListRecord.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h">
@@ -110,6 +111,7 @@
     <ClInclude Include="InferenceHeuristic.h">
       <Filter>InferenceHeuristics</Filter>
     </ClInclude>
+    <ClInclude Include="EdgeChangeListRecord.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="def.def">

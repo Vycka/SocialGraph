@@ -2,6 +2,7 @@
 #include "Node.h"
 #include "Tools.h"
 
+
 Edge::Edge(Node *source, Node *target, double weight, int secs)
 {
 	this->source = source;
@@ -10,12 +11,15 @@ Edge::Edge(Node *source, Node *target, double weight, int secs)
 	this->lastActivity = secs;
 	changedInPause = false;
 	this->userData = NULL;
+	changeListLink = NULL;
 }
 
 Edge::~Edge(void)
 {
 	if (userData)
 		delete userData;
+	if (changeListLink)
+		changeListLink->setEdge(NULL);
 }
 
 bool Edge::sameNicks(const std::string *ln1, const std::string *ln2)

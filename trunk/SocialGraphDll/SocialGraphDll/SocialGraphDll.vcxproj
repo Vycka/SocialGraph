@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="EdgeChangeListRecord.cpp" />
     <ClCompile Include="GraphConfig.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -166,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="EdgeChangeListRecord.h" />
     <ClInclude Include="GraphConfig.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Tools.h" />

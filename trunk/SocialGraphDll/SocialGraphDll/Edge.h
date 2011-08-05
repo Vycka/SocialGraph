@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <time.h>
+#include "EdgeChangeListRecord.h"
 
 #define LPUSERDATA void*
 #define USERDATA void
@@ -30,6 +31,8 @@ public:
 	inline void updateActivityTimeForSource(int time = (int)time(NULL)) { this->sourceActivity = time; };
 	inline void updateActivityTimeForTarget(int time = (int)time(NULL)) { this->targetActivity = time; };
 	inline void updateActivityTime(int secs = (int)time(NULL)) { lastActivity = secs; };
+	inline EdgeChangeListRecord* getChangeListLink() { return changeListLink; };
+	inline void setChangeListLink(EdgeChangeListRecord *ecl) { changeListLink = ecl; };
 	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
 	inline LPUSERDATA getUserData() { return userData; };
 private:
@@ -37,6 +40,7 @@ private:
 	Node *target;
 	double weight;
 	bool changedInPause;
+	EdgeChangeListRecord *changeListLink;
 	int lastActivity;
 	int sourceActivity,targetActivity;
 	LPUSERDATA userData;

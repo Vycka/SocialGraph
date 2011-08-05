@@ -30,7 +30,7 @@ struct GvEdgeChatDot
 struct GvEdgeData
 {
 	int sourceFrames,targetFrames;
-	Gdiplus::Color sourceInactiveColor,targetInactiveColor;
+	//Gdiplus::Color sourceInactiveColor,targetInactiveColor;
 	std::vector<GvEdgeChatDot> sourceChatDots;
 	std::vector<GvEdgeChatDot> targetChatDots;
 };
@@ -125,7 +125,7 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	//overridinam kaikuriuos configus ir renderinam
 	srand32(12345); // kad nesikeistu perrenderinant randomas :)
 	
-	cfg->gCacheGdiTools = true;
+
 	
 	//TODO: those overrides need to be cleaned up one day (Hopefully before stable v2.0 release)
 	cfg->gSpringEmbedderIterations = cfg->vidSEIterationsPerFrame;
@@ -142,6 +142,7 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 		execInMirc("/echo -sg SocialGraph: Bad vidRendererThreads value, defaulting it to 4");
 	}
 
+	cfg->gCacheGdiTools = true;
 	gt = new GdiTools(cfg);
 	cfg->logSave = false;
 	vidRendFrame = VIDRENDER_BEGINFRAME;
@@ -369,20 +370,20 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 	int eclWR = cfg->iOutputWidth - 105, eclWC = cfg->iOutputWidth - 135, eclWL = cfg->iOutputWidth - 136, eclClock = cfg->iOutputWidth - 243;
 	double eclH = 130;
-	for (std::list<GraphEdgeChangeList>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
 	{
 
 		//TODO: Will need to make separate font/brush for these..
 
-		GraphEdgeChangeList *l = &(*i);
-		std::string stNow = ctimeToTimeStr(l->tNow);
+		EdgeChangeListRecord *l = *i;
+		std::string stNow = ctimeToTimeStr(l->getTimeBegin());
 		std::wstring wstNow;
 		wstNow.assign(stNow.begin(),stNow.end());
-		gt->g->DrawString(l->n1.c_str(),l->n1.size(),gt->fCredits,Gdiplus::PointF((float)eclWL,(float)eclH),&sfL,gt->sbLabel);
-		gt->g->DrawString(l->n2.c_str(),l->n2.size(),gt->fCredits,Gdiplus::PointF((float)eclWR,(float)eclH),&sfR,gt->sbLabel);
+		gt->g->DrawString(l->getNickSource().c_str(),l->getNickSource().size(),gt->fCredits,Gdiplus::PointF((float)eclWL,(float)eclH),&sfL,gt->sbLabel);
+		gt->g->DrawString(l->getNickTarget().c_str(),l->getNickTarget().size(),gt->fCredits,Gdiplus::PointF((float)eclWR,(float)eclH),&sfR,gt->sbLabel);
 		gt->g->DrawString(wstNow.c_str(),wstNow.size(),gt->fCredits,Gdiplus::PointF((float)eclClock,(float)eclH),&sfL,gt->sbTitle);
 		Gdiplus::Color c;
-		if ((*i).isAppearing)
+		if (l->getEdge())
 			c = Gdiplus::Color(cfg->iEdgeColor.a,cfg->iEdgeColor.r,cfg->iEdgeColor.g,cfg->iEdgeColor.b);
 		else
 			c = Gdiplus::Color(cfg->iEdgeColorChangeInactive.a,cfg->iEdgeColorChangeInactive.r,cfg->iEdgeColorChangeInactive.g,cfg->iEdgeColorChangeInactive.b);
@@ -1042,8 +1043,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 			e->setChangedInPause(false);
 			return;
 		}
-		GraphEdgeChangeList gecl(activity,e->getSource()->getWNick(),e->getTarget()->getWNick(),true);
-		addEdgeChangeList(gecl);
+		addEdgeChangeList(activity,e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
 	}
 }
 
@@ -1065,11 +1065,12 @@ void GraphVideo::decay(double d, int tNow)
 		Edge *e = edges[x];
 		double wLast = e->getWeight();
 		e->appWeight(-newDecay);
-		if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
-		{
-			GraphEdgeChangeList gecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),false);
-			addEdgeChangeList(gecl);
-		}
+		//SHOULD NOT BE NEEDED ANYMORE WITH NEW SYSTEM
+		//if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
+		//{
+		//	EdgeChangeListRecord gecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
+		//	addEdgeChangeList(ecl);
+		//}
 
 		if (e->getWeight() <= 0)
 		{
@@ -1151,7 +1152,6 @@ void GraphVideo::deleteNode(const std::string *lnick)
 
 	//if node has any connected edges, set edges weight to 0 and let decay() handle the rest.
 	//Otherwise node might get deleted without becoming disconnected and flying off
-	//TODO: TEST THIS HOTFIX!!!
 	if (iNode->second->getConEdges())
 	{
 		for (std::vector<Edge*>::iterator i = edges.begin(); i != edges.end(); i++)

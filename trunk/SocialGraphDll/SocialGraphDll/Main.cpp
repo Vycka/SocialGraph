@@ -295,7 +295,7 @@ void main(int argc, char** arg)
 
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
-	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\#Linkomanija.Config1080pEx.txt");
+	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
 	GraphVideo *g = new GraphVideo(&c);
 	g->renderVideo();
 	delete g;
