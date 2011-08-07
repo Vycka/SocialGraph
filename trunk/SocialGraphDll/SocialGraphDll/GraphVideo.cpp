@@ -385,12 +385,12 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
 	{
 
-		//TODO: Will need to make separate font/brush for these..
-
 		EdgeChangeListRecord *l = *i;
 		std::string stNow = ctimeToTimeStr(l->getTimeBegin());
 		std::wstring wstNow;
 		wstNow.assign(stNow.begin(),stNow.end());
+
+		//TODO: Add seperate customizable font parameter for these.
 		gt->g->DrawString(l->getNickSource().c_str(),l->getNickSource().size(),gt->fCredits,Gdiplus::PointF((float)eclWL,(float)eclH),&sfL,gt->sbLabel);
 		gt->g->DrawString(l->getNickTarget().c_str(),l->getNickTarget().size(),gt->fCredits,Gdiplus::PointF((float)eclWR,(float)eclH),&sfR,gt->sbLabel);
 		gt->g->DrawString(wstNow.c_str(),wstNow.size(),gt->fCredits,Gdiplus::PointF((float)eclClock,(float)eclH),&sfL,gt->sbTitle);
@@ -438,6 +438,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	wtlTime.assign(tlTime.begin(),tlTime.end());
 	wtlDate.assign(tlDate.begin(),tlDate.end());
 
+	//TODO: Add customizable brushes/colors and maybe position
 	gt->g->DrawString(wtlTime.c_str(),wtlTime.size()-3,gt->fVidTimelapseTime,Gdiplus::PointF((float)cfg->iOutputWidth-325,(float)40),gt->sbChannel);
 	gt->g->DrawString(wtlDate.c_str(),wtlDate.size(),gt->fVidTimelapseDate,Gdiplus::PointF((float)cfg->iOutputWidth-220,(float)10),gt->sbChannel);
 

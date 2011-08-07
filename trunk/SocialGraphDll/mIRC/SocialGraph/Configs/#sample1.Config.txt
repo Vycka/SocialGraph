@@ -63,7 +63,7 @@ iNickFontSize     8
 ## Nick relation changelist only works in video rendering at this moment. It will be implamented for stills in the future releases.
 ## Select here, which information and how many lines of it to draw?
 gEdgeChangeListEnabled 1
-gEdgeChangeListDrawLogSize 10
+gEdgeChangeListDrawLogSize 15
 
 ## after how much seconds edges will start to grey out, and after how many seconds greying out reaches maximum?
 ## These parameters also apply to Changelist lines.
@@ -170,17 +170,17 @@ vidEdgeChatDotSpeedPixelsPerFrame 6
 vidEdgeChatDotRadius 3
 
 ## gC and gMaxNodeMovement and values for active nodes.
-vidMaxNodeMovement 0.0025
-vidC               0.0035
+vidMaxNodeMovement 0.0015
+vidC               0.0025
 
 ## gBorder for video
-vidBorderSize 10
+vidBorderSize 50
 
 ## gNodeRadius for video
 vidNodeRadius 8
 
 ## gC and gMaxNodeMovement values for disconnected nodes.
-vidMaxNodeMovementDisconnected 0.004
+vidMaxNodeMovementDisconnected 0.005
 vidCDisconnected               0.004
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
