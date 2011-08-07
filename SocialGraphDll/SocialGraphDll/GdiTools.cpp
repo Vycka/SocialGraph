@@ -4,7 +4,8 @@
 
 GdiTools::GdiTools(GraphConfig *cfg)
 {
-	bmp = new Gdiplus::Bitmap(cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
+	//TODO: Make PixelFormat customizable from config file.
+	bmp = new Gdiplus::Bitmap(cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat32bppPARGB);
 	g = new Gdiplus::Graphics(bmp);
 	cBackground = new Gdiplus::Color(cfg->iBackgroundColor.argb());
 	cChannel = new Gdiplus::Color(cfg->iChannelColor.argb());
@@ -32,6 +33,7 @@ GdiTools::GdiTools(GraphConfig *cfg)
 	pNodeBorder = new Gdiplus::Pen(*cNodeBorder,2);
 	GetEncoderClsid(cfg->fWEncoderMime.c_str(),&encoderClsid);
 	g->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
 
 	fVidTimelapseTime = new Gdiplus::Font(L"Lucida Console", 72, Gdiplus::FontStyleBold);
 	fVidTimelapseDate = new Gdiplus::Font(L"Lucida Console", 24, Gdiplus::FontStyleRegular);
