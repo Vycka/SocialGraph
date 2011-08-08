@@ -67,6 +67,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	gEdgeDecayMultiplyIdleSecs = getInt("gEdgeDecayMultiplyIdleSecs");
 	gCacheGdiTools             = getInt("gCacheGdiTools");
 	gMinMaxWeight              = getDouble("gMinMaxWeight");
+	gPreserveAlpha             = getBool("gPreserveAlpha");
 
 	//inference heuristics
 	hAdjacency  = getDouble("hAdjacency");
@@ -104,6 +105,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidNickFontSize         = getInt("vidNickFontSize");
 	vidNodeRadius           = getInt("vidNodeRadius");
 	vidBorderSize           = getInt("vidBorderSize");
+	vidPreserveAlpha        = getBool("vidPreserveAlpha");
 	//...
 
 	//clear list 

@@ -23,7 +23,7 @@ public:
 		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
 	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeChangeListDrawLogSize;
 	//bool gEdgeNickListDrawInserts, gEdgeNickListDrawRemoves;
-	bool gEdgeChangeListEnabled;
+	bool gEdgeChangeListEnabled,gPreserveAlpha;
 	double gMinMaxWeight;
 	//ftp stuff
 	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;
@@ -48,5 +48,5 @@ public:
 	double vidMaxNodeMovement,vidC,vidCDisconnected,vidMaxNodeMovementDisconnected;
 	int vidDisconnectedFadeOutFrames,vidOutputWidth,vidOutputHeight,vidNickFontSize;
 	int vidNodeRadius,vidBorderSize;
-
+	bool vidPreserveAlpha;
 };

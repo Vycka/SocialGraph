@@ -811,6 +811,7 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 	std::wstring wcredits;
 	//std::cout << "XXYY: " << minX << " " << maxX << " " << minY<< " " << maxY << std::endl; 
 	//backgroundo spalva
+	gt->g->Clear(Gdiplus::Color(0));
 	gt->g->FillRectangle(gt->sbBackground,*gt->rBackground);
 	//remas
 	gt->g->DrawRectangle(gt->pBorder,*gt->rBackground);
