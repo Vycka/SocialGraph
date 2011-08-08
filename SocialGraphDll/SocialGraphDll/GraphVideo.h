@@ -46,4 +46,5 @@ private:
 	double xyDivY2;
 	double xyDivX3;
 	double xyDivY3;
+	int vidBitmapPixelFormat;
 };

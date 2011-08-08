@@ -136,6 +136,10 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	cfg->iNickFontSize = cfg->vidNickFontSize;
 	cfg->gBorderSize   = cfg->vidBorderSize;
 	cfg->gNodeRadius   = cfg->vidNodeRadius;
+	cfg->gPreserveAlpha = cfg->vidPreserveAlpha;
+
+	vidBitmapPixelFormat = (cfg->vidPreserveAlpha ? PixelFormat32bppARGB : PixelFormat24bppRGB);
+
 	if (cfg->vidRendererThreads > 16 || cfg->vidRendererThreads < 1)
 	{
 		cfg->vidRendererThreads = 4;
@@ -345,6 +349,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 {
 	std::wstring wcredits;
 	//filling background
+	gt->g->Clear(Gdiplus::Color(0));
 	gt->g->FillRectangle(gt->sbBackground,*gt->rBackground);
 	//frame
 	gt->g->DrawRectangle(gt->pBorder,*gt->rBackground);
@@ -612,7 +617,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 	GraphRendererFrame *frame = new GraphRendererFrame;
 	frame->fName = *fWPath;
-	frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,PixelFormat24bppRGB);
+	frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,vidBitmapPixelFormat);
 	
 	int writeThread = 0, writePos = 0;
 	bool posFound = false;

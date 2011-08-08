@@ -76,6 +76,9 @@ gEdgeColorChangeInactivityMax 7200
 ## image/bmp image/jpeg image/gif image/tiff image/png 
 fEncoderMime   "image/png"
 
+## Should alpha channel be preserved in outputed still image?
+gPreserveAlpha 0
+
 ## Andvenced parameters for graph spring embedder physics simulation.
 ## Should not be touched unless you know what you are doing.
 gTemporalDecayAmount        0.02
@@ -186,5 +189,9 @@ vidCDisconnected               0.004
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20
 
+## Should alpha channel be preserved in outputed images?
+## Using that allows to make more postprocessing customization to the video
+## For instance: Background color can be made transperant and in postprocess you can add diferent background image or even an animation without messing socialgraph
+vidPreserveAlpha 0
 
 ## END OF CONFIG FILE
