@@ -4,7 +4,7 @@ alias sgDll {
 
 ;this should not be called by user otherwise bad things might happen. You been WARNED
 alias -l sgStartup {
-  ;window @SocialGraph
+  window @SocialGraph
   unset %sgChans
   var %t = $findfile($scriptdirConfigs\,*Config.txt,0,1,sgInitGraph $1-)
 }

@@ -45,7 +45,7 @@
   + Add: Multichannel supportas!!!
   + Add: Klaidu check'ai config skaityme tad necrashins daugiau mirco blogas configas, o pasakys kur problema
 
-2011-07-xx v1.1: Stable (not released)
+201x-xx-xx v1.1: Stable (not released)
   + Add: gCacheGdiTools parametras, kad isjungt galetum GdiPlus Cache, jis tiem kurie nori kad botas valgytu maziau ramo, bet botas valgys daugiau cpu (defaultas 1)
   + Add: Grafiko keitimosi loginima
   + Add: Video kadru renderinima is grafiko keitimosi logo (su surenderintais kadrais galima poto padaryt video)
@@ -57,6 +57,8 @@
   * Fix: Multithreaded rendereris pagaliau pilnai sutvarkytas. (Ant AMD x6 1055T matomas 400% pagreitejimas)
   + Add: Lekiantys taskiukai ant liniju, kurie parodys kaip pasnekovai tarpusavy snekasi.
   + Add: Atjungti vartotojai nuo grafo nepradings iskart, o isleks pirma uz paveiksliuko ribu.
+  + Add: Alpha spalvos islaikymas paveiksliuke
+
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve
 Tvarkingesnis config failas (90% Done)
