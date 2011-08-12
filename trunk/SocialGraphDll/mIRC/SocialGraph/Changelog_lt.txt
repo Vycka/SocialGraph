@@ -59,6 +59,8 @@
   + Add: Atjungti vartotojai nuo grafo nepradings iskart, o isleks pirma uz paveiksliuko ribu.
   + Add: Alpha spalvos islaikymas paveiksliuke
   ! Change: Visos Socialgraph zinutes perkeltos i @SocialGraph langa.
+  - Del: pasalintas gEdgeThreshold parametras, jis buvo praktiskai nenaudojamas ir su klaidom, beto tai, ka jis dare, galima pasiekt ir per kitus parametrus.
+  ! Change: Pakeistas GraphData failo formatas, jis bus atnaujintas automatiskai, taciau po sito nebebus galima grizt prie senesnes versijos.
 
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve

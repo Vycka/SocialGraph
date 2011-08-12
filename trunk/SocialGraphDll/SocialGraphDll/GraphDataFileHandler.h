@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#define REVISION 58
+#include "Tools.h" //just for revision
 #define FILE_VERSION 1
 
 //V0 won't be used anymore, because it doesn't have any headers
