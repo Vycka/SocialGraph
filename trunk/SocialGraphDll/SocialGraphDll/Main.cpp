@@ -40,7 +40,7 @@ void __stdcall LoadDll(LOADINFO* li)
 	srand32((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	execInMircInit(&mHwnd);
-	execInMirc("/echo -sg SocialGraph: v1.04 BETA Dll Loaded!");
+	execInMirc("/.signal SocialGraph @sg v1.04 BETA Dll Loaded!");
 }
 
 int __stdcall UnloadDll(int type)
@@ -57,7 +57,7 @@ int __stdcall UnloadDll(int type)
 	}
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
-	execInMirc("/echo -sg SocialGraph: Dll Shutting down!");
+	execInMirc("/.signal SocialGraph @sg Dll Shutting down!");
 	execInMircShutdown();
 	return 1;
 }
@@ -67,7 +67,7 @@ ALIAS mInitGraph(ALP)
 	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
-		std::string mmsg = "/echo -sg SocialGraph: Graph not initialized due bad config: " + std::string(data);
+		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
 		execInMirc(&mmsg);
 		return 1;
 	}
@@ -80,7 +80,7 @@ ALIAS mInitGraph(ALP)
 
 	std::string configFile(data);
 	configFile.erase(0,configFile.rfind("\\",configFile.size())+1);
-	std::string mmsg = "/echo -sg SocialGraph: Config File: " + configFile + " Loaded for channel: " + c.nChannel;
+	std::string mmsg = "/.signal SocialGraph @sg Config File: " + configFile + " Loaded for channel: " + c.nChannel;
 	execInMirc(&mmsg);
 
 	Graph *graph = new Graph(&c);
@@ -211,6 +211,18 @@ ALIAS mDeleteUnusedNodes(ALP)
 	return 1;
 }
 
+//mSaveOld was created mainly for debug purposes only
+ALIAS mSaveOld(ALP)
+{
+	std::string chan(data),lchan;
+
+	strToLower(&chan,&lchan);
+	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
+	if (graphIter != graphs.end())
+		graphIter->second->saveOldFrame();
+	return 1;
+}
+
 ALIAS mDumpFile(ALP)
 {
 	std::string chan,lchan,file;
@@ -230,7 +242,7 @@ ALIAS mRenderVideo(ALP)
 	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
-		std::string mmsg = "/echo -sg SocialGraph: Graph not initialized due bad config: " + std::string(data);
+		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
 		execInMirc(&mmsg);
 		return 1;
 	}
@@ -296,8 +308,10 @@ void main(int argc, char** arg)
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
-	GraphVideo *g = new GraphVideo(&c);
-	g->renderVideo();
+	Graph *g = new Graph(&c);
+	g->saveOldFrame();
+	//GraphVideo *g = new GraphVideo(&c);
+	//g->renderVideo();
 	delete g;
 	system("pause");
 	Gdiplus::GdiplusShutdown(gdiplusToken);

@@ -4,7 +4,7 @@ alias sgDll {
 
 ;this should not be called by user otherwise bad things might happen. You been WARNED
 alias -l sgStartup {
-  window @SocialGraph
+  window -e0 @SocialGraph
   unset %sgChans
   var %t = $findfile($scriptdirConfigs\,*Config.txt,0,1,sgInitGraph $1-)
 }
@@ -59,7 +59,12 @@ on *:nick: {
 on *:signal:SocialGraph: {
   ;getNicks genFrame setChan
   ;echo -sg SocialGraph Signal: $1-
-  if (genFrame == $1) {
+
+  if (@sg == $1) {
+    if (!$window(@SocialGraph)) { window -e0 @SocialGraph }
+    echo @SocialGraph $2- 
+  }
+  else if (genFrame == $1) {
     ;you can announce here to channel when new graph is creaded $2 - channel name, $3 - frame number
     return
   }
@@ -131,6 +136,10 @@ alias sgInitGraph {
 
 alias sgDestroyGraph {
   dll $sgDll mDestroyGraph $1
+}
+
+alias sgSaveOld {
+  dll $sgDll mSaveOld $1
 }
 
 ;Video rendering is experimental and slow function, use with care. or dont use at all.

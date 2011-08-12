@@ -370,7 +370,7 @@ void Graph::loadFromFile(const char *fn)
 	std::fstream f(fn,std::ios_base::in);
 	if (!f.good())
 	{
-		std::string mmsg = "/echo @SocialGraph SocialGraph: Unable to open GraphData file: ";
+		std::string mmsg = "/.signal SocialGraph @sg Unable to open GraphData file: ";
 		mmsg += fn;
 		execInMirc(&mmsg);
 		return;
@@ -419,7 +419,7 @@ void Graph::loadFromFile(const char *fn)
 	{
 		lastFrame = 0;
 		clear();
-		std::string mmsg = "/echo @SocialGraph SocialGraph: Unable to read GraphData file correctly (file might be corrupted): ";
+		std::string mmsg = "/.signal SocialGraph @sg Unable to read GraphData file correctly (file might be corrupted): ";
 		mmsg += fn;
 		execInMirc(&mmsg);
 	}
@@ -559,13 +559,13 @@ void Graph::updateFrame()
 	{	
 		lastRender = timeNow;
 		//RENDER IMAGE
-		this->lastFrame++; //padidinam frame
+		this->lastFrame++;
 		
-		if (cfg->logSave) //loger stuff
+		if (cfg->logSave) //Logger Stuff
 			logger->wFrame(lastFrame);
 
-		makeImage(); //surenderinam
-		dumpToFile(cfg->fGraphOutput.c_str());
+		makeImage(); //render it
+		dumpToFile(cfg->fGraphOutput.c_str()); //save graphdata
 		char buff[15];
 		_itoa(lastFrame,buff,10);
 
@@ -573,7 +573,7 @@ void Graph::updateFrame()
 		std::string mmsg = "/.signal SocialGraph genFrame " + cfg->nChannel + " " + std::string(buff);
 		execInMirc(&mmsg);
 #ifdef GRAPHNOTICES
-		mmsg = "/echo @SocialGraph SocialGraph: Next Frame Generated: #";
+		mmsg = "/.signal SocialGraph @sg Next Frame Generated: #";
 		mmsg += buff + std::string(" Channel: ") + cfg->nChannel;
 		execInMirc(&mmsg);
 #endif
@@ -930,7 +930,7 @@ void Graph::upload()
 	char buff[16];
 
 #ifdef GRAPHNOTICES
-	std::string mmsg = "/echo @SocialGraph SocialGraph: Uploading Frame: #";
+	std::string mmsg = "/.signal SocialGraph @sg Uploading Frame: #";
 	mmsg += _itoa(lastFrame,buff,10) + std::string(" Channel: ") + cfg->nChannel;
 	execInMirc(&mmsg);
 #endif
@@ -939,7 +939,7 @@ void Graph::upload()
 		cfg->fImageOutput.c_str(),cfg->ftpDir.c_str(),cfg->ftpFile.c_str());
 	if (err)
 	{
-		std::string s("/echo @SocialGraph SocialGraph: Error uploading to FTP - Channel: " + cfg->nChannel + ", Error Code: ");
+		std::string s("/.signal SocialGraph @sg Error uploading to FTP - Channel: " + cfg->nChannel + ", Error Code: ");
 		_itoa(err,buff,10);
 		s += buff + std::string(", Extended Err: ") + ftpGetExtendedError(); 
 		execInMirc(&s);
@@ -949,10 +949,13 @@ void Graph::upload()
 void Graph::saveOldFrame()
 {
 			char buff[16];
+			//std::string mDebug("/.signal SocialGraph @sg Debug:" + cfg->fImageOutput + std::string(" == ") + cfg->oPathBegin + _itoa(lastFrame,buff,10) + cfg->oPathEnd);
+			//execInMirc(&mDebug);
+
 			if (!CopyFile(cfg->fImageOutput.c_str(),std::string(cfg->oPathBegin+_itoa(lastFrame,buff,10)+cfg->oPathEnd).c_str(),true))
 			{
 #ifdef GRAPHNOTICES
-				std::string mmsg = "/echo @SocialGraph SocialGraph: Error Saving old frame. Error Code: ";
+				std::string mmsg = "/.signal SocialGraph @sg Error Saving old frame. Error Code: ";
 				mmsg += _itoa(GetLastError(),buff,10);
 				execInMirc(&mmsg);
 #endif

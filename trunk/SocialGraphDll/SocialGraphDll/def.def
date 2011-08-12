@@ -16,3 +16,4 @@ mDumpFile
 mInitGraph
 mDestroyGraph
 mRenderVideo
+mSaveOld
