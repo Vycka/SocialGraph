@@ -59,6 +59,8 @@
   + Add: Nodes in graph video, which looses all relation edges, won't disappear instantly, instead they will fly off the screen and fade out, once they reach gBorder
   + Add: Alpha channel support for image output
   ! Change: Moved all SocialSraph messages to @SocialGraph window.
+  - Del: gEdgeThreshold parameter, it was buggy and useless, and it's effect can be achieved in other ways.
+  + Change: GraphData file format changed, it will be updated automatically, however, after that downgrading won't be possible!
 
 TODO File:
 ability to keep last n graphs in ftp serv

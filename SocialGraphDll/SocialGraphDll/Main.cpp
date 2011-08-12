@@ -41,7 +41,9 @@ void __stdcall LoadDll(LOADINFO* li)
 	srand32((unsigned int)time((time_t*)0));
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	execInMircInit(&mHwnd);
-	execInMirc("/.signal SocialGraph @sg v1.04 BETA Dll Loaded!");
+	std::stringstream ssEim;
+	ssEim << "/.signal SocialGraph @sg SocialGraphDLL v1.04 R" << REVISION << " BETA Loaded!";
+	execInMirc(&ssEim.str());
 }
 
 int __stdcall UnloadDll(int type)
