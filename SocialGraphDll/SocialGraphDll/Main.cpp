@@ -1,5 +1,6 @@
 //#define WIN32_LEAN_AND_MEAN
 #define _CRT_SECURE_NO_WARNINGS
+
 #include <windows.h>
 #include <gdiplus.h>
 #include <sstream>
@@ -73,7 +74,7 @@ ALIAS mInitGraph(ALP)
 	}
 
 	std::string lchan;
-	strToLower(&c.nChannel,&lchan);
+	strToLower(c.nChannel,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		return 1;
@@ -88,10 +89,10 @@ ALIAS mInitGraph(ALP)
 	return 1;
 }
 
-ALIAS mDestroyGraph(ALP)
+ALIAS mUnloadGraph(ALP)
 {
 	std::string chan(data),lchan;
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 	{
@@ -109,7 +110,7 @@ ALIAS mAddMessage(ALP)
 	getline(ss,nick,' ');
 	getline(ss,msg,'\0');
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->onMessage(&nick,&msg);
@@ -123,7 +124,7 @@ ALIAS mAddJoin(ALP)
 	std::stringstream ss(data);
 	ss >> chan >> nick;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->onJoin(&nick);
@@ -134,7 +135,7 @@ ALIAS mMakeImage(ALP)
 {
 	std::string chan(data),lchan;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->makeImage();
@@ -145,7 +146,7 @@ ALIAS mUpload(ALP)
 {
 	std::string chan(data),lchan;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->upload();
@@ -158,11 +159,11 @@ ALIAS mAddIgnore(ALP)
 	std::stringstream ss(data);
 	ss >> chan >> nick;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 	{
-		strToLower(&nick,&lnick);
+		strToLower(nick,lnick);
 		graphIter->second->addIgnore(&lnick);
 	}
 	return 1;
@@ -174,11 +175,11 @@ ALIAS mDeleteIgnore(ALP)
 	std::stringstream ss(data);
 	ss >> chan >> nick;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 	{
-		strToLower(&nick,&lnick);
+		strToLower(nick,lnick);
 		graphIter->second->deleteIgnore(&lnick);
 	}
 	return 1;
@@ -190,11 +191,11 @@ ALIAS mDeleteNode(ALP)
 	std::stringstream ss(data);
 	ss >> chan >> nick;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 	{
-		strToLower(&nick,&lnick);
+		strToLower(nick,lnick);
 		graphIter->second->deleteNode(&lnick);
 	}
 	return 1;
@@ -204,7 +205,7 @@ ALIAS mDeleteUnusedNodes(ALP)
 {
 	std::string chan(data),lchan;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->deleteUnusedNodes();
@@ -216,7 +217,7 @@ ALIAS mSaveOld(ALP)
 {
 	std::string chan(data),lchan;
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
 		graphIter->second->saveOldFrame();
@@ -230,10 +231,10 @@ ALIAS mDumpFile(ALP)
 	getline(ss,chan,' ');
 	getline(ss,file,'\0');
 
-	strToLower(&chan,&lchan);
+	strToLower(chan,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
-		graphIter->second->dumpToFile(file.c_str());
+		graphIter->second->saveToFile(file.c_str());
 	return 1;
 }
 
@@ -309,7 +310,8 @@ void main(int argc, char** arg)
 
 	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
 	Graph *g = new Graph(&c);
-	g->saveOldFrame();
+	g->printLists();
+	g->saveToFileEx("i:\\test.txt");
 	//GraphVideo *g = new GraphVideo(&c);
 	//g->renderVideo();
 	delete g;

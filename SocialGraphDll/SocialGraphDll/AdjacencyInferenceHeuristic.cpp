@@ -23,7 +23,7 @@ void AdjacencyInferenceHeuristic::infer(const std::string *lnick,const std::stri
 	//std::cout << "AIH: " << lnick << " " << lastNick << std::endl;
 	if (lastNick != *lnick)
 	{
-		Edge *e = getGraph()->findEdge(&lastNick,lnick);
+		Edge *e = getGraph()->findEdge(lastNick,*lnick);
 		if (e)
 		{
 #ifdef HEURISTIC_NOTICES
@@ -32,7 +32,7 @@ void AdjacencyInferenceHeuristic::infer(const std::string *lnick,const std::stri
 			else
 				this->sendInferenceChangeToMirc(*e->getTarget()->getLNick(),*e->getSource()->getLNick(),this->getName(),getWeighting());
 #endif
-			if (*lnick == *e->getSource()->getLNick())
+			if (*lnick == e->getSource()->getLNick())
 				getGraph()->updateEdge(e,getWeighting(),e->getSource());
 			else
 				getGraph()->updateEdge(e,getWeighting(),e->getTarget());

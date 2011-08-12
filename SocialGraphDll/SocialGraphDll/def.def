@@ -14,6 +14,6 @@ mDeleteUnusedNodes
 mDeleteNode
 mDumpFile
 mInitGraph
-mDestroyGraph
+mUnloadGraph
 mRenderVideo
 mSaveOld

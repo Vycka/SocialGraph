@@ -20,7 +20,7 @@ public:
 	//graph config
 	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
-		gNodeRadius,gEdgeThreshold,gNodeBumpWeight;
+		gNodeRadius,gNodeBumpWeight;
 	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeChangeListDrawLogSize;
 	//bool gEdgeNickListDrawInserts, gEdgeNickListDrawRemoves;
 	bool gEdgeChangeListEnabled,gPreserveAlpha;

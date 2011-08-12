@@ -22,9 +22,9 @@ Edge::~Edge(void)
 		changeListLink->setEdge(NULL);
 }
 
-bool Edge::sameNicks(const std::string *ln1, const std::string *ln2)
+bool Edge::sameNicks(const std::string &ln1, const std::string &ln2)
 {
-	return ((*ln1 == *source->getLNick() && *ln2 == *target->getLNick()) || (*ln1 == *target->getLNick() && *ln2 == *source->getLNick()));
+	return ((ln1 == source->getLNick() && ln2 == target->getLNick()) || (ln1 == target->getLNick() && ln2 == source->getLNick()));
 }
 
 //if source node doesn't match to a n, then it assumes that its target node
@@ -40,9 +40,9 @@ void Edge::updateActivityTimeForNode(const Node *n, int time)
 //if source nick doesn't match to a lnick, then it assumes that its target nick
 void Edge::updateActivityTimeForNick(const std::string &lnick, int time)
 {
-	if (lnick == *source->getLNick())
+	if (lnick == source->getLNick())
 		updateActivityTimeForSource(time);
-	else if (lnick == *target->getLNick())
+	else if (lnick == target->getLNick())
 		updateActivityTimeForTarget(time);
 	else //extra if's are for debug. in theory they should not be needed, and if last statment wont be triggered, it will be removed, if it will be triggered, then hunting for logical bugs begins..
 		execInMirc("/.signal SocialGraph @sg ActForNick: can't find nick!");

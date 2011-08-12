@@ -93,7 +93,6 @@ gMaxNodeMovement            0.5
 gMinDiagramSize             10
 gBorderSize                 50
 gNodeRadius                 5
-gEdgeThreshold              0
 gNodeBumpWeight             0.2
 gMinMaxWeight               5
 
@@ -140,7 +139,7 @@ vidOutputHeight  1080
 ## 3596.4 == 59.94fps (24h==1min) (Double NTSC framerate)
 ## 7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate)
 
-## In what number of frames represent one day.
+## What number of frames represent one day.
 ## Default value (1798.2) assumes, that you render your video in NTSC framerate, and you want that 1 miunte of the video would represent 24hours of the activity.
 vidFramesPerDay 1798.2017982017982017982017982018
 
@@ -151,15 +150,15 @@ vidSEIterationsPerFrame 1
 ## vidRendererThreads has to be at least 1 and no more than 16 (MAX_THREADS). 
 vidRendererThreads 4
 
-## Initial time (unix time) and end time (unix time), to render from log file, but because of the really basic implamentation of this, all graphlog file still be parsed
-## So its better just to start logging to the new file once you plan to generate new video
+## Initial time (unix time) and end time (unix time), to render from log file, but because of the really basic implamentation of this feature, graphlog file will still be parsed from beginning,
+## And frames will start to be drawn from specified time. So its better just to start logging to the new file once you plan to generate new video
 ## 0 means infinity to both directions, so if Begin time is 0, graph will be rendered from beggining, 0 in end time means, that graph will be rendered to the end of the log.
 vidBeginRenderTime 0
 vidEndRenderTime 0
 
 ## vidXYDivRatio Recommended val: (100*(finalFramsPerSec/30))
 ## (finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
-## The bigger vidXYDivRatio, the less jerky graphvideo will be, however, because of it boundries will be moved slower and objects can get out of the picture frame.
+## The bigger vidXYDivRatio, the less jerky graphvideo will be, however, because of it, graph can be zoomed out too much for the long time, and all nodes will move to their own places slower when cluttered.
 ## Trivia: This algorithm is in overall bad for video rendering, but good for stills, so in video rendering it needs to be reprogrammed one day.
 vidXYDivRatio 100
 

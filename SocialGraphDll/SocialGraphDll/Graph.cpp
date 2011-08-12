@@ -6,6 +6,7 @@
 #include "GraphConfig.h"
 #include "GdiTools.h"
 #include "Logger.h"
+#include "GraphDataFileHandler.h"
 #include "InferenceHeuristic.h"
 #include "AdjacencyInferenceHeuristic.h"
 #include "BinarySequenceInferenceHeuristic.h"
@@ -43,6 +44,8 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 	QueryPerformanceFrequency((LARGE_INTEGER*)&qpcTicksPerMs);
 	qpcTicksPerMs = qpcTicksPerMs / 1000;
 
+	graphDataFileHandle = new GraphDataFileHandler(this);
+
 	if (!videoRendering)
 		initGraphForLogging();
 }
@@ -79,7 +82,7 @@ Graph::~Graph(void)
 		std::string mmsg = "/.signal SocialGraph delChan " + cfg->nChannel;
 		execInMirc(&mmsg);
 
-		dumpToFile(cfg->fGraphOutput.c_str());
+		saveToFile(cfg->fGraphOutput.c_str());
 	}
 
 	if (cfg->logSave)
@@ -98,6 +101,7 @@ Graph::~Graph(void)
 		delete logger;
 
 	delete cfg;
+	delete graphDataFileHandle;
 }
 
 
@@ -107,17 +111,16 @@ void Graph::clear()
 		logger->wEnd();
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 		delete i->second;
-	for (unsigned int x = 0;x < edges.size();x++)
-		delete edges[x];
-
-	//std::stringstream ss;
-	//ss << "/echo @SocialGraph Graph: called clear():" << this->lastFrame;
-	//execInMirc(ss.str().c_str());
+	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
+		delete *i;
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); i++)
+		delete *i;
 
 	nodes.clear();
 	edges.clear();
 	ignoreNicks.clear();
 	visibleNodes.clear();
+	edgeChangeList.clear();
 }
 
 Node *Graph::addNode(const std::string *nick,const std::string *lnick,double weight)
@@ -146,7 +149,7 @@ Node *Graph::addNode(const std::string *nick,const std::string *lnick,double wei
 Node* Graph::addNode(const std::string *nick,double weight)
 {
 	std::string lnick;
-	strToLower(nick,&lnick);
+	strToLower(*nick,lnick);
 	return addNode(nick,&lnick,weight);
 }
 
@@ -193,12 +196,13 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		return;
 
 	//jei yra toks edge, padidinam weight, jei ner, kuriam/kraunam
-	Edge *e = findEdge(ln1,ln2);
+	Edge *e = findEdge(*ln1,*ln2);
 	double wLast = 0.0;
 	if (e)
 	{
 		Node *inputFrom;
-		if (*e->getSource()->getLNick() == *ln1)
+		wLast = e->getWeight();
+		if (e->getSource()->getLNick() == *ln1)
 		{
 			inputFrom = e->getSource();
 			e->updateActivityTimeForSource();
@@ -225,18 +229,9 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 
 		e = new Edge(source,target,weight);
 		edges.push_back(e);
+		addEdgeChangeList((int)time(0), e);
 		if (cfg->logSave)
 			logger->wAddEdge(e,weight,source);
-	}
-	
-	if (wLast <= cfg->gEdgeThreshold && e->getWeight() > cfg->gEdgeThreshold)
-	{
-		if (e->getChangedInPause())
-		{
-			e->setChangedInPause(false);
-			return;
-		}
-		addEdgeChangeList((int)time(0),e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
 	}
 	updateFrame();	
 }
@@ -245,15 +240,17 @@ void Graph::updateEdge(Edge *e, double weight,const Node *inputFrom)
 {
 	if (weight == 0.0)
 		return;
+	double wLast = e->getWeight();
 	e->appWeight(weight);
 	e->updateActivityTime();
 	e->updateActivityTimeForNode(inputFrom);
 	if (cfg->logSave)
 		logger->wAddEdge(e,weight,inputFrom);
+
 	updateFrame();
 }
 
-Edge* Graph::findEdge(const std::string *ln1, const std::string *ln2)
+Edge* Graph::findEdge(const std::string &ln1, const std::string &ln2)
 {
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
@@ -268,13 +265,13 @@ Edge* Graph::findEdge(const std::string *ln1, const std::string *ln2)
 void Graph::onMessage(const std::string *nick,const std::string *msg)
 {
 	std::string lnick;
-	strToLower(nick,&lnick);
+	strToLower(*nick,lnick);
 
 	if (findIgnore(&lnick))
 		return;
 
 	std::string lmsg;
-	strToLower(msg,&lmsg);
+	strToLower(*msg,lmsg);
 
 	addNode(nick,&lnick,cfg->gNodeBumpWeight);
 
@@ -285,7 +282,7 @@ void Graph::onMessage(const std::string *nick,const std::string *msg)
 void Graph::onJoin(const std::string *nick)
 {
 	std::string lnick;
-	strToLower(nick,&lnick);
+	strToLower(*nick,lnick);
 
 	if (findIgnore(&lnick))
 		return;
@@ -305,7 +302,7 @@ void Graph::printLists()
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 	{
 		std::cout << " | " << std::setw(16) << i->first << " | " 
-				  << std::setw(16) << *i->second->getNick() << " | ";
+				  << std::setw(16) << i->second->getNick() << " | ";
 		std::cout.setf(std::ios::left);
 		std::cout << std::setw(10) << i->second->getWeight() << " | "
 				  << std::setw(10) << i->second->getX() << " | " 
@@ -317,15 +314,34 @@ void Graph::printLists()
 	std::cout << "\n----Edges/Decay----\n";
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
-		double newDecay = (d * ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs)) + d;
-		std::cout << " | " << std::setw(16) << *edges[x]->getSource()->getNick() << " - ";
+		double mul = ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
+		mul *= mul;
+		double newDecay = (d * mul) + d;
+		std::cout << " | " << std::setw(16) << edges[x]->getSource()->getNick() << " - ";
 		std::cout.setf(std::ios::left);
-		std::cout << std::setw(16) << *edges[x]->getTarget()->getNick() << " | "
+		std::cout << std::setw(16) << edges[x]->getTarget()->getNick() << " | "
 				  << std::setw(10) << edges[x]->getWeight() << " | "
 				  << edges[x]->getActivityTime() << " | "
 				  << std::setw(10) << newDecay << " |" << std::endl;
 		std::cout.unsetf(std::ios::left);
 	}
+	
+	std::cout << "\n----Edge Change List----\n";
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
+	{
+		EdgeChangeListRecord *eclr = *i;
+
+		std::string sNick = eclr->getNickSource(),tNick = eclr->getNickTarget();
+		//sNick.assign(eclr->getNickSource().begin(),eclr->getNickSource().end());
+		//tNick.assign(eclr->getNickTarget().begin(),eclr->getNickTarget().end());
+
+		std::cout << " | " << std::setw(16) << sNick << " - ";
+		std::cout.setf(std::ios::left);
+		std::cout << std::setw(16) << tNick << " | "
+			<< eclr->getTimeBegin() << " | " << eclr->getTimeLast() << " | " << std::endl; 
+		std::cout.unsetf(std::ios::left);
+	}
+
 	std::cout << "\n----Inferences----\n";
 	for (unsigned int x = 0;x < inferences.size();x++)
 	{
@@ -337,7 +353,7 @@ void Graph::printLists()
 	std::cout << "\n----Visible Nodes----\n";
 	for (unsigned int x = 0;x < visibleNodes.size();x++)
 	{
-		std::cout << " | " << std::setw(16) << *visibleNodes[x]->getNick() << " | ";
+		std::cout << " | " << std::setw(16) << visibleNodes[x]->getNick() << " | ";
 		std::cout.setf(std::ios::left);
 		std::cout << std::setw(10) << visibleNodes[x]->getWeight() << " | "
 				  << std::setw(10) << visibleNodes[x]->getX() << " | "
@@ -357,8 +373,8 @@ void Graph::updateVisibleNodeList()
 	std::set<Node*> uniqNodes;
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
-		uniqNodes.insert(edges[x]->getSource());
-		uniqNodes.insert(edges[x]->getTarget());
+			uniqNodes.insert(edges[x]->getSource());
+			uniqNodes.insert(edges[x]->getTarget());
 	}
 	visibleNodes.clear();
 	for (std::set<Node*>::iterator iun = uniqNodes.begin();iun != uniqNodes.end();iun++)
@@ -367,97 +383,40 @@ void Graph::updateVisibleNodeList()
 
 void Graph::loadFromFile(const char *fn)
 {
-	std::fstream f(fn,std::ios_base::in);
-	if (!f.good())
+	clear();
+	if (!graphDataFileHandle->load(cfg->fGraphOutput.c_str()))
 	{
+		clear();
 		std::string mmsg = "/.signal SocialGraph @sg Unable to open GraphData file: ";
 		mmsg += fn;
 		execInMirc(&mmsg);
-		return;
-	}
-
-	clear();
-	int n = 0;
-	int timeSaved;
-	f >> lastFrame >> timeSaved >> n;
-	for (int x = 0;x < n;x++)
-	{
-		Node *node = new Node(&f);
-		nodes.insert(std::make_pair(*node->getLNick(),node));
-		if (cfg->logSave)
-			logger->wAddNode(node,node->getWeight());
-	}
-
-	f >> n;
-	int tPassed = ((int)time(NULL) - timeSaved);
-	for (int x = 0;x < n;x++)
-	{
-		std::string n1,n2,ln1,ln2;
-		double weight;
-		int secs;
-		f >> n1 >> n2 >> weight >> secs;
-		strToLower(&n1,&ln1);
-		strToLower(&n2,&ln2);
-		Node *node1 = findNode(&ln1);
-		Node *node2 = findNode(&ln2);
-		node1->appConEdges(1);
-		node2->appConEdges(1);
-		Edge *e = new Edge(node1,node2,weight,secs + tPassed);
-		edges.push_back(e);
-		if (cfg->logSave)
-			logger->wAddEdge(e,weight,node1);
-	}
-
-	f >> n;
-	for (int x = 0;x < n;x++)
-	{
-		std::string n1;
-		f >> n1;
-		ignoreNicks.insert(n1);
-	}
-	if (!f.good()) //kazkas atsitiko blogo skaityme
-	{
-		lastFrame = 0;
-		clear();
-		std::string mmsg = "/.signal SocialGraph @sg Unable to read GraphData file correctly (file might be corrupted): ";
-		mmsg += fn;
+		mmsg = std::string("/.signal SocialGraph @sg If it's the the first time you launching SocialGraph, for specified channel, than ignore this error, new file will be created and graph will start from the beginning, if not, that means that data file was corrupted and new one will be recreated, and graph will start from the beginning!");
 		execInMirc(&mmsg);
 	}
-	if (cfg->logSave)
-		logger->wFrame(lastFrame);
-	f.close();
+	else if (cfg->logSave)
+	{
+		for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+			logger->wAddNode(i->second,i->second->getWeight());
+		for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
+			logger->wAddEdge(*i,(*i)->getWeight(),(*i)->getSource());
+	}
 }
 
-void Graph::dumpToFile(const char *fn)
+void Graph::saveToFile(const char *fn)
 {
-
 #ifdef COMP_EXE
 	return;
 #endif
-	std::fstream f(fn,std::ios_base::out);
-	f << lastFrame << ' ' << (int)time(NULL) <<  std::endl;
-	f << nodes.size() << std::endl;
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	if (!graphDataFileHandle->save(fn))
 	{
-		Node *n = i->second;
-		f << *n->getNick() << "\t\t" << n->getX() << '\t' << n->getY() << '\t' << n->getWeight() << std::endl;
+		std::string mmsg = "/.signal SocialGraph @sg Something went wrong saving graphdata file. GraphData NOT SAVED!";
+		execInMirc(&mmsg);
 	}
+}
 
-	f << std::endl << edges.size() << std::endl;
-	
-	for (unsigned int x = 0;x < edges.size();x++)
-	{	
-		Edge *e = edges[x];
-		f << *e->getSource()->getNick() << "\t" << *e->getTarget()->getNick() << "\t" << e->getWeight()
-			<< "\t" << e->getActivityTime() << std::endl;
-	}
-
-	f << std::endl << ignoreNicks.size() << std::endl;
-
-	for (std::set<std::string>::iterator i = ignoreNicks.begin();i != ignoreNicks.end();i++)
-		f << *i << std::endl;
-
-	f.close();
+bool Graph::saveToFileEx(const char *fn)
+{
+	return graphDataFileHandle->save(fn);
 }
 
 void Graph::decay(double d, int tNow)
@@ -478,13 +437,7 @@ void Graph::decay(double d, int tNow)
 		double newDecay = (d * mul) + d;
 		double wLast = e->getWeight();
 		e->appWeight(-newDecay);
-		
-		//SHOULD NOT BE NEEDED WITH NEW CHANGELIST SYSTEM
-		//if (wLast > cfg->gEdgeThreshold && e->getWeight() <= cfg->gEdgeThreshold)
-		//{
-		//	EdgeChangeListRecord ecl(tNow,e->getSource()->getWNick(),e->getTarget()->getWNick(),e);
-		//	addEdgeChangeList(ecl);
-		//}
+
 		if (e->getWeight() <= 0)
 		{
 			e->getSource()->appConEdges(-1);
@@ -518,7 +471,7 @@ void Graph::deleteUnusedNodes()
 	}
 	for (std::list<Node*>::iterator iErase = nodesToErase.begin(); iErase != nodesToErase.end();iErase++)
 	{
-		std::map<std::string,Node*>::iterator iNode = nodes.find(*(*iErase)->getLNick());
+		std::map<std::string,Node*>::iterator iNode = nodes.find((*iErase)->getLNick());
 		if (cfg->logSave)
 			logger->wDelNode(iNode->second);
 		delete iNode->second;
@@ -565,7 +518,7 @@ void Graph::updateFrame()
 			logger->wFrame(lastFrame);
 
 		makeImage(); //render it
-		dumpToFile(cfg->fGraphOutput.c_str()); //save graphdata
+		saveToFile(cfg->fGraphOutput.c_str()); //save graphdata
 		char buff[15];
 		_itoa(lastFrame,buff,10);
 
@@ -593,7 +546,7 @@ void Graph::updateFrame()
 			}
 		//FTP UPLOAD END
 	}
-	decay(cfg->gTemporalDecayAmount);
+	decay(cfg->gTemporalDecayAmount); //decay will be called each time updateFrame() is received, no matter, if frame wont be updated because of minimum time pause and so on.
 }
 
 void Graph::makeImage(int iterations, std::wstring *output,int tNow)
@@ -821,6 +774,81 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 	double borderSize = cfg->gBorderSize;
 	gt->g->DrawString(cfg->nWChannel.c_str(),cfg->nWChannel.size(),gt->fChannel, *gt->pChannel ,gt->sbChannel);
 	gt->g->DrawString(cfg->nWTitle.c_str(),cfg->nWTitle.size(),gt->fTitle,*gt->pTitle,gt->sbTitle);
+
+
+	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorInactive.r;
+	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorInactive.g;
+	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorInactive.b;
+
+	short int edgeChangeListMaxDiffR = cfg->iEdgeChangeListColor.r - cfg->iEdgeChangeListColorInactive.r;
+	short int edgeChangeListMaxDiffG = cfg->iEdgeChangeListColor.g - cfg->iEdgeChangeListColorInactive.g;
+	short int edgeChangeListMaxDiffB = cfg->iEdgeChangeListColor.b - cfg->iEdgeChangeListColorInactive.b;
+	short int edgeChangeListMaxDiffA = cfg->iEdgeChangeListColor.a - cfg->iEdgeChangeListColorInactive.a;
+
+	//EdgeChangeList Begin
+
+	Gdiplus::StringFormat sfL,sfR;
+	sfL.SetAlignment(Gdiplus::StringAlignmentFar);
+	sfR.SetAlignment(Gdiplus::StringAlignmentNear);
+
+	int eclWR = cfg->iOutputWidth - 105, eclWC = cfg->iOutputWidth - 135, eclWL = cfg->iOutputWidth - 136, eclClock = cfg->iOutputWidth - 243;
+	double eclH = 130;
+
+	double edgeInactivityMinMaxDiff = cfg->gEdgeColorChangeInactivityMax - cfg->gEdgeColorChangeInactivityMin;
+
+
+	
+
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin(); i != edgeChangeList.end(); i++)
+	{
+
+		EdgeChangeListRecord *l = *i;
+		std::string stNow = ctimeToTimeStr(l->getTimeBegin());
+		std::wstring wstNow;
+		wstNow.assign(stNow.begin(),stNow.end());
+
+		//TODO: Add seperate customizable font parameter for these.
+		gt->g->DrawString(l->getWNickSource().c_str(),l->getWNickSource().size(),gt->fCredits,Gdiplus::PointF((float)eclWL,(float)eclH),&sfL,gt->sbLabel);
+		gt->g->DrawString(l->getWNickTarget().c_str(),l->getWNickTarget().size(),gt->fCredits,Gdiplus::PointF((float)eclWR,(float)eclH),&sfR,gt->sbLabel);
+		gt->g->DrawString(wstNow.c_str(),wstNow.size(),gt->fCredits,Gdiplus::PointF((float)eclClock,(float)eclH),&sfL,gt->sbTitle);
+		
+		int lineHeight = (int)(eclH + 9);
+		if (l->getEdge())
+		{
+			Gdiplus::Color c(cfg->iEdgeChangeListColor.argb());
+			int changeListInactivity = szClock - l->getTimeLast();
+			if (changeListInactivity > cfg->gEdgeColorChangeInactivityMin)
+			{
+				if (changeListInactivity < edgeInactivityMinMaxDiff)
+				{
+					double inactivityMultiplier = (1.0 / edgeInactivityMinMaxDiff) * changeListInactivity;
+					c = Gdiplus::Color((unsigned char)(cfg->iEdgeChangeListColor.a - (edgeChangeListMaxDiffA * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.r - (edgeChangeListMaxDiffR * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.g - (edgeChangeListMaxDiffG * inactivityMultiplier)),
+										(unsigned char)(cfg->iEdgeChangeListColor.b - (edgeChangeListMaxDiffB * inactivityMultiplier)));
+				}
+				else
+					c = Gdiplus::Color(cfg->iEdgeChangeListColorInactive.argb());
+			}
+			Gdiplus::Pen p(c,3);
+			gt->g->DrawLine(&p,eclWC+2,lineHeight,eclWC+26,lineHeight);
+		}
+		else
+		{
+			Gdiplus::Color c(cfg->iEdgeChangeListColorInactive.argb());
+			Gdiplus::Pen p(c,3);
+			gt->g->DrawLine(&p,eclWC+2,lineHeight,eclWC+9,lineHeight);
+			gt->g->DrawLine(&p,eclWC+19,lineHeight,eclWC+26,lineHeight);
+			gt->g->DrawLine(&p,eclWC+11,lineHeight+5,eclWC+17,lineHeight-5);
+		}
+
+		
+
+		//eclH += cfg->iNickFontSize + 3;
+		eclH += 15;
+	}
+	//EdgeChangeList End
+
 	std::string tlTime = ctimeToTimeStr(szClock);
 	std::string tlDate = ctimeToDateStr(szClock);
 	std::wstring wtlTime, wtlDate;
@@ -860,14 +888,8 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 	gt->g->DrawString(wcredits.c_str(),wcredits.size(),gt->fCredits,
 		Gdiplus::PointF((float)borderSize,(float)(height + borderSize * 2 - 5 - 30)),gt->sbTitle);
 
-	short int edgeInactivityMaxDiffR = cfg->iEdgeColor.r - cfg->iEdgeColorInactive.r;
-	short int edgeInactivityMaxDiffG = cfg->iEdgeColor.g - cfg->iEdgeColorInactive.g;
-	short int edgeInactivityMaxDiffB = cfg->iEdgeColor.b - cfg->iEdgeColorInactive.b;
-
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
-		if (edges[x]->getWeight() < cfg->gEdgeThreshold)
-			continue;
 		Node *nodeA = edges[x]->getSource();
 		Node *nodeB = edges[x]->getTarget();
 		double weight = edges[x]->getWeight();
@@ -911,12 +933,14 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 	for (unsigned int x = 0;x < visibleNodes.size();x++)
 	{
 		Node *n = visibleNodes[x];
+		if (!n->getConEdges())
+			continue;
 		int x1 = (int) ((width * (n->getX() - minX) / (maxX - minX)) + borderSize);
 		int y1 = (int) ((height * (n->getY() - minY) / (maxY - minY)) + borderSize);
 		int newNodeRadius = (int) (log((n->getWeight() + 1) / 10) + nodeRadius);
 		gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
-		gt->g->DrawString(n->getWNick(),n->getNick()->size(),gt->fNick,
+		gt->g->DrawString(n->getWNick(),n->getNick().size(),gt->fNick,
 			Gdiplus::PointF((float)x1+newNodeRadius-1,(float)y1+newNodeRadius-1),gt->sbLabel);
 	}
 	gt->bmp->Save(fWPath->c_str(),&gt->encoderClsid,NULL);
@@ -968,16 +992,35 @@ GraphConfig* Graph::getConfig()
 	return cfg;
 }
 
-void Graph::addEdgeChangeList(int time,const wchar_t *sourceNick,const wchar_t *targetNick,Edge *edge)
+void Graph::addEdgeChangeList(int timeBegin, Edge *edge)
 {
+
 	if (!cfg->gEdgeChangeListEnabled)
 		return;
 
-	if (edgeChangeList.size() > (unsigned int)cfg->gEdgeChangeListDrawLogSize)
+	if (edgeChangeList.size() >= (unsigned int)cfg->gEdgeChangeListDrawLogSize)
 	{
 		delete *edgeChangeList.begin();
 		edgeChangeList.pop_front();
 	}
-	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(time, sourceNick, targetNick, edge,cfg->iEdgeColor);
+	Node *sNode = edge->getSource();
+	Node *tNode = edge->getTarget();
+
+	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(timeBegin, sNode->getNick(), sNode->getWNick(),  tNode->getNick(), tNode->getWNick(), edge);
+	edgeChangeList.push_back(nEcl);
+}
+
+void Graph::addEdgeChangeList(int timeBegin, int timeLast,const std::string &n1,const std::wstring &wn1, const std::string &n2,const std::wstring &wn2, Edge *e)
+{
+	if (!cfg->gEdgeChangeListEnabled)
+		return;
+
+	if (edgeChangeList.size() >= (unsigned int)cfg->gEdgeChangeListDrawLogSize)
+	{
+		delete *edgeChangeList.begin();
+		edgeChangeList.pop_front();
+	}
+
+	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(timeBegin, timeLast, n1, wn1,  n2, wn2, e);
 	edgeChangeList.push_back(nEcl);
 }
