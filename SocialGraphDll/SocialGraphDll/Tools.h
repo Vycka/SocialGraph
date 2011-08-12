@@ -1,4 +1,5 @@
 #pragma once
+//COMP_EXE (Compile executable) means that program will not try to inject mIRC, so it will able to work on its own without mIRC, for debugging purposes.
 //#define COMP_EXE
 #include <string>
 #include <Windows.h>

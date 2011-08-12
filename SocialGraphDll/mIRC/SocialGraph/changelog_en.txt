@@ -52,12 +52,13 @@
   + Add: Generation time in upper right corner (good for timelapse stuff in videos).
   + Add: Relations changelist drawing in upper right corner below timelapse time.
   + Add: Inactive relation edges will be greyed out, if they stay on graph inactive.
-  ! Change: inactive edges decay value will be squared based from inactivity vs gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
+  ! Change: Inactive edges decay value will be squared based from inactivity vs gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
   + Add: gMinMaxWeight parameter - minimum assumed weight, so just appeared relation edges wont be very thick, if there are no other thick relations.
   * Fix: Multithreaded VideoGraph renderer fixed (On my AMD x6 1055T I meassured 400% Speedup.)
   + Add: Flying dots on relation edges in GraphVideo, they will represent, who addressed who.
   + Add: Nodes in graph video, which looses all relation edges, won't disappear instantly, instead they will fly off the screen and fade out, once they reach gBorder
   + Add: Alpha channel support for image output
+  ! Change: Moved all SocialSraph messages to @SocialGraph window.
 
 TODO File:
 ability to keep last n graphs in ftp serv

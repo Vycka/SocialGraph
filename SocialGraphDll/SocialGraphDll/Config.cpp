@@ -11,7 +11,7 @@ Config::Config(const char *fn)
 	if (!cfgList.size())
 	{
 		badConfig = true;
-		std::string mmsg = "/.echo -sg SocialGraph: Config file is empty or not exists: ";
+		std::string mmsg = "/.signal SocialGraph @sg Config file is empty or doesn't exist: ";
 		mmsg += configFile;
 		execInMirc(&mmsg);
 	}
@@ -104,7 +104,7 @@ std::string Config::getParam(const char *key)
 	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
 	if (cfgIter == cfgList.end())
 	{
-		std::string err = "/echo -sg SocialGraph: Bad/Missing config variable: " + std::string(key) + " \r\nConfig File: " + this->configFile;
+		std::string err = "/.signal SocialGraph @sg Bad/Missing config variable: " + std::string(key) + " \r\n Config File: " + this->configFile;
 		execInMirc(&err);
 		badConfig = true;
 		return std::string("\" \"");

@@ -58,6 +58,7 @@
   + Add: Lekiantys taskiukai ant liniju, kurie parodys kaip pasnekovai tarpusavy snekasi.
   + Add: Atjungti vartotojai nuo grafo nepradings iskart, o isleks pirma uz paveiksliuko ribu.
   + Add: Alpha spalvos islaikymas paveiksliuke
+  ! Change: Visos Socialgraph zinutes perkeltos i @SocialGraph langa.
 
 TODO File:
 Galimybe kad paskutinis x grafiku butu saugomi ftp serve

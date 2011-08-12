@@ -151,7 +151,7 @@ vidSEIterationsPerFrame 1
 ## vidRendererThreads has to be at least 1 and no more than 16 (MAX_THREADS). 
 vidRendererThreads 4
 
-## Initial ctime and end time, to render from log file, but because of the really basic implamentation of this, all graphlog file still be parsed
+## Initial time (unix time) and end time (unix time), to render from log file, but because of the really basic implamentation of this, all graphlog file still be parsed
 ## So its better just to start logging to the new file once you plan to generate new video
 ## 0 means infinity to both directions, so if Begin time is 0, graph will be rendered from beggining, 0 in end time means, that graph will be rendered to the end of the log.
 vidBeginRenderTime 0
