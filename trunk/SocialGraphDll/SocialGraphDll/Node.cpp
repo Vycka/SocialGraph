@@ -3,39 +3,31 @@
 
 
 
-Node::Node(const std::string *nick,const std::string *lnick,double weight, double px, double py)
+Node::Node(const std::string *nick,const std::string *lNick,double weight, double px, double py)
 {
-	setNick(nick,lnick);
-	this->weight = weight;
-	x = px;
-	y = py;
-	fx = 0;
-	fy = 0;
-	cEdges = 0;
-	//nodeVisible = false;
-	userData = NULL;
+	set(*nick,*lNick,weight,px,py);
 }
 
 Node::Node(const std::string *nick,double weight,double px, double py)
 {
-	std::string lnick;
-	strToLower(nick,&lnick);
-	Node(nick,&lnick,weight,px,py);
+	std::string lNick;
+	strToLower(*nick,lNick);
+	set(*nick,lNick,weight,px,py);
 }
 
-Node::Node(std::fstream *f)
+void Node::set(const std::string &nick, const std::string &lNick, double weight, double posX,double posY)
 {
-	*f >> nick >> x >> y >> weight;
+	setNick(&nick,&lNick);
+	this->weight = weight;
+	x = posX;
+	y = posY;
 	fx = 0;
 	fy = 0;
-	cEdges = 0;	
-	strToLower(&nick,&lnick);
-	wnick.assign(nick.begin(),nick.end());
-	//nodeVisible = false;
+	cEdges = 0;
 	userData = NULL;
 }
 
-Node::~Node(void)
+Node::~Node()
 {
 	if (userData)
 		delete userData;

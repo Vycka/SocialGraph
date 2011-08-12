@@ -29,7 +29,7 @@ void Logger::wFrame(int frame)
 void Logger::wAddNode(Node *n, double weight)
 {
 	int t = (int)time(NULL);
-	logQueue << t << ' ' << VID_ADDNODE << ' ' << *n->getNick() << ' ' << weight << std::endl;
+	logQueue << t << ' ' << VID_ADDNODE << ' ' << n->getNick() << ' ' << weight << std::endl;
 	qFlush();
 }
 
@@ -37,7 +37,7 @@ void Logger::wDelNode(Node *n)
 {
 	
 	int t = (int)time(NULL);
-	logQueue << t << ' ' << VID_DELETENODE << ' ' << *n->getLNick() << std::endl; 
+	logQueue << t << ' ' << VID_DELETENODE << ' ' << n->getLNick() << std::endl; 
 	qFlush();
 }
 
@@ -46,14 +46,14 @@ void Logger::wAddEdge(Edge *e,double weight,const Node *inputFrom)
 	int t = (int)time(NULL);
 	if (e->getSource() == inputFrom)
 	{
-		logQueue << t << ' ' << VID_ADDEDGE << ' ' << *e->getSource()->getLNick() << ' '
-			<< *e->getTarget()->getLNick() << ' ' << weight << ' '
+		logQueue << t << ' ' << VID_ADDEDGE << ' ' << e->getSource()->getLNick() << ' '
+			<< e->getTarget()->getLNick() << ' ' << weight << ' '
 			<< e->getActivityTime() << std::endl; 
 	}
 	else
 	{
-		logQueue << t << ' ' << VID_ADDEDGE << ' ' << *e->getTarget()->getLNick() << ' '
-			<< *e->getSource()->getLNick() << ' ' << weight << ' '
+		logQueue << t << ' ' << VID_ADDEDGE << ' ' << e->getTarget()->getLNick() << ' '
+			<< e->getSource()->getLNick() << ' ' << weight << ' '
 			<< e->getActivityTime() << std::endl; 
 	}
 	qFlush();

@@ -16,7 +16,7 @@ public:
 	inline Node* getSource() { return source; };
 	inline Node* getTarget() { return target; };
 	inline double getWeight() { return weight; };
-	bool sameNicks(const std::string *ln1,const std::string *ln2);
+	bool sameNicks(const std::string &ln1,const std::string &ln2);
 	inline int getActivityTime() { return lastActivity; };
 	inline void setChangedInPause(bool state) { this->changedInPause = state; };
 	inline bool getChangedInPause() { return changedInPause; };
@@ -32,6 +32,7 @@ public:
 	inline void updateActivityTimeForTarget(int time = (int)time(NULL)) { this->targetActivity = time; };
 	inline EdgeChangeListRecord* getChangeListLink() { return changeListLink; };
 	inline void setChangeListLink(EdgeChangeListRecord *ecl) { changeListLink = ecl; };
+	inline void breakChangeListLink() { if (changeListLink) { changeListLink->setEdge(0); changeListLink = NULL; }; };
 	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
 	inline LPUSERDATA getUserData() { return userData; };
 	void updateActivityTime(int secs = (int)time(NULL));

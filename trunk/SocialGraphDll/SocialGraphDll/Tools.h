@@ -4,7 +4,7 @@
 #include <string>
 #include <Windows.h>
 
-void strToLower(const std::string *src,std::string *des);
+std::string& strToLower(const std::string &src,std::string &des);
 void replaceChars(const std::string *src, std::string *des,const std::string *srcMask,const std::string *desMask,int changes = -1);
 void replaceString(const std::string *src, std::string *des,const std::string *srcStr,const std::string *desStr,int changes = -1);
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);

@@ -20,10 +20,11 @@ static unsigned int rx32 = 123456789, ry32 = 362436069, rz32 = 521288629;
 //static unsigned int rx32 = 0, ry32 = 1, rz32 = 0;
 //rand32 stuff end
 
-void strToLower(const std::string *src,std::string *des)
+std::string& strToLower(const std::string &src,std::string &des)
 {
-	for (unsigned int x = 0;x < src->size();x++)
-		*des += tolower((*src)[x]);
+	for (unsigned int x = 0;x < src.size();x++)
+		des += tolower(src[x]);
+	return des;
 }
 
 void replaceChars(const std::string *src, std::string *des,const std::string *srcMask,const std::string *desMask,int changes)

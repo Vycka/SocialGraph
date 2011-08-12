@@ -60,7 +60,6 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	gMinDiagramSize            = getDouble("gMinDiagramSize");
 	gBorderSize                = getDouble("gBorderSize");
 	gNodeRadius                = getDouble("gNodeRadius");
-	gEdgeThreshold             = getDouble("gEdgeThreshold");
 	gNodeBumpWeight            = getDouble("gNodeBumpWeight");
 	gMinPauseBeforeNextRender  = getInt("gMinPauseBeforeNextRender");
 	gMinPauseBeforeNextUpload  = getInt("gMinPauseBeforeNextUpload");

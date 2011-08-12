@@ -5,15 +5,27 @@ EdgeChangeListRecord::EdgeChangeListRecord()
 {
 }
 
-EdgeChangeListRecord::EdgeChangeListRecord(int time, std::wstring n1, std::wstring n2, Edge *e, CColor lastKnownColor)
+EdgeChangeListRecord::EdgeChangeListRecord(int timeBegin,const std::string &n1,const std::wstring &wn1, const std::string &n2,const std::wstring &wn2, Edge *e)
 {
-	tBegin = time;
-	tLast = time;
+	set(timeBegin,timeBegin,n1,wn1,n2,wn2,e);
+}
+
+EdgeChangeListRecord::EdgeChangeListRecord(int timeBegin, int timeLast,const std::string &n1,const std::wstring &wn1, const std::string &n2,const std::wstring &wn2, Edge *e)
+{
+	set(timeBegin,timeLast,n1,wn1,n2,wn2,e);
+}
+
+void EdgeChangeListRecord::set(int timeBegin, int timeLast,const std::string &n1,const std::wstring &wn1, const std::string &n2,const std::wstring &wn2, Edge *e)
+{
+	tBegin = timeBegin;
+	tLast = timeBegin;
 	this->n1 = n1;
 	this->n2 = n2;
+	this->wn1 = wn1;
+	this->wn2 = wn2;
 	edge = e;
-	edge->setChangeListLink(this);
-	this->lastKnownColor = lastKnownColor;
+	if (edge)
+		edge->setChangeListLink(this);
 }
 
 EdgeChangeListRecord::~EdgeChangeListRecord()

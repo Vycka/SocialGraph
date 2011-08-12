@@ -17,6 +17,7 @@ class GraphConfig;
 class InferenceHeuristic;
 class Logger;
 class Edge;
+class GraphDataFileHandler;
 
 
 //TODO CLASS GraphEdgeChangeList
@@ -35,13 +36,15 @@ public:
 	Node* findNode(const std::string *lnick);
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight = 0);
 	void updateEdge(Edge *e, double weight,const Node *inputFrom);
-	Edge* findEdge(const std::string *ln1, const std::string *ln2);
+	Edge* findEdge(const std::string &ln1, const std::string &ln2);
 	void onMessage(const std::string *nick, const std::string *msg);
 	void onMessage(const char *nick, const char *msg);
 	void onJoin(const std::string *nick);
 	void updateVisibleNodeList();
 	void printLists();
-	void dumpToFile(const char *fn);
+	void saveToFile(const char *fn);
+	//saveToFileEx Only for debug pusposes to bypass COMP_EXE without editing saveToFile function.
+	bool saveToFileEx(const char *fn);
 	void loadFromFile(const char *fn);
 	virtual void decay(double d,int tNow = (int)time(NULL));
 	virtual void deleteUnusedNodes();
@@ -59,8 +62,12 @@ public:
 	void saveOldFrame();
 	GraphConfig* getConfig();
 	//inline bool isNodeInFrame(Node *n, double extraBorderX = 0.0, double extraBorderY = 0.0) { return (n->getX() >= minX - extraBorderX && n->getY() >= minY - extraBorderY && n->getX() <= maxX + extraBorderX && n->getY() <= maxY + extraBorderY ? true : false); };
+
+	friend GraphDataFileHandler;
 protected:
-	void addEdgeChangeList(int time,const wchar_t *sourceNick,const wchar_t *targetNick,Edge *edge);
+	void addEdgeChangeList(int timeBegin, Edge *edge);
+	void addEdgeChangeList(int timeBegin, int timeLast,const std::string &n1,const std::wstring &wn1, const std::string &n2,const std::wstring &wn2, Edge *e);
+
 	double minX,maxX,minY,maxY;
 	GdiTools *gt;
 	GraphConfig *cfg;
@@ -77,4 +84,5 @@ private:
 	unsigned int lastRender,lastUpload;
 	bool isVideoRenderingGraph;
 	Logger *logger;
+	GraphDataFileHandler *graphDataFileHandle;
 };
