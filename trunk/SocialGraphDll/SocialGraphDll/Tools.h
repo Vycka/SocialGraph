@@ -1,7 +1,7 @@
 #pragma once
 //COMP_EXE (Compile executable) means that program will not try to inject mIRC, so it will able to work on its own without mIRC, for debugging purposes.
 //#define COMP_EXE
-#define REVISION 59
+#define REVISION 60
 #include <string>
 #include <Windows.h>
 
@@ -16,7 +16,7 @@ void execInMirc(const std::string &s);
 //void execInMirc(const char *s);
 void execInMircInit(HWND *mh);
 void execInMircShutdown();
-void printInSGWindow(const std::string &text);
+void printToSGWindow(const std::string &text);
 std::string getInQuotes(const std::string &s);
 std::wstring getInQuotes(const std::wstring &s);
 std::string ctimeToDateStr(int t);

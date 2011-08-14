@@ -155,7 +155,7 @@ void execInMircInit(HWND *mh)
 void execInMirc(const std::string &s)
 {
 #ifdef COMP_EXE
-	std::cout << "EIM: " << *s << std::endl;
+	std::cout << "EIM: " << s << std::endl;
 	return;
 #endif
 	wsprintf(mData, s.c_str());
@@ -175,7 +175,7 @@ void execInMircShutdown()
 	CloseHandle(hMap);
 }
 
-void printInSGWindow(const std::string &text)
+void printToSGWindow(const std::string &text)
 {
 	std::stringstream ss;
 	ss << "/.signal SocialGraph @sg " << text;
