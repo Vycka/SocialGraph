@@ -43,7 +43,7 @@ void __stdcall LoadDll(LOADINFO* li)
 	execInMircInit(&mHwnd);
 	std::stringstream ssEim;
 	ssEim << "/.signal SocialGraph @sg SocialGraphDLL v1.04 R" << REVISION << " BETA Loaded!";
-	execInMirc(&ssEim.str());
+	execInMirc(ssEim.str());
 }
 
 int __stdcall UnloadDll(int type)
@@ -71,7 +71,7 @@ ALIAS mInitGraph(ALP)
 	if (c.isBadConfig())
 	{
 		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
-		execInMirc(&mmsg);
+		execInMirc(mmsg);
 		return 1;
 	}
 
@@ -84,7 +84,7 @@ ALIAS mInitGraph(ALP)
 	std::string configFile(data);
 	configFile.erase(0,configFile.rfind("\\",configFile.size())+1);
 	std::string mmsg = "/.signal SocialGraph @sg Config File: " + configFile + " Loaded for channel: " + c.nChannel;
-	execInMirc(&mmsg);
+	execInMirc(mmsg);
 
 	Graph *graph = new Graph(&c);
 	graphs.insert(std::make_pair(lchan,graph));
@@ -246,7 +246,7 @@ ALIAS mRenderVideo(ALP)
 	if (c.isBadConfig())
 	{
 		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
-		execInMirc(&mmsg);
+		execInMirc(mmsg);
 		return 1;
 	}
 

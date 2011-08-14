@@ -113,7 +113,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 				_itoa(gr->framesRendered,frameNr,10);
 				std::string mmsg = "/.signal SocialGraph @sg Video Frames Rendered: ";
 				mmsg += frameNr;
-				execInMirc(&mmsg);			
+				execInMirc(mmsg);			
 			}
 		}
 	}
@@ -222,7 +222,7 @@ void GraphVideo::renderVideo()
 	{
 		std::stringstream ssEim;
 		ssEim << "/.signal SocialGraph @sg Seeking log to the " << cfg->vidBeginRenderTime << " time position, This feature is pretty basic and seeking can become long if log file is large enough. So it is suggested to avoid this feautre and create new log files for each graphvideo everytime until better seeking algorithm is implamented!";
-		execInMirc(&ssEim.str());
+		execInMirc(ssEim.str());
 	}
 	if (cfg->vidEndRenderTime <= 0)
 		cfg->vidEndRenderTime = 0x7FFFFFFF;
@@ -319,8 +319,8 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 			if (cfg->vidBeginRenderTime)
 			{
 				std::stringstream ssEim;
-				ssEim << "/.signal SocialGraph @sg Seeking complete! Begining still rendering.";
-				execInMirc(&ssEim.str());
+				ssEim << "/.signal SocialGraph @sg Seeking complete! Begining video frames rendering.";
+				execInMirc(ssEim.str());
 			}
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 			updateVisibleNodeList();
@@ -1039,7 +1039,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		{
 			std::string mmsg("/.signal SocialGraph @sg Sissing nick in log: ");
 			mmsg += *ln1;
-			execInMirc(&mmsg);
+			execInMirc(mmsg);
 			node1 = addNode(ln1,ln1,0);
 			relocateNode(node1);
 		}
@@ -1047,7 +1047,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		{
 			std::string mmsg("/.signal SocialGraph @sg Missing nick in log: ");
 			mmsg += *ln2;
-			execInMirc(&mmsg);
+			execInMirc(mmsg);
 			node2 = addNode(ln2,ln2,0);
 			relocateNode(node2);
 		}

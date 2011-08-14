@@ -3,6 +3,7 @@
 #include <time.h>
 #include <Gdiplus.h>
 #include <iostream>
+#include <sstream>
 #include <wininet.h>
 
 //execInMirc stuff
@@ -41,22 +42,27 @@ void replaceChars(const std::string *src, std::string *des,const std::string *sr
 			}
 }
 
-void replaceString(const std::string *src, std::string *des,const std::string *srcStr,const std::string *desStr,int changes)
+void replaceString(const std::string &src, std::string &des, const std::string &srcStr, const std::string &desStr, int changes)
 {
 	int changed = 0;
 	if (src != des)
-		*des = *src;
+		des = src;
 	int searchPos = 0;
-	while (searchPos+srcStr->size() <= des->size() && changes != 0)
+	while (searchPos+srcStr.size() <= des.size() && changes != 0)
 	{
-		searchPos = des->find(srcStr->c_str(),searchPos);
+		searchPos = des.find(srcStr.c_str(),searchPos);
 		if (searchPos == std::string::npos)
 			return;
-		des->erase(searchPos,srcStr->size());
-		des->insert(searchPos,desStr->c_str());
-		searchPos += desStr->size();
+		des.erase(searchPos,srcStr.size());
+		des.insert(searchPos,desStr.c_str());
+		searchPos += desStr.size();
 		changes--;
 	}
+}
+
+std::wstring strToWStr(const std::string &str)
+{
+	return std::wstring(str.begin(),str.end());
 }
 
 
@@ -146,20 +152,20 @@ void execInMircInit(HWND *mh)
 	mData = (LPSTR)MapViewOfFile(hMap,FILE_MAP_ALL_ACCESS,0,0,0);
 }
 
-void execInMirc(const std::string *s)
+void execInMirc(const std::string &s)
 {
 #ifdef COMP_EXE
 	std::cout << "EIM: " << *s << std::endl;
 	return;
 #endif
-	wsprintf(mData, s->c_str());
+	wsprintf(mData, s.c_str());
 	SendMessage(*mHwnd, WM_MCOMMAND, 0, 0);
 }
 
 void execInMirc(const char *s)
 {
 	std::string mmsg = s;
-	execInMirc(&mmsg);
+	execInMirc(mmsg);
 }
 
 
@@ -169,20 +175,27 @@ void execInMircShutdown()
 	CloseHandle(hMap);
 }
 
-std::string getInQuotes(const std::string *s)
+void printInSGWindow(const std::string &text)
 {
-	//surandam pirma ir paskutini " ir tam tarpe iskirpsim
-	int qBegin = s->find('"',0);
-	int qEnd = s->rfind('"',s->size());
-	return std::string(*s,qBegin+1,qEnd-qBegin-1);
+	std::stringstream ss;
+	ss << "/.signal SocialGraph @sg " << text;
+	execInMirc(ss.str());
 }
 
-std::wstring getInQuotes(const std::wstring *s)
+std::string getInQuotes(const std::string &s)
 {
 	//surandam pirma ir paskutini " ir tam tarpe iskirpsim
-	int qBegin = s->find('"',0);
-	int qEnd = s->rfind('"',s->size());
-	return std::wstring(*s,qBegin+1,qEnd-qBegin-1);
+	int qBegin = s.find('"',0);
+	int qEnd = s.rfind('"',s.size());
+	return std::string(s,qBegin+1,qEnd-qBegin-1);
+}
+
+std::wstring getInQuotes(const std::wstring &s)
+{
+	//surandam pirma ir paskutini " ir tam tarpe iskirpsim
+	int qBegin = s.find('"',0);
+	int qEnd = s.rfind('"',s.size());
+	return std::wstring(s,qBegin+1,qEnd-qBegin-1);
 }
 
 std::string ctimeToDateStr(int t)
