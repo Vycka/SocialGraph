@@ -1,7 +1,7 @@
 #include "Config.h"
-#include "Tools.h"
 #include <fstream>
-#include <sstream>
+
+
 
 Config::Config(const char *fn)
 {
@@ -13,7 +13,7 @@ Config::Config(const char *fn)
 		badConfig = true;
 		std::string mmsg = "/.signal SocialGraph @sg Config file is empty or doesn't exist: ";
 		mmsg += configFile;
-		execInMirc(&mmsg);
+		execInMirc(mmsg);
 	}
 }
 
@@ -51,16 +51,16 @@ std::string Config::getString(const char *cfgName)
 {
 	std::string des;
 	std::string buff = getParam(cfgName);
-	des = getInQuotes(&buff);
-	replaceParam(&des);
+	des = getInQuotes(buff);
+	replaceParam(des);
 	return des;
 }
 std::wstring Config::getWString(const char *cfgName)
 {
 	std::string des;
 	std::string buff = getParam(cfgName);
-	des = getInQuotes(&buff);
-	replaceParam(&des);
+	des = getInQuotes(buff);
+	replaceParam(des);
 	std::wstring wdes;
 	wdes.assign(des.begin(),des.end());
 	return wdes;
@@ -99,22 +99,38 @@ void Config::read()
 	f.close();
 }
 
-std::string Config::getParam(const char *key)
+const std::string& Config::getParam(const char *key)
 {
+	static const std::string defaultEmpty("\" \"");
+
 	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
 	if (cfgIter == cfgList.end())
 	{
-		std::string err = "/.signal SocialGraph @sg Bad/Missing config variable: " + std::string(key) + " \r\n Config File: " + this->configFile;
-		execInMirc(&err);
+		printInSGWindow("[ERROR] Missing config variable: " + std::string(key) + " \r\n Config File: " + this->configFile);
 		badConfig = true;
-		return std::string("\" \"");
+		return defaultEmpty;
 	}
 	else
 		return cfgIter->second;
 }
 
-void Config::replaceParam(std::string *param)
+const std::string& Config::getParam(const char *key, const std::string &defaultValue)
+{
+
+	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
+	if (cfgIter == cfgList.end())
+	{
+		printInSGWindow("[WARNING] Missing config variable: " + std::string(key) + ". Using Default value: " + defaultValue +" Config File: " + this->configFile);
+		badConfig = true;
+		return defaultValue;
+	}
+	else
+		return cfgIter->second;
+}
+
+std::string& Config::replaceParam(std::string &param)
 {
 	for (unsigned int x = 0;x < replaceTable.size();x++)
-		replaceString(param,param,&replaceTable[x].from,&replaceTable[x].to);
+		replaceString(param,param,replaceTable[x].from,replaceTable[x].to);
+	return param;
 }
