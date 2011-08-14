@@ -86,13 +86,12 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 				isThereFrameToRender = true;
 			}
 		if (!isThereFrameToRender)
-		{
-			//execInMirc("/echo -sg SocialGraph: Renderer Queue is Empty!");		
+		{	
 			if (gr->stopThreads)
 			{
 				std::stringstream ss;
-				ss << "/.signal SocialGraph @sg Video Renderer Thread Exited - " << grts->threadId + 1;
-				execInMirc(ss.str().c_str());
+				ss << "[INFO] GraphVideo: Thread Exited - " << grts->threadId + 1;
+				printToSGWindow(ss.str());
 				return 0;
 			}
 			Sleep(1);
@@ -111,9 +110,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 			{
 				char frameNr[20];
 				_itoa(gr->framesRendered,frameNr,10);
-				std::string mmsg = "/.signal SocialGraph @sg Video Frames Rendered: ";
-				mmsg += frameNr;
-				execInMirc(mmsg);			
+				printToSGWindow("[INFO] GraphVideo: Video Frames Rendered: " + std::string(frameNr));			
 			}
 		}
 	}
@@ -142,7 +139,7 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	if (cfg->vidRendererThreads > 16 || cfg->vidRendererThreads < 1)
 	{
 		cfg->vidRendererThreads = 4;
-		execInMirc("/.signal SocialGraph @sg Bad vidRendererThreads value, defaulting it to 4");
+		printToSGWindow("[WARNING] GraphVideo: Bad vidRendererThreads value, defaulting it to 4");
 	}
 
 	cfg->gCacheGdiTools = true;
@@ -181,7 +178,7 @@ GraphVideo::~GraphVideo()
 void GraphVideo::renderVideo()
 {
 	int beginTime = (int)time(0);
-	execInMirc("/.signal SocialGraph @sg Starting Video Frames Rendering...");
+	printToSGWindow("[INFO] GraphVideo: Starting Video Frames Rendering");
 	//initialize multithreated renderer stuff
 	
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
@@ -191,7 +188,7 @@ void GraphVideo::renderVideo()
 		grh[x] = CreateThread(NULL,NULL,graphRenderSaveStillQueoe,&grts[x],NULL,NULL);
 		if (grh[x] == NULL)
 		{
-			execInMirc("/.signal SocialGraph @sg Unable to create renderer threads. Halting!");
+			printToSGWindow("[ERROR] GraphVideo: Unable to create renderer threads. Halting!");
 			grq->stopThreads = true;
 			WaitForMultipleObjects(x,grh,true,-1);
 			for (int y = 0; y < x;y++)
@@ -199,8 +196,8 @@ void GraphVideo::renderVideo()
 			return;
 		}
 		std::stringstream ss;
-		ss << "/.signal SocialGraph @sg Video Renderer Thread Created: " << grts[x].threadId + 1; 
-		execInMirc(ss.str().c_str());
+		ss << "[INFO] GraphVideo: Video Renderer Thread Created: " << grts[x].threadId + 1; 
+		printToSGWindow(ss.str());
 	}
 	int timestamp,lastTime,key,activity;
 	std::string n1,ln1,ln2;
@@ -221,8 +218,8 @@ void GraphVideo::renderVideo()
 	if (cfg->vidBeginRenderTime)
 	{
 		std::stringstream ssEim;
-		ssEim << "/.signal SocialGraph @sg Seeking log to the " << cfg->vidBeginRenderTime << " time position, This feature is pretty basic and seeking can become long if log file is large enough. So it is suggested to avoid this feautre and create new log files for each graphvideo everytime until better seeking algorithm is implamented!";
-		execInMirc(ssEim.str());
+		ssEim << "[WARNING] GraphVideo: Seeking log to the " << cfg->vidBeginRenderTime << " time position, This feature is pretty basic and seeking can become long if log file is large enough. So it is suggested to avoid this feautre and create new log files for each graphvideo everytime until better seeking algorithm is implamented!";
+		printToSGWindow(ssEim.str());
 	}
 	if (cfg->vidEndRenderTime <= 0)
 		cfg->vidEndRenderTime = 0x7FFFFFFF;
@@ -247,11 +244,7 @@ void GraphVideo::renderVideo()
 				renderFrames(nextRender,lastTime);		
 			ss >> ln1 >> ln2 >> weight >> activity;
 			if (timestamp < activity)
-			{
-				std::stringstream ssEig;
-				ssEig << "/.signal SocialGraph @sg Time Continuity Error: " << ss.str();
-				execInMirc(ssEig.str().c_str());
-			}
+				printToSGWindow("[WARNING] GraphVideo: VID_ADDEDGE Time Continuity Error: " + ss.str());
 			addEdge(&ln1,&ln2,weight,activity);
 			if (!pauseRender)
 			{
@@ -283,9 +276,9 @@ void GraphVideo::renderVideo()
 		case VID_INIT:
 			break;
 		default:
-			std::stringstream ssmmsg;
-			ssmmsg << "/.signal SocialGraph @sg Unknown Log Key: " << timestamp << " " << key << " Seeking till the new line!";
-			execInMirc(ssmmsg.str().c_str());
+			std::stringstream ssmsg;
+			ssmsg << "[WARNING] GraphVideo: Unknown Log Key: " << timestamp << " " << key << " Seeking till the new line!";
+			printToSGWindow(ssmsg.str());
 			ss.ignore(0x7FFFFFFF,'\n');
 			//ss.setstate(std::ios::badbit);
 			break;
@@ -297,11 +290,11 @@ void GraphVideo::renderVideo()
 	WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 		CloseHandle(grh[x]);
-	execInMirc("/.signal SocialGraph @sg Video Rendering Finished");
+	printToSGWindow("[INFO] GraphVideo: Video Rendering Finished");
 	
 	int diffTime = (int)time(0) - beginTime;
 	ss.str("");
-	ss << "/.signal SocialGraph @sg Frames rendered: " << grq->framesRendered-1 << " // Time took: " << diffTime << "seconds.";
+	ss << "[INFO] GraphVideo: Frames rendered: " << grq->framesRendered-1 << " // Time took: " << diffTime << "seconds.";
 	execInMirc(ss.str().c_str());
 }
 
@@ -316,12 +309,8 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 		dir += cfg->vidRenderPEnd;
 		if (!firstFrameRendered)
 		{
-			if (cfg->vidBeginRenderTime)
-			{
-				std::stringstream ssEim;
-				ssEim << "/.signal SocialGraph @sg Seeking complete! Begining video frames rendering.";
-				execInMirc(ssEim.str());
-			}
+			if (cfg->vidBeginRenderTime != 0)
+				printToSGWindow("[INFO] GraphVideo: Seeking complete! Begining video frames rendering.");
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 			updateVisibleNodeList();
 			//doLayout(iterations); first time dont do layout :P, so you will get a nice circle
@@ -850,7 +839,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 				
 				if (nodeA == nodeB)
 				{
-					execInMirc("/.signal SocialGraph @sg Logical error: Identical nodes in the Visible/Disconnected loop!");
+					printToSGWindow("[WARNING] GraphVideo: Logical error - identical nodes in the Visible/Disconnected loop!");
 					continue;
 				}
 
@@ -1037,17 +1026,13 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 
 		if (!node1)
 		{
-			std::string mmsg("/.signal SocialGraph @sg Sissing nick in log: ");
-			mmsg += *ln1;
-			execInMirc(mmsg);
+			printToSGWindow("[WARNING] GraphVideo: Missing nick in log: " + *ln1);
 			node1 = addNode(ln1,ln1,0);
 			relocateNode(node1);
 		}
 		if (!node2)
 		{
-			std::string mmsg("/.signal SocialGraph @sg Missing nick in log: ");
-			mmsg += *ln2;
-			execInMirc(mmsg);
+			printToSGWindow("[WARNING] GraphVideo: Missing nick in log: " + *ln2);
 			node2 = addNode(ln2,ln2,0);
 			relocateNode(node2);
 		}
@@ -1180,9 +1165,6 @@ void GraphVideo::clear()
 	edges.clear();
 	visibleNodes.clear();
 	visibleDisconnectedNodes.clear();
-	//std::stringstream ss;
-	//ss << "/echo @SocialGraph Video: called clear():" << this->lastFrame;
-	//execInMirc(ss.str().c_str());
 }
 
 void GraphVideo::deleteNode(const std::string *lnick)

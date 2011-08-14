@@ -35,7 +35,7 @@ void Edge::updateActivityTimeForNode(const Node *n, int time)
 	else if (n == target)
 		updateActivityTimeForTarget(time);
 	else //extra if's are for debug. in theory they should not be needed, and if last statment wont be triggered, it will be removed, if it will be triggered, then hunting for logical bugs begins..
-		execInMirc("/.signal SocialGraph @sg ActForNick: can't find node!");
+		printToSGWindow("[WARNING] Edge: Update Activity for nick - can't find specified node!");
 }
 //if source nick doesn't match to a lnick, then it assumes that its target nick
 void Edge::updateActivityTimeForNick(const std::string &lnick, int time)
@@ -45,7 +45,7 @@ void Edge::updateActivityTimeForNick(const std::string &lnick, int time)
 	else if (lnick == target->getLNick())
 		updateActivityTimeForTarget(time);
 	else //extra if's are for debug. in theory they should not be needed, and if last statment wont be triggered, it will be removed, if it will be triggered, then hunting for logical bugs begins..
-		execInMirc("/.signal SocialGraph @sg ActForNick: can't find nick!");
+		printToSGWindow("[WARNING] Edge: Update Activity for nick - can't find specified nick! Nick: " + lnick);
 }
 
 void Edge::updateActivityTime(int secs)

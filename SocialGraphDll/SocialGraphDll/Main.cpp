@@ -42,8 +42,8 @@ void __stdcall LoadDll(LOADINFO* li)
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	execInMircInit(&mHwnd);
 	std::stringstream ssEim;
-	ssEim << "/.signal SocialGraph @sg SocialGraphDLL v1.04 R" << REVISION << " BETA Loaded!";
-	execInMirc(ssEim.str());
+	ssEim << "[INFO] SocialGraphDLL v1.04 R" << REVISION << " BETA Loaded!";
+	printToSGWindow(ssEim.str());
 }
 
 int __stdcall UnloadDll(int type)
@@ -60,7 +60,7 @@ int __stdcall UnloadDll(int type)
 	}
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
-	execInMirc("/.signal SocialGraph @sg Dll Shutting down!");
+	printToSGWindow("[INFO] SocialGraphDll Shutting down!");
 	execInMircShutdown();
 	return 1;
 }
@@ -70,8 +70,7 @@ ALIAS mInitGraph(ALP)
 	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
-		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
-		execInMirc(mmsg);
+		printToSGWindow("[ERROR] Init: Graph not initialized due bad config: " + std::string(data));
 		return 1;
 	}
 
@@ -83,8 +82,8 @@ ALIAS mInitGraph(ALP)
 
 	std::string configFile(data);
 	configFile.erase(0,configFile.rfind("\\",configFile.size())+1);
-	std::string mmsg = "/.signal SocialGraph @sg Config File: " + configFile + " Loaded for channel: " + c.nChannel;
-	execInMirc(mmsg);
+	printToSGWindow("[INFO] Init: " + configFile + " Loaded for channel: " + c.nChannel);
+
 
 	Graph *graph = new Graph(&c);
 	graphs.insert(std::make_pair(lchan,graph));
@@ -245,8 +244,7 @@ ALIAS mRenderVideo(ALP)
 	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
-		std::string mmsg = "/.signal SocialGraph @sg Graph not initialized due bad config: " + std::string(data);
-		execInMirc(mmsg);
+		printToSGWindow("[ERROR] GraphVideo: Unable to render video due bad config: " + std::string(data));
 		return 1;
 	}
 

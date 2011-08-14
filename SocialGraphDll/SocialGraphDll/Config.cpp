@@ -2,7 +2,6 @@
 #include <fstream>
 
 
-
 Config::Config(const char *fn)
 {
 	badConfig = false;
@@ -11,9 +10,7 @@ Config::Config(const char *fn)
 	if (!cfgList.size())
 	{
 		badConfig = true;
-		std::string mmsg = "/.signal SocialGraph @sg Config file is empty or doesn't exist: ";
-		mmsg += configFile;
-		execInMirc(mmsg);
+		printToSGWindow("[ERROR] Config: Config file is empty or doesn't exist: " + configFile);
 	}
 }
 
@@ -106,7 +103,7 @@ const std::string& Config::getParam(const char *key)
 	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
 	if (cfgIter == cfgList.end())
 	{
-		printInSGWindow("[ERROR] Missing config variable: " + std::string(key) + " \r\n Config File: " + this->configFile);
+		printToSGWindow("[ERROR] Config: Missing config variable: " + std::string(key) + " \r\n Config File: " + this->configFile);
 		badConfig = true;
 		return defaultEmpty;
 	}
@@ -120,7 +117,7 @@ const std::string& Config::getParam(const char *key, const std::string &defaultV
 	std::map <std::string,std::string>::iterator cfgIter = cfgList.find(std::string(key));
 	if (cfgIter == cfgList.end())
 	{
-		printInSGWindow("[WARNING] Missing config variable: " + std::string(key) + ". Using Default value: " + defaultValue +" Config File: " + this->configFile);
+		printToSGWindow("[WARNING] Config: Missing config variable: " + std::string(key) + ". Using Default value: " + defaultValue +" Config File: " + this->configFile);
 		badConfig = true;
 		return defaultValue;
 	}
