@@ -930,7 +930,7 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 			continue;
 		int x1 = (int) ((width * (n->getX() - minX) / (maxX - minX)) + borderSize);
 		int y1 = (int) ((height * (n->getY() - minY) / (maxY - minY)) + borderSize);
-		int newNodeRadius = (int) (log((n->getWeight() + 1) / 10) + nodeRadius);
+		int newNodeRadius = (int) (log((n->getWeight() / 10) + 1) + nodeRadius);
 		gt->g->FillEllipse(gt->sbNode,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawString(n->getWNick(),n->getNick().size(),gt->fNick,

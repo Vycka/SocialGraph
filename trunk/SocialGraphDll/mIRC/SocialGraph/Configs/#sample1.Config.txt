@@ -92,7 +92,7 @@ gMaxRepulsiveForceDistance  6
 gMaxNodeMovement            0.5
 gMinDiagramSize             10
 gBorderSize                 50
-gNodeRadius                 5
+gNodeRadius                 3
 gNodeBumpWeight             0.2
 gMinMaxWeight               5
 
