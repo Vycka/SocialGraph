@@ -580,7 +580,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		int x1 = getNodeFinalCoordX(n);
 		int y1 = getNodeFinalCoordY(n);
 
-		nData->lastKnownRadius = (float)(log((n->getWeight() + 1) / 10) + nodeRadius);
+		nData->lastKnownRadius = (float)(log((n->getWeight() / 10) + 1) + nodeRadius);
 
 		if (nData->disconnectedStillVisible)
 		{
