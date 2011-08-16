@@ -26,7 +26,7 @@ class GraphDataFileHandler;
 class Graph
 {
 public:
-	Graph(const GraphConfig *cfg,bool videoRendering = false);
+	Graph(const GraphConfig &cfg,bool videoRendering = false);
 	~Graph(void);
 	void initGraphForLogging();
 	virtual void clear();
@@ -61,6 +61,7 @@ public:
 	void upload();
 	void saveOldFrame();
 	GraphConfig* getConfig();
+	void reloadConfig(const GraphConfig &newConfig);
 	//inline bool isNodeInFrame(Node *n, double extraBorderX = 0.0, double extraBorderY = 0.0) { return (n->getX() >= minX - extraBorderX && n->getY() >= minY - extraBorderY && n->getX() <= maxX + extraBorderX && n->getY() <= maxY + extraBorderY ? true : false); };
 
 	friend GraphDataFileHandler;
@@ -79,6 +80,11 @@ protected:
 	std::vector<Node*> visibleNodes;
 	std::list<EdgeChangeListRecord*> edgeChangeList;
 private:
+	//opens/appends log file, writes VID_PAUSE command, populates list based on current edges,nodes lists, and writes VID_RESUME command.
+	void loggerStart(const std::string &fname);
+	//writes VID_PAUSE, VID_CLEAR headers closes the file and deletes logger object.
+	void loggerStop();
+
 	std::vector<InferenceHeuristic*> inferences;
 	std::set<std::string> ignoreNicks;
 	unsigned int lastRender,lastUpload;

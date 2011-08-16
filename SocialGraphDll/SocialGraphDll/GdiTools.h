@@ -7,7 +7,7 @@ class GraphConfig;
 class GdiTools
 {
 public:
-	GdiTools(GraphConfig *cfg);
+	GdiTools(const GraphConfig &cfg);
 	~GdiTools(void);
 
 	CLSID encoderClsid;

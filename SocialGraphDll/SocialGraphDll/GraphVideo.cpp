@@ -117,7 +117,7 @@ DWORD WINAPI graphRenderSaveStillQueoe(LPVOID lp)
 	return 0;
 }
 
-GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
+GraphVideo::GraphVideo(const GraphConfig &config) : Graph(config,true)
 {
 	//overridinam kaikuriuos configus ir renderinam
 	srand32(12345); // kad nesikeistu perrenderinant randomas :)
@@ -133,6 +133,8 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 	cfg->gBorderSize   = cfg->vidBorderSize;
 	cfg->gNodeRadius   = cfg->vidNodeRadius;
 	cfg->gPreserveAlpha = cfg->vidPreserveAlpha;
+	cfg->logSave = false;
+	cfg->gCacheGdiTools = true;
 
 	vidBitmapPixelFormat = (cfg->vidPreserveAlpha ? PixelFormat32bppARGB : PixelFormat24bppRGB);
 
@@ -142,9 +144,8 @@ GraphVideo::GraphVideo(GraphConfig *config) : Graph(config,true)
 		printToSGWindow("[WARNING] GraphVideo: Bad vidRendererThreads value, defaulting it to 4");
 	}
 
-	cfg->gCacheGdiTools = true;
-	gt = new GdiTools(cfg);
-	cfg->logSave = false;
+	
+	gt = new GdiTools(*cfg);	
 	vidRendFrame = VIDRENDER_BEGINFRAME;
 	vidSecsPerFrame = 86400.0 / cfg->vidFramesPerDay;
 	firstFrameRendered = false;
@@ -178,6 +179,7 @@ GraphVideo::~GraphVideo()
 void GraphVideo::renderVideo()
 {
 	int beginTime = (int)time(0);
+	setCancelRendering(false);
 	printToSGWindow("[INFO] GraphVideo: Starting Video Frames Rendering");
 	//initialize multithreated renderer stuff
 	
@@ -223,7 +225,7 @@ void GraphVideo::renderVideo()
 	}
 	if (cfg->vidEndRenderTime <= 0)
 		cfg->vidEndRenderTime = 0x7FFFFFFF;
-	while (ss.good() && timestamp < cfg->vidEndRenderTime)
+	while (ss.good() && timestamp < cfg->vidEndRenderTime && !cancelRendering)
 	{
 		Node *n = NULL;
 		ss >> timestamp >> key;
@@ -277,7 +279,7 @@ void GraphVideo::renderVideo()
 			break;
 		default:
 			std::stringstream ssmsg;
-			ssmsg << "[WARNING] GraphVideo: Unknown Log Key: " << timestamp << " " << key << " Seeking till the new line!";
+			ssmsg << "[WARNING] GraphVideo: Unknown log key: " << timestamp << " " << key << " Seeking till the new line!";
 			printToSGWindow(ssmsg.str());
 			ss.ignore(0x7FFFFFFF,'\n');
 			//ss.setstate(std::ios::badbit);
@@ -290,12 +292,15 @@ void GraphVideo::renderVideo()
 	WaitForMultipleObjects(cfg->vidRendererThreads,grh,true,-1);
 	for (int x = 0;x < cfg->vidRendererThreads;x++)
 		CloseHandle(grh[x]);
-	printToSGWindow("[INFO] GraphVideo: Video Rendering Finished");
+	if (cancelRendering)
+		printToSGWindow("[INFO] GraphVideo: Video rendering terminated by user command!");
+	else
+		printToSGWindow("[INFO] GraphVideo: Video rendering finished!");
 	
 	int diffTime = (int)time(0) - beginTime;
-	ss.str("");
-	ss << "[INFO] GraphVideo: Frames rendered: " << grq->framesRendered-1 << " // Time took: " << diffTime << "seconds.";
-	execInMirc(ss.str().c_str());
+	std::stringstream ssEndMsg;
+	ssEndMsg << "[INFO] GraphVideo: Frames rendered: " << grq->framesRendered-1 << " // Time took: " << diffTime << "seconds.";
+	printToSGWindow(ssEndMsg.str());
 }
 
 void GraphVideo::renderFrames(double &nextRender, int timestamp)
@@ -349,8 +354,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 {
 	std::wstring wcredits;
 	//filling background
-	gt->g->Clear(Gdiplus::Color(0));
-	gt->g->FillRectangle(gt->sbBackground,*gt->rBackground);
+	gt->g->Clear(*gt->cBackground);
 	//frame
 	gt->g->DrawRectangle(gt->pBorder,*gt->rBackground);
 
@@ -1024,16 +1028,20 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		Node *node1 = findNode(ln1);
 		Node *node2 = findNode(ln2);
 
+		char buff[11];
 		if (!node1)
 		{
-			printToSGWindow("[WARNING] GraphVideo: Missing nick in log: " + *ln1);
+
+			printToSGWindow("[WARNING] GraphVideo: Missing nick in log(1): " + *ln1 + (" Activity time:") + _itoa(activity,buff,10));
 			node1 = addNode(ln1,ln1,0);
+			node1->setUserData(new GvNodeData());
 			relocateNode(node1);
 		}
 		if (!node2)
 		{
-			printToSGWindow("[WARNING] GraphVideo: Missing nick in log: " + *ln2);
+			printToSGWindow("[WARNING] GraphVideo: Missing nick in log(2): " + *ln2 + (" Activity time:") + _itoa(activity,buff,10));
 			node2 = addNode(ln2,ln2,0);
+			node2->setUserData(new GvNodeData());
 			relocateNode(node2);
 		}
 		if (((GvNodeData*)node1->getUserData())->disconnectedStillVisible)

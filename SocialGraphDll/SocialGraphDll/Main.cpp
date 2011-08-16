@@ -85,7 +85,7 @@ ALIAS mInitGraph(ALP)
 	printToSGWindow("[INFO] Init: " + configFile + " Loaded for channel: " + c.nChannel);
 
 
-	Graph *graph = new Graph(&c);
+	Graph *graph = new Graph(c);
 	graphs.insert(std::make_pair(lchan,graph));
 	return 1;
 }
@@ -214,6 +214,7 @@ ALIAS mDeleteUnusedNodes(ALP)
 }
 
 //mSaveOld was created mainly for debug purposes only
+//It forces to copy current graph image as the old frame for testing, if output directory is correct and it works
 ALIAS mSaveOld(ALP)
 {
 	std::string chan(data),lchan;
@@ -243,45 +244,56 @@ ALIAS mRenderVideo(ALP)
 {
 	GraphConfig c(data);
 	if (c.isBadConfig())
-	{
 		printToSGWindow("[ERROR] GraphVideo: Unable to render video due bad config: " + std::string(data));
-		return 1;
+	else if (gRender)
+		printToSGWindow("[ERROR] GraphVideo: Unable to render video because another video rendering is in progress");
+	else
+	{
+		gRender = new GraphVideo(c);
+		gRender->renderVideo();
+		delete gRender;
+		gRender = NULL;
 	}
-
-	gRender = new GraphVideo(&c);
-	gRender->renderVideo();
-	delete gRender;
-	gRender = NULL;
 	return 1;
 }
-//su atsiradusiu logginimu sitas paliko nebsuderinamas ir nebuvo kantyrbes sugalvot, kaip suderinamuma islaikyt for now..
-/*
+
+ALIAS mCancelVideoRendering(ALP)
+{
+	if (!gRender)
+		printToSGWindow("[ERROR] GraphVideo: Video renderer is not running!");
+	else
+	{
+		printToSGWindow("[INFO] GraphVideo: Cancel rendering signal sent!");
+		gRender->setCancelRendering(true);
+	}
+	return 1;
+}
+
+ALIAS mIsVideoRenderingInProgress(ALP)
+{
+	strcpy(data,(gRender ? "1" : "0"));
+	return 3;
+}
+
 ALIAS mReloadConfig(ALP)
 {
-	Config c(data);
+	GraphConfig c(data);
 	if (c.isBadConfig())
 	{
-		std::string mmsg = "/echo -sg SocialGraph: Config not reloaded due bad config: " + std::string(data);
-		execInMirc(&mmsg);
+		printToSGWindow("[ERROR] Init: Graph not initialized due bad config: " + std::string(data));
 		return 1;
 	}
 
 	std::string lchan;
-	strToLower(&c.nChannel,&lchan);
+	strToLower(c.nChannel,lchan);
 	std::map<std::string,Graph*>::iterator graphIter = graphs.find(lchan);
 	if (graphIter != graphs.end())
-	{
-		graphIter->second->reloadConfig(&c);
-	}
+		graphIter->second->reloadConfig(c);
 	else
-	{
-		std::string mmsg = "/echo -sg SocialGraph: Config not reloaded because channel does not exist: " + c.nChannel;
-		mmsg += ". Use mInitGraph to load a new channel.";
-		execInMirc(&mmsg);
-	}
+		printToSGWindow("[ERROR] Init: Config not reloaded because channel does not exist: " + c.nChannel + ". Use mInitGraph to load a new channel.");
 	return 1;
 }
-*/
+
 
 void main(int argc, char** arg)
 {
@@ -309,7 +321,7 @@ void main(int argc, char** arg)
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
-	Graph *g = new Graph(&c);
+	Graph *g = new Graph(c);
 	g->printLists();
 	g->saveToFileEx("i:\\test.txt");
 	//GraphVideo *g = new GraphVideo(&c);

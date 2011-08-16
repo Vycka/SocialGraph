@@ -19,14 +19,15 @@
 #include <queue>
 #include <Math.h>
 
-Graph::Graph(const GraphConfig *cfg,bool videoRendering)
+Graph::Graph(const GraphConfig &cfg,bool videoRendering)
 {
 	isVideoRenderingGraph = videoRendering;
-	this->cfg = new GraphConfig(*cfg);
+	this->cfg = new GraphConfig(cfg);
 #ifdef COMP_EXE
 	this->cfg->logSave = false;	
 #endif
 	gt = NULL;
+	logger = NULL;
 
 	lastFrame = 0;
 	lastRender = 0;
@@ -36,10 +37,10 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 	minY = 0;
 	maxY = 12;
 
-	inferences.push_back(new AdjacencyInferenceHeuristic(this,cfg->hAdjacency));
-	inferences.push_back(new BinarySequenceInferenceHeuristic(this,cfg->hBinary));
-	inferences.push_back(new DirectAddressingInferenceHeuristic(this,cfg->hDirect));
-	inferences.push_back(new IndirectAddressingInferenceHeuristic(this,cfg->hIndirect));
+	inferences.push_back(new AdjacencyInferenceHeuristic(this,this->cfg->hAdjacency));
+	inferences.push_back(new BinarySequenceInferenceHeuristic(this,this->cfg->hBinary));
+	inferences.push_back(new DirectAddressingInferenceHeuristic(this,this->cfg->hDirect));
+	inferences.push_back(new IndirectAddressingInferenceHeuristic(this,this->cfg->hIndirect));
 
 	QueryPerformanceFrequency((LARGE_INTEGER*)&qpcTicksPerMs);
 	qpcTicksPerMs = qpcTicksPerMs / 1000;
@@ -52,27 +53,19 @@ Graph::Graph(const GraphConfig *cfg,bool videoRendering)
 
 void Graph::initGraphForLogging()
 {
-	if (cfg->logSave)
-	{
-		logger = new Logger(cfg->logFile.c_str());
-		logger->wPause();
-	}
-	else
-		logger = NULL;
-
 	
 	loadFromFile(cfg->fGraphOutput.c_str());
 
+	if (cfg->logSave)
+		loggerStart(cfg->logFile); //dinamicaly creates logger object.
+
 	if (cfg->gCacheGdiTools)
-		gt = new GdiTools(this->cfg);
+		gt = new GdiTools(*cfg);
 	
 	std::string mmsg = "/.signal SocialGraph addChan " + cfg->nChannel;
 	execInMirc(mmsg);
 
 	deleteUnusedNodes();
-
-	if (cfg->logSave)
-		logger->wResume();
 }
 
 Graph::~Graph(void)
@@ -85,11 +78,11 @@ Graph::~Graph(void)
 		saveToFile(cfg->fGraphOutput.c_str());
 	}
 
-	if (cfg->logSave)
-		logger->wPause();
-
 	for (unsigned int x = 0;x < inferences.size();x++)
 		delete inferences[x];
+	
+	if (cfg->logSave)
+		loggerStop(); //it also deletes logger object.
 
 	clear();
 	inferences.clear();
@@ -97,8 +90,7 @@ Graph::~Graph(void)
 	if (cfg->gCacheGdiTools && gt != NULL)
 		delete gt;
 
-	if (cfg->logSave)
-		delete logger;
+
 
 	delete cfg;
 	delete graphDataFileHandle;
@@ -107,8 +99,9 @@ Graph::~Graph(void)
 
 void Graph::clear()
 {
-	if (cfg->logSave)
+	if (logger) //temporary workaround for calling clear before logger is initialized
 		logger->wEnd();
+	
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 		delete i->second;
 	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
@@ -387,16 +380,8 @@ void Graph::loadFromFile(const char *fn)
 	if (!graphDataFileHandle->load(cfg->fGraphOutput.c_str()))
 	{
 		clear();
-
 		printToSGWindow("[WARNING] GraphData: Unable to open GraphData file: " + std::string(fn));
 		printToSGWindow("[WARNING] GraphData: If it's the the first time you launching SocialGraph for specified channel, then ignore this error, new file will be created and graph will start from the beginning, if not, that means that GraphData file was corrupted and new one will be recreated, and graph will start from the beginning!");
-	}
-	else if (cfg->logSave)
-	{
-		for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
-			logger->wAddNode(i->second,i->second->getWeight());
-		for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
-			logger->wAddEdge(*i,(*i)->getWeight(),(*i)->getSource());
 	}
 }
 
@@ -753,12 +738,12 @@ void Graph::calcBounds()
 void Graph::drawImage(std::wstring *fWPath,int szClock)
 {
 	if (!cfg->gCacheGdiTools)
-		gt = new GdiTools(cfg);
+		gt = new GdiTools(*cfg);
 	std::wstring wcredits;
 	//std::cout << "XXYY: " << minX << " " << maxX << " " << minY<< " " << maxY << std::endl; 
 	//backgroundo spalva
-	gt->g->Clear(Gdiplus::Color(0));
-	gt->g->FillRectangle(gt->sbBackground,*gt->rBackground);
+	gt->g->Clear(*gt->cBackground);
+	//gt->g->FillRectangle(gt->sbBackground,*gt->rBackground);
 	//remas
 	gt->g->DrawRectangle(gt->pBorder,*gt->rBackground);
 
@@ -1009,4 +994,51 @@ void Graph::addEdgeChangeList(int timeBegin, int timeLast,const std::string &n1,
 
 	EdgeChangeListRecord *nEcl = new EdgeChangeListRecord(timeBegin, timeLast, n1, wn1,  n2, wn2, e);
 	edgeChangeList.push_back(nEcl);
+}
+
+void Graph::reloadConfig(const GraphConfig &newConfig)
+{
+	//TODO: Find a clever way to fix bug, that inference weightnings are not reloaded with this config reload command.
+	if (gt)
+	{
+		delete gt;
+		gt = NULL;
+	}
+
+	if (cfg->logSave && !newConfig.logSave)
+		loggerStop();
+	else if (!cfg->logSave && newConfig.logSave)
+		loggerStart(newConfig.logFile);
+
+	if (newConfig.gCacheGdiTools)
+		gt = new GdiTools(newConfig);
+
+	delete cfg;
+	cfg = new GraphConfig(newConfig);
+
+}
+
+void Graph::loggerStart(const std::string &fname)
+{
+	if (logger)
+		return;
+
+	logger = new Logger(fname.c_str());
+	logger->wPause();
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+		logger->wAddNode(i->second,i->second->getWeight());
+	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
+		logger->wAddEdge(*i,(*i)->getWeight(),(*i)->getSource());
+	logger->wFrame(lastFrame);
+	logger->wResume();
+}
+
+void Graph::loggerStop()
+{
+	if (!logger)
+		return;
+	logger->wPause();
+	logger->wEnd();
+	delete logger;
+	logger = NULL;
 }
