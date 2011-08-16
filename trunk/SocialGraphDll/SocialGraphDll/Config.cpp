@@ -118,7 +118,6 @@ const std::string& Config::getParam(const char *key, const std::string &defaultV
 	if (cfgIter == cfgList.end())
 	{
 		printToSGWindow("[WARNING] Config: Missing config variable: " + std::string(key) + ". Using Default value: " + defaultValue +" Config File: " + this->configFile);
-		badConfig = true;
 		return defaultValue;
 	}
 	else

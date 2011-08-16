@@ -49,4 +49,6 @@ private:
 	double xyDivX3;
 	double xyDivY3;
 	int vidBitmapPixelFormat;
+	int fadeOutNodeParts,fadeOutEdgeParts;
+	int *fadeSumTable;
 };
