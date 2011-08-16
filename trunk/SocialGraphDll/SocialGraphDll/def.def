@@ -16,4 +16,7 @@ mDumpFile
 mInitGraph
 mUnloadGraph
 mRenderVideo
+mCancelVideoRendering
+mIsVideoRenderingInProgress
 mSaveOld
+mReloadConfig

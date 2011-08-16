@@ -7,7 +7,7 @@ struct GraphRendererQueue;
 class GraphVideo : public Graph
 {
 public:
-	GraphVideo(GraphConfig *config);
+	GraphVideo(const GraphConfig &config);
 	~GraphVideo();
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight,int activity);
 	void renderVideo();
@@ -27,6 +27,7 @@ public:
 	inline int getNodeFinalCoordY(Node *n) { return (int)((nodeCoordCalcHeight * (n->getY() - minY) / (maxY - minY)) + nodeCoordCalcBorderY); };
 	bool isNodeInFrame(Node *n);
 	bool isNodeWithinBorder(Node *n);
+	inline void setCancelRendering(bool val) { cancelRendering = val; };
 private:
 	int vidRendFrame;
 	std::vector<Node*> visibleDisconnectedNodes;
@@ -36,6 +37,7 @@ private:
 	GraphRendererThreadSync *grts;
 	bool pauseRender;
 	bool firstFrameRendered;
+	bool cancelRendering;
 	int nodeDeg;
 	int nodeCoordCalcWidth, nodeCoordCalcHeight;
 	int nodeCoordCalcBorderX, nodeCoordCalcBorderY;

@@ -55,7 +55,6 @@ bool GraphDataFileHandler::load(const char *fName)
 	if (!fs.good())
 		return false;
 	dataFileContent = std::string((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
-	//getline(fs,dataFileContent,'\n');
 	fs.close();
 	if (dataFileContent.empty())
 		return false;
@@ -70,7 +69,7 @@ bool GraphDataFileHandler::load(const char *fName)
 		ss >> fileVersion;
 		ss >> fileRevision;
 	}
-	else
+	else //Support for old version from alpha (without the header) (assumed file version V0)
 	{
 		dataFileContent.append("\n");
 		dataFileContent.append(cFileEnding);

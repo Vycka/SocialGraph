@@ -12,7 +12,7 @@ class GdiTools;
 
 struct CColor
 {
-	unsigned long argb()
+	unsigned long argb() const
 	{
 		return *((unsigned long*)(this));
 	}

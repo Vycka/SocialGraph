@@ -1,4 +1,7 @@
 #pragma once
+
+//TODO: rewrite format on how logger handles pauses/resumes to be more efficient and seeking to specific time  friendly for parsing.
+
 #define LOG_WRITE_COUNT 30
 #include <fstream>
 #include <sstream>

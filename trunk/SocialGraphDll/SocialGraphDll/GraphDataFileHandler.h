@@ -8,6 +8,10 @@
 //V0 won't be used anymore, because it doesn't have any headers
 //V1 EdgeChangeList support and headers!
 
+//TODO: Don't give the graph object for the filehandler, but give the the data struct to populate it with data, and if reading was successful,
+//Only then copy them to the graph in loadFromFile() function.
+//This would also fix early clear() call before logger is initialized. And it would allow to for existing graph to continue if GraphData reading fails.
+
 class Graph;
 
 class GraphDataFileHandler
