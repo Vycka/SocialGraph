@@ -29,8 +29,9 @@ struct GvEdgeChatDot
 
 struct GvEdgeData
 {
-	int sourceFrames,targetFrames;
-	//Gdiplus::Color sourceInactiveColor,targetInactiveColor;
+	GvEdgeData() : framesDead(0), isDead(false) {};
+	int framesDead;
+	bool isDead;
 	std::vector<GvEdgeChatDot> sourceChatDots;
 	std::vector<GvEdgeChatDot> targetChatDots;
 };
@@ -167,6 +168,14 @@ GraphVideo::GraphVideo(const GraphConfig &config) : Graph(config,true)
 	xyDivY2 = xyDivY * 4;
 	xyDivX3 = xyDivX / 4;
 	xyDivY3 = xyDivY / 4;
+
+	this->fadeOutEdgeParts = ::sumRange(1,cfg->vidEdgeFramesToDie+1);
+	this->fadeOutNodeParts = ::sumRange(1,cfg->vidDisconnectedFadeOutFrames+1);
+	int fadeBiggestValue = (cfg->vidEdgeFramesToDie > cfg->vidDisconnectedFadeOutFrames ? cfg->vidEdgeFramesToDie : cfg->vidDisconnectedFadeOutFrames) + 2;
+	fadeSumTable = new int[fadeBiggestValue];
+	fadeSumTable[0] = 0;
+	for (int x = 1; x < fadeBiggestValue; x++)
+		fadeSumTable[x] = fadeSumTable[x-1] + x;
 }
 
 GraphVideo::~GraphVideo()
@@ -174,6 +183,7 @@ GraphVideo::~GraphVideo()
 	delete grq;
 	delete [] grh;
 	delete [] grts;
+	delete [] fadeSumTable;
 }
 
 void GraphVideo::renderVideo()
@@ -232,14 +242,14 @@ void GraphVideo::renderVideo()
 		switch (key)
 		{
 		case VID_ADDNODE:
-			if (!pauseRender)
-				renderFrames(nextRender,lastTime);	
+			//if (!pauseRender)
+			//	renderFrames(nextRender,lastTime);	
 			ss >> n1 >> weight;
 			n = addNode(&n1,weight);
 			if (!n->getUserData())
 				n->setUserData(new GvNodeData);
-			if (!pauseRender)
-				renderFrames(nextRender,timestamp);
+			//if (!pauseRender)
+			//	renderFrames(nextRender,timestamp);
 			break;
 		case VID_ADDEDGE:
 			if (!pauseRender)
@@ -454,6 +464,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 	for (std::vector<Edge*>::iterator ei = edges.begin(); ei != edges.end(); ei++)
 	{
 		Edge *edge = *ei;
+		GvEdgeData* edgeData = (GvEdgeData*)edge->getUserData(); 
 		Node *nodeA = edge->getSource();
 		Node *nodeB = edge->getTarget();
 		double weight = edge->getWeight();
@@ -492,7 +503,11 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		alphaFinal -= (int)((alphaFinal - cfg->iEdgeColorInactive.a) * eiMul);
 		if (alphaFinal < cfg->iEdgeColorInactive.a)
 			alphaFinal = cfg->iEdgeColorInactive.a;
-
+		if (edgeData->isDead)
+		{
+			edgeData->framesDead++;
+			alphaFinal -= (alphaFinal / fadeOutEdgeParts) * fadeSumTable[edgeData->framesDead]; 
+		}
 		float finalThickness = (float)((weightStrength / 75) + 2); // 255/75=3.4
 
 		Gdiplus::Color finalColor((int)alphaFinal,cfg->iEdgeColor.r-eiDiffR,cfg->iEdgeColor.g-eiDiffG,cfg->iEdgeColor.b-eiDiffB);
@@ -588,12 +603,13 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 
 		if (nData->disconnectedStillVisible)
 		{
-			if (nData->fadeOutEnabled)
+			if (nData->fadeOutEnabled) //already fading out 
 			{
 				nData->fadeOutSteps++;
+				double mul = (1.0 / this->fadeOutNodeParts) * fadeSumTable[nData->fadeOutSteps];
 
-				CColor ccLabel(cfg->iLabelColor.a / nData->fadeOutSteps,cfg->iLabelColor.r,cfg->iLabelColor.g,cfg->iLabelColor.b);
-				CColor ccNodeBorder(cfg->iNodeBorderColor.a / nData->fadeOutSteps,cfg->iNodeBorderColor.r,cfg->iNodeBorderColor.g,cfg->iNodeBorderColor.b);
+				CColor ccLabel = CColor(cfg->iLabelColor) - (CColor(cfg->iLabelColor) * mul);
+				CColor ccNodeBorder = CColor(cfg->iNodeBorderColor) - (CColor(cfg->iNodeBorderColor) * mul);
 
 				Gdiplus::Pen fadeOutpNodeBorder(ccNodeBorder.argb(),1.0);
 				Gdiplus::SolidBrush fadeOutsbLabel(ccLabel.argb());
@@ -602,7 +618,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 				gt->g->DrawEllipse(&fadeOutpNodeBorder,x1 -nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
 				gt->g->DrawString(n->getWNick(),n->getNick().size(),gt->fVidNick,Gdiplus::PointF((float)x1+nData->lastKnownRadius-1,(float)y1+nData->lastKnownRadius-1),&fadeOutsbLabel);
 			}
-			else
+			else //still in active boarder but disconnected
 			{
 				//lol 2x
 				gt->g->DrawEllipse(gt->pNodeBorder,x1 -nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
@@ -610,7 +626,7 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 			}
 
 		}
-		else
+		else //connected
 		{
 			gt->g->FillEllipse(gt->sbNode,x1 - nData->lastKnownRadius,y1 - nData->lastKnownRadius,nData->lastKnownRadius*2,nData->lastKnownRadius*2);
 			//lol 3x
@@ -774,7 +790,7 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 	{
 		Node *n = visibleDisconnectedNodes[x];
 		GvNodeData *nData = (GvNodeData*)n->getUserData();
-		if (!isNodeInFrame(n) || nData->fadeOutSteps > cfg->vidDisconnectedFadeOutFrames)
+		if (!isNodeInFrame(n) || nData->fadeOutSteps >= cfg->vidDisconnectedFadeOutFrames)
 		{
 			
 			nData->disconnectedStillVisible = false;
@@ -785,6 +801,44 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 		else if (!isNodeWithinBorder(n) && !nData->fadeOutEnabled)
 		{
 			nData->fadeOutBegin();
+		}
+	}
+	
+	for (unsigned int x = 0; x < edges.size(); x++)
+	{
+		Edge *e = edges[x];
+		GvEdgeData* edgeData = (GvEdgeData*)e->getUserData();
+		if (!edgeData->isDead)
+			continue;
+		if (edgeData->framesDead >= cfg->vidEdgeFramesToDie)
+		{
+			e->breakChangeListLink();
+			e->getSource()->appConEdges(-1);
+			e->getTarget()->appConEdges(-1);
+
+			//Here's the only place where disconnectedStillVisible can become true.
+			//cancel fadeout here if it was active
+
+			if (e->getSource()->getConEdges() == 0)
+			{
+				Node *n = e->getSource();
+				GvNodeData *nData = (GvNodeData*)n->getUserData();
+				visibleDisconnectedNodes.push_back(n);
+				nData->disconnectedStillVisible = true;
+				nData->fadeOutCancel();
+
+			}
+			if (e->getTarget()->getConEdges() == 0)
+			{
+				Node *n = e->getTarget();
+				GvNodeData *nData = (GvNodeData*)n->getUserData();
+				visibleDisconnectedNodes.push_back(n);
+				nData->disconnectedStillVisible = true;
+				nData->fadeOutCancel();
+			}
+			delete e;
+			edges.erase(edges.begin()+x);
+			x--;
 		}
 	}
 	mergeVisibleAndDisconnectedNodes();
@@ -1016,12 +1070,18 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 	if (e)
 	{
 		wLast = e->getWeight();
+		GvEdgeData* edgeData = (GvEdgeData*)e->getUserData();
 		e->appWeight(weight);
 		e->updateActivityTime(activity);
 		if (!e->getChangedInPause())
 			e->updateActivityTimeForNick(*ln1,activity);
 		if (e->getSource()->getLNick() != *ln1)
 			isInputFromSource = false;
+		if (edgeData->isDead)
+		{
+			edgeData->isDead = false;
+			edgeData->framesDead = 0;
+		}
 	}
 	else	
 	{
@@ -1100,49 +1160,34 @@ void GraphVideo::decay(double d, int tNow)
 			i->second->setWeight(0);
 
 	}
-	for (unsigned int x = 0;x < edges.size();x++)
+	for (unsigned int x = 0; x < edges.size(); x++)
 	{
+		Edge *e = edges[x];
 		//tipo extra saugiklis kad senesni edges greiciau mazetu
-		double mul = ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
+		double mul = ((tNow - e->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
 		mul *= mul;
 		double newDecay = (d * mul) + d;
-		Edge *e = edges[x];
 		double wLast = e->getWeight();
 		e->appWeight(-newDecay);
-
-		if (e->getWeight() <= 0.0)
+		GvEdgeData* edgeData = (GvEdgeData*)e->getUserData();
+		if (e->getWeight() <= 0.0 && !edgeData->isDead)
 		{
-			e->breakChangeListLink();
-			e->getSource()->appConEdges(-1);
-			e->getTarget()->appConEdges(-1);
-			if (tNow >= cfg->vidBeginRenderTime)
+			edgeData->isDead = true;
+			//rest of the stuff involving edge deletion and everything related to it is moved to makeImage
+			//decay only deletes edges when while log file seeking is present.
+			//TODO: Remove edge deletion here, once better log seeking algorithm is implamented
+			if (!firstFrameRendered)
 			{
+				e->breakChangeListLink();
+				e->getSource()->appConEdges(-1);
+				e->getTarget()->appConEdges(-1);
+				delete e;
 
-				//Here's the only place where disconnectedStillVisible can become true.
-				//cancel fadeout here if it was active
-
-				if (e->getSource()->getConEdges() == 0)
-				{
-					Node *n = e->getSource();
-					GvNodeData *nData = (GvNodeData*)n->getUserData();
-					visibleDisconnectedNodes.push_back(n);
-					nData->disconnectedStillVisible = true;
-					nData->fadeOutCancel();
-
-				}
-				if (e->getTarget()->getConEdges() == 0)
-				{
-					Node *n = e->getTarget();
-					GvNodeData *nData = (GvNodeData*)n->getUserData();
-					visibleDisconnectedNodes.push_back(n);
-					nData->disconnectedStillVisible = true;
-					nData->fadeOutCancel();
-				}
+				edges.erase(edges.begin()+x);
+				x--;
 			}
-			delete e;
-			edges.erase(edges.begin()+x);
-			x--;
 		}
+	
 	}
 }
 

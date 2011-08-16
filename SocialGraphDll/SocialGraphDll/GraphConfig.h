@@ -48,5 +48,6 @@ public:
 	double vidMaxNodeMovement,vidC,vidCDisconnected,vidMaxNodeMovementDisconnected;
 	int vidDisconnectedFadeOutFrames,vidOutputWidth,vidOutputHeight,vidNickFontSize;
 	int vidNodeRadius,vidBorderSize;
+	int vidEdgeFramesToDie;
 	bool vidPreserveAlpha;
 };

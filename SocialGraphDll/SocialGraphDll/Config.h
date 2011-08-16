@@ -12,12 +12,15 @@ class GdiTools;
 
 struct CColor
 {
-	unsigned long argb() const
+	inline unsigned long argb() const
 	{
 		return *((unsigned long*)(this));
 	}
 	CColor(unsigned char a = 0, unsigned char r = 0, unsigned char g = 0, unsigned char b = 0) : a(a), r(r), g(g), b(b) {};
 	CColor(unsigned long argb) { *((unsigned long*)(this)) = argb; };
+	inline CColor& operator /(const int &i) { a /= i; r /= i; g /= i; b /= i; return *this; };
+	inline CColor& operator -(const CColor &cc) { a -=cc.a; r -=cc.r; g -=cc.g; b -=cc.b; return *this; };
+	inline CColor& operator *(const double &d) { a = (unsigned char)(a * d); r = (unsigned char)(r * d); g = (unsigned char)(g * d); b = (unsigned char)(b * d); return *this; };
 	//RGB A for now //TODO Needs to be converted to ARGB in the future.
 	CColor(const std::string &str) { std::stringstream ss(str); ss >> r >> g >> b >> a; };
 	unsigned char b,g,r,a; //do not change b,g,r,a variable declaration order or it will mess up argb() function

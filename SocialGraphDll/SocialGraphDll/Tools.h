@@ -1,7 +1,7 @@
 #pragma once
 //COMP_EXE (Compile executable) means that program will not try to inject mIRC, so it will able to work on its own without mIRC, for debugging purposes.
 //#define COMP_EXE
-#define REVISION 63
+#define REVISION 64
 #include <string>
 #include <Windows.h>
 
@@ -10,6 +10,8 @@ void replaceChars(const std::string *src, std::string *des,const std::string *sr
 void replaceString(const std::string &src, std::string &des,const std::string &srcStr,const std::string &desStr,int changes = -1);
 std::wstring strToWStr(const std::string &str);
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
+//min + min+1 + min+2 + ... + max
+int sumRange (int min, int max); 
 DWORD ftpUpload(const char *host, int port, const char *login, const char *pass, const char *file, const char *remoteDir, const char *remoteFile);
 const char *ftpGetExtendedError();
 void execInMirc(const std::string &s);

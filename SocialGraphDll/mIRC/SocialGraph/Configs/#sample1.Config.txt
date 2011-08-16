@@ -183,7 +183,7 @@ vidNodeRadius 8
 
 ## gC and gMaxNodeMovement values for disconnected nodes.
 vidMaxNodeMovementDisconnected 0.005
-vidCDisconnected               0.004
+vidCDisconnected               0.005
 
 ## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
 vidDisconnectedFadeOutFrames 20
@@ -192,5 +192,9 @@ vidDisconnectedFadeOutFrames 20
 ## Using that allows to make more postprocessing customization to the video
 ## For instance: Background color can be made transperant and in postprocess you can add diferent background image or even an animation without messing socialgraph
 vidPreserveAlpha 0
+
+## How many frames edge stays alive tu fully fade out before it dies?
+## Fading out process will be handled by decreasing alpha of current edge color(color based on edge inactivity) to zero
+vidEdgeFramesToDie 30
 
 ## END OF CONFIG FILE

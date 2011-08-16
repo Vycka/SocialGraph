@@ -273,3 +273,12 @@ unsigned int rand32(unsigned int min, unsigned int max)
 {
 	return min + (rand32() % (max-min+1));
 }
+
+//min + min+1 + min+2 + ... + max
+int sumRange(int min, int max)
+{
+	int out = 0;
+	for (int x = min; x <= max; x++)
+		out += x;
+	return out;
+}

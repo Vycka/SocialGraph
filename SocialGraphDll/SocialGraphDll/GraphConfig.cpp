@@ -105,6 +105,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	vidNodeRadius           = getInt("vidNodeRadius");
 	vidBorderSize           = getInt("vidBorderSize");
 	vidPreserveAlpha        = getBool("vidPreserveAlpha");
+	vidEdgeFramesToDie      = getInt("vidEdgeFramesToDie","30");
 	//...
 
 	//clear list 
