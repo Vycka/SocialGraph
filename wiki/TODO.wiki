@@ -13,6 +13,7 @@ Logger
 
 Graph (for stills)
  * Automatic clean-up for unused nodes.
+ * Multi-network support (PRIORITY)
 
 GraphVideo
  * Redesign multi-threading - split threads before image is drawn on bitmaps (currently multi-threading only take's care of image compression).
