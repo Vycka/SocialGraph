@@ -1,15 +1,15 @@
 #summary Todo list for things that sooner or later have to be added.
-#labels TODO
+#labels todo
 
 GraphDataFileHandler
  * File handler needs to read all data into separate lists like "struct GraphData { lists,variables }". This will fix some incompatibility issues with Logger and won't reset current graph if file reading fails.
 
 Logger
  * Needs major format redesign:
-   - Make some index file for faster seeking.
-   - Better way for handling new nodes.
-   - Better transition between pauses/resumes (when mirc is closed/started again)
-   - In overall, it needs probably a full rewrite.
+   * Make some index file for faster seeking.
+   * Better way for handling new nodes.
+   * Better transition between pauses/resumes (when mirc is closed/started again)
+   * In overall, it needs probably a full rewrite.
 
 Graph (for stills)
  * Automatic clean-up for unused nodes.
