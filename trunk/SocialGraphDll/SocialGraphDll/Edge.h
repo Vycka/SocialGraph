@@ -15,9 +15,9 @@ public:
 	~Edge(void);
 	inline Node* getSource() { return source; };
 	inline Node* getTarget() { return target; };
-	inline double getWeight() { return weight; };
+	inline double getWeight() const { return weight; };
 	bool sameNicks(const std::string &ln1,const std::string &ln2);
-	inline int getActivityTime() { return lastActivity; };
+	inline int getActivityTime() const { return lastActivity; };
 	inline void setChangedInPause(bool state) { this->changedInPause = state; };
 	inline bool getChangedInPause() { return changedInPause; };
 	inline void setSource(Node *source) { this->source = source; };

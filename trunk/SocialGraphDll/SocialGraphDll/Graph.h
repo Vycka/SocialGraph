@@ -62,6 +62,7 @@ public:
 	void saveOldFrame();
 	GraphConfig* getConfig();
 	void reloadConfig(const GraphConfig &newConfig);
+	double calculateDecay(const Edge &e,const double &d, const int &tNow);
 	//inline bool isNodeInFrame(Node *n, double extraBorderX = 0.0, double extraBorderY = 0.0) { return (n->getX() >= minX - extraBorderX && n->getY() >= minY - extraBorderY && n->getX() <= maxX + extraBorderX && n->getY() <= maxY + extraBorderY ? true : false); };
 
 	friend GraphDataFileHandler;
