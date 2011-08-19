@@ -322,11 +322,11 @@ void main(int argc, char** arg)
 	CColor test(255,255,255,255);
 	CColor test2 = CColor(test) * 0.5;
 	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
-	//Graph *g = new Graph(c);
-	//g->printLists();
+	Graph *g = new Graph(c);
+	g->printLists();
 	//g->saveToFileEx("i:\\test.txt");
-	GraphVideo *g = new GraphVideo(c);
-	g->renderVideo();
+	//GraphVideo *g = new GraphVideo(c);
+	//g->renderVideo();
 	delete g;
 	system("pause");
 	Gdiplus::GdiplusShutdown(gdiplusToken);

@@ -307,15 +307,13 @@ void Graph::printLists()
 	std::cout << "\n----Edges/Decay----\n";
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
-		double mul = ((tNow - edges[x]->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
-		mul *= mul;
-		double newDecay = (d * mul) + d;
+
 		std::cout << " | " << std::setw(16) << edges[x]->getSource()->getNick() << " - ";
 		std::cout.setf(std::ios::left);
 		std::cout << std::setw(16) << edges[x]->getTarget()->getNick() << " | "
 				  << std::setw(10) << edges[x]->getWeight() << " | "
 				  << edges[x]->getActivityTime() << " | "
-				  << std::setw(10) << newDecay << " |" << std::endl;
+				  << std::setw(10) << calculateDecay(*edges[x],d,tNow) << " |" << std::endl;
 		std::cout.unsetf(std::ios::left);
 	}
 	
@@ -411,12 +409,7 @@ void Graph::decay(double d, int tNow)
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
 		Edge *e = edges[x];
-		//tipo extra saugiklis kad senesni edges greiciau mazetu
-		double mul = ((tNow -e->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
-		mul *= mul;
-		double newDecay = (d * mul) + d;
-		double wLast = e->getWeight();
-		e->appWeight(-newDecay);
+		e->appWeight(-calculateDecay(*e,d,tNow));
 
 		if (e->getWeight() <= 0)
 		{
@@ -1041,4 +1034,13 @@ void Graph::loggerStop()
 	logger->wEnd();
 	delete logger;
 	logger = NULL;
+}
+
+double Graph::calculateDecay(const Edge &e,const double &d, const int &tNow)
+{
+	double mul = (int)((tNow - e.getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs); //typecasting to int, so lower weights decay slower
+	mul *= mul;
+	double newDecay = (d * mul) + d;
+	newDecay += ((int)(e.getWeight() / 100) * 0.01); //for each extra 100 weight, decay value will increase by 0.01
+	return newDecay;
 }

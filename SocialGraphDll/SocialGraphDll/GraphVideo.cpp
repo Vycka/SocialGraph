@@ -1163,12 +1163,7 @@ void GraphVideo::decay(double d, int tNow)
 	for (unsigned int x = 0; x < edges.size(); x++)
 	{
 		Edge *e = edges[x];
-		//tipo extra saugiklis kad senesni edges greiciau mazetu
-		double mul = ((tNow - e->getActivityTime()) / cfg->gEdgeDecayMultiplyIdleSecs);
-		mul *= mul;
-		double newDecay = (d * mul) + d;
-		double wLast = e->getWeight();
-		e->appWeight(-newDecay);
+		e->appWeight(-calculateDecay(*e,d,tNow));
 		GvEdgeData* edgeData = (GvEdgeData*)e->getUserData();
 		if (e->getWeight() <= 0.0 && !edgeData->isDead)
 		{
