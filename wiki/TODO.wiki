@@ -13,11 +13,12 @@ Logger
 
 Graph (for stills)
  * Automatic clean-up for unused nodes.
- * Multi-network support (PRIORITY)
+ * Multi-network support (PRIORITY.. Sort of.)
 
 GraphVideo
  * Redesign multi-threading - split threads before image is drawn on bitmaps (currently multi-threading only take's care of image compression).
  * Calculate frames ahead before drawing - that would allow all new wide range of visual features (AKA Post-processing).
+ * Nodes would gain/lose speed momentum for smoothing out their movement.
 
 Config
  * Add ability to generate missing variables to config file
@@ -26,6 +27,8 @@ Config
 
 New Features
  * Autoupdate
+ * Audio analysis, extra animation from music.
+ * Directly encode videos using DirectShow.
  * TBA
  * IF anyone has ideas, you can submit them by commenting or in issues list.
 
