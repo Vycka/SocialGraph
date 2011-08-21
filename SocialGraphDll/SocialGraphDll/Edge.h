@@ -36,6 +36,8 @@ public:
 	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
 	inline LPUSERDATA getUserData() { return userData; };
 	void updateActivityTime(int secs = (int)time(NULL));
+	//returns true if edge is connected to specified node.
+	inline bool isConnectedToNode(const Node *n) { return (getSource() == n || getTarget() == n); };
 private:
 	Node *source;
 	Node *target;

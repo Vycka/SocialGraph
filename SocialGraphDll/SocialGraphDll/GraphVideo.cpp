@@ -55,12 +55,12 @@ struct GraphRendererFrame
 
 struct GraphRendererQueue
 {
-	GraphRendererQueue() : framesRendered(0), stopThreads(false), lastThreadadded(0) {
+	GraphRendererQueue() : framesRendered(0), stopThreads(false), lastThreadAdded(0) {
 	for (int x = 0; x < MAX_THREADS; x++)
 		for (int y = 0; y < VIDRENDER_MAX_FRAME_Q; y++)
 			renderQueoe[x][y] = NULL;
 	};
-	int framesRendered, lastThreadadded;
+	int framesRendered, lastThreadAdded;
 	bool stopThreads;
 	GraphRendererFrame *renderQueoe[MAX_THREADS][VIDRENDER_MAX_FRAME_Q];
 	CLSID encoderClsid;
@@ -318,10 +318,10 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 	while (nextRender <= timestamp)
 	{
 		wchar_t frameNr[20];
-		std::wstring dir = cfg->vidRenderPBegin;
+		std::wstring outputPath = cfg->vidRenderPBegin;
 		_itow(vidRendFrame++,frameNr,10);
-		dir += frameNr;
-		dir += cfg->vidRenderPEnd;
+		outputPath += frameNr;
+		outputPath += cfg->vidRenderPEnd;
 		if (!firstFrameRendered)
 		{
 			if (cfg->vidBeginRenderTime != 0)
@@ -332,10 +332,11 @@ void GraphVideo::renderFrames(double &nextRender, int timestamp)
 			calcBounds();
 			mergeVisibleAndDisconnectedNodes();
 			QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
-			drawImage(&dir,(int)nextRender);
+			drawImage((int)nextRender);
+			copyCurrentBitmapToSaveQueue(outputPath);
 		}
 		else
-			makeImage(cfg->vidSEIterationsPerFrame,&dir,(int)nextRender);
+			makeImage(cfg->vidSEIterationsPerFrame,outputPath,(int)nextRender);
 		nextRender += vidSecsPerFrame;
 
 	}
@@ -360,7 +361,7 @@ void GraphVideo::relocateNode(Node *n)
 	}
 }
 
-void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
+void GraphVideo::drawImage(int szClock)
 {
 	std::wstring wcredits;
 	//filling background
@@ -635,32 +636,6 @@ void GraphVideo::drawImage(std::wstring *fWPath,int szClock)
 		}
 		//need better solution here one day :/
 	}
-
-	GraphRendererFrame *frame = new GraphRendererFrame;
-	frame->fName = *fWPath;
-	frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,vidBitmapPixelFormat);
-	
-	int writeThread = 0, writePos = 0;
-	bool posFound = false;
-	do
-	{
-		posFound = false;
-		while (!posFound)
-		{
-			grq->lastThreadadded = (grq->lastThreadadded + 1) % cfg->vidRendererThreads;
-			for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
-				if (!grq->renderQueoe[grq->lastThreadadded][x])
-				{
-					writeThread = grq->lastThreadadded;
-					writePos = x;
-					posFound = true;
-					break;
-				}
-		}
-	} while (!posFound);
-	SuspendThread(grh[writeThread]);
-	grq->renderQueoe[writeThread][writePos] = frame;
-	ResumeThread(grh[writeThread]);
 	if (!firstFrameRendered)
 		firstFrameRendered = true;
 }
@@ -779,9 +754,9 @@ void GraphVideo::calcBounds()
 	}
 }
 
-void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
+void GraphVideo::makeImage(int iterations,const std::wstring &outputPath,int tNow)
 {
-	QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
+	//QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 	updateVisibleNodeList();
 	doLayout(iterations);
 	calcBounds();
@@ -842,8 +817,9 @@ void GraphVideo::makeImage(int iterations, std::wstring *output,int tNow)
 		}
 	}
 	mergeVisibleAndDisconnectedNodes();
-	QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
-	drawImage(output,tNow);
+	//QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickAfterRender);
+	drawImage(tNow);
+	copyCurrentBitmapToSaveQueue(outputPath);
 }
 
 void GraphVideo::doLayout(int gSpringEmbedderIterations)
@@ -1207,12 +1183,14 @@ void GraphVideo::clear()
 		delete i->second;
 	for (unsigned int x = 0;x < edges.size();x++)
 		delete edges[x];
-
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); i++)
+		delete *i;
 
 	nodes.clear();
 	edges.clear();
 	visibleNodes.clear();
 	visibleDisconnectedNodes.clear();
+	edgeChangeList.clear();
 }
 
 void GraphVideo::deleteNode(const std::string *lnick)
@@ -1226,14 +1204,14 @@ void GraphVideo::deleteNode(const std::string *lnick)
 		return;
 
 
-	//if node has any connected edges, set edges weight to 0 and let decay() handle the rest.
-	//Otherwise node might get deleted without becoming disconnected and flying off
+	//if node has any connected edges, set edges weight to 0 and let natural decay handle the rest.
+	//Otherwise node will get deleted without becoming disconnected and flying off the screen first.
 	if (iNode->second->getConEdges())
 	{
 		for (std::vector<Edge*>::iterator i = edges.begin(); i != edges.end(); i++)
 		{
 			Edge *e = *i;
-			if (e->getSource() == iNode->second || e->getTarget() == iNode->second)
+			if (e->isConnectedToNode(iNode->second))
 				e->setWeight(0);
 		}
 		return;
@@ -1265,4 +1243,32 @@ bool GraphVideo::isNodeWithinBorder(Node *n)
 		y + nData->lastKnownRadius > cfg->gBorderSize && y < cfg->iOutputHeight - cfg->gBorderSize)
 		return true;
 	return false;
+}
+
+void GraphVideo::copyCurrentBitmapToSaveQueue(const std::wstring &fWPath)
+{
+	GraphRendererFrame *frame = new GraphRendererFrame;
+	frame->fName = fWPath;
+	frame->fbmp = gt->bmp->Clone(0,0,cfg->iOutputWidth,cfg->iOutputHeight,vidBitmapPixelFormat);
+	
+	int writeThread = 0, writePos = 0;
+	bool posFound = false;
+	while (!posFound && !cancelRendering)
+	{
+		grq->lastThreadAdded = (grq->lastThreadAdded + 1) % cfg->vidRendererThreads;
+		for (int x = 0; x < VIDRENDER_MAX_FRAME_Q; x++)
+		{
+			if (!grq->renderQueoe[grq->lastThreadAdded][x])
+			{
+				writeThread = grq->lastThreadAdded;
+				writePos = x;
+				posFound = true;
+				break;
+			}
+		}
+		Sleep(1);
+	}
+	SuspendThread(grh[writeThread]);
+	grq->renderQueoe[writeThread][writePos] = frame;
+	ResumeThread(grh[writeThread]);
 }

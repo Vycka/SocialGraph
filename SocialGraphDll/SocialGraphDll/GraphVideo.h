@@ -13,8 +13,9 @@ public:
 	void renderVideo();
 	void renderFrames(double &nextRender,int timestamp);
 	void relocateNode(Node *n);
-	void drawImage(std::wstring *fWPath,int szClock);
-	void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
+	void drawImage(int szClock);
+	//does all calculations for next frame (updates layout, deltes faded out nodes/edges...) calls drawImage()
+	void makeImage(int iterations,const std::wstring &outputPath,int tNow = (int)time(NULL));
 	void doLayout(int gSpringEmbedderIterations);
 	void calcBounds();
 	void deleteUnusedNodes();
@@ -29,6 +30,9 @@ public:
 	bool isNodeWithinBorder(Node *n);
 	inline void setCancelRendering(bool val) { cancelRendering = val; };
 private:
+	//Copies current gt->g bitmap to multithreaded save queue.
+	//Warning: If queue is full, function becomes blocking until there is enough space in queue
+	void copyCurrentBitmapToSaveQueue(const std::wstring &fWPath);
 	int vidRendFrame;
 	std::vector<Node*> visibleDisconnectedNodes;
 	double vidSecsPerFrame;
