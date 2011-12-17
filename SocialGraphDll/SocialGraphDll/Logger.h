@@ -34,7 +34,9 @@ public:
 	void wPause();
 	void wResume();
 	void qFlush(bool force = false);
+	bool isLoggerWorking() { return isWorking; }
 private:
+	bool isWorking;
 	std::fstream logFile;
 	std::stringstream logQueue;
 };
