@@ -31,18 +31,18 @@ struct GvEdgeData
 {
 	GvEdgeData() : framesDead(0), isDead(false) {};
 	int framesDead;
-	bool isDead;
 	std::vector<GvEdgeChatDot> sourceChatDots;
 	std::vector<GvEdgeChatDot> targetChatDots;
+	bool isDead;
 };
 
 struct GvNodeData
 {
 	GvNodeData() : disconnectedStillVisible(false), lastKnownRadius(5), fadeOutSteps(0), fadeOutEnabled(false) {};
-	bool disconnectedStillVisible;
 	float lastKnownRadius;
 	int fadeOutSteps;
 	bool fadeOutEnabled;
+	bool disconnectedStillVisible;
 	inline void fadeOutBegin() { fadeOutSteps = 0; fadeOutEnabled = true; };
 	inline void fadeOutCancel() { fadeOutSteps = 0; fadeOutEnabled = false; };
 };
@@ -462,7 +462,7 @@ void GraphVideo::drawImage(int szClock)
 	gt->g->DrawString(wtlTime.c_str(),wtlTime.size()-3,gt->fVidTimelapseTime,Gdiplus::PointF((float)cfg->iOutputWidth-325,(float)40),gt->sbChannel);
 	gt->g->DrawString(wtlDate.c_str(),wtlDate.size(),gt->fVidTimelapseDate,Gdiplus::PointF((float)cfg->iOutputWidth-220,(float)10),gt->sbChannel);
 
-	for (std::vector<Edge*>::iterator ei = edges.begin(); ei != edges.end(); ei++)
+	for (std::vector<Edge*>::iterator ei = edges.begin(); ei != edges.end(); ++ei)
 	{
 		Edge *edge = *ei;
 		GvEdgeData* edgeData = (GvEdgeData*)edge->getUserData(); 
@@ -834,9 +834,9 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 	for (int it = 0; it < gSpringEmbedderIterations; it++) {
 			
 			// Calculate forces acting on nodes due to node-node repulsions...
-		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ++ai)
 		{
-			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); bi++)
+			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); ++bi)
 			{
 				Node *nodeA = *ai;
 				Node *nodeB = *bi;
@@ -864,9 +864,9 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 		
 
 		//Repeat calculations for visible but disconnected nodes
-		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ++ai)
 		{
-			for (std::vector<Node*>::iterator bi = visibleDisconnectedNodes.begin(); bi != visibleDisconnectedNodes.end(); bi++)
+			for (std::vector<Node*>::iterator bi = visibleDisconnectedNodes.begin(); bi != visibleDisconnectedNodes.end(); ++bi)
 			{
 				Node *nodeA = *ai;
 				Node *nodeB = *bi;
@@ -936,7 +936,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 		}
 			
 		// Now move each node to its new location...
-		for (std::vector<Node*>::iterator it = visibleNodes.begin(); it != visibleNodes.end(); it++)
+		for (std::vector<Node*>::iterator it = visibleNodes.begin(); it != visibleNodes.end(); ++it)
 		{
 			Node *node = *it;
 			
@@ -967,7 +967,7 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 		}
 		
 		//move visible disconnected nodes to the new location
-		for (std::vector<Node*>::iterator it = visibleDisconnectedNodes.begin(); it != visibleDisconnectedNodes.end(); it++)
+		for (std::vector<Node*>::iterator it = visibleDisconnectedNodes.begin(); it != visibleDisconnectedNodes.end(); ++it)
 		{
 			Node *node = *it;
 			
@@ -1003,7 +1003,7 @@ void GraphVideo::deleteUnusedNodes()
 {
 	updateVisibleNodeList();
 	std::list <Node*> nodesToErase;
-	for (std::map<std::string,Node*>::iterator iNodes = nodes.begin();iNodes != nodes.end();iNodes++)
+	for (std::map<std::string,Node*>::iterator iNodes = nodes.begin();iNodes != nodes.end(); ++iNodes)
 	{	
 		//method called only in pausedRender, so after this one nodes weight will be updated from next LOG_INIT
 		if (iNodes->second->getWeight() > cfg->gTemporalDecayAmount || ((GvNodeData*)iNodes->second->getUserData())->disconnectedStillVisible)
@@ -1024,7 +1024,7 @@ void GraphVideo::deleteUnusedNodes()
 		if (!found) //jei nerado tokio naudojamo, desim prie nenaudojamu saraso
 			nodesToErase.push_back(iNodes->second);
 	}
-	for (std::list<Node*>::iterator iErase = nodesToErase.begin(); iErase != nodesToErase.end();iErase++)
+	for (std::list<Node*>::iterator iErase = nodesToErase.begin(); iErase != nodesToErase.end(); ++iErase)
 	{
 		std::map<std::string,Node*>::iterator iNode = nodes.find((*iErase)->getLNick());
 		delete iNode->second;
@@ -1129,7 +1129,7 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 
 void GraphVideo::decay(double d, int tNow)
 {
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end(); ++i)
 	{
 		i->second->appWeight(-d);
 		if (i->second->getWeight() < 0)
@@ -1164,7 +1164,7 @@ void GraphVideo::decay(double d, int tNow)
 
 void GraphVideo::deleteDisconnectedVisibleNode(Node *n)
 {
-	for (std::vector<Node*>::iterator i = visibleDisconnectedNodes.begin(); i != visibleDisconnectedNodes.end(); i++)
+	for (std::vector<Node*>::iterator i = visibleDisconnectedNodes.begin(); i != visibleDisconnectedNodes.end(); ++i)
 		if (n == *i)
 		{
 			visibleDisconnectedNodes.erase(i);
@@ -1179,11 +1179,11 @@ void GraphVideo::mergeVisibleAndDisconnectedNodes()
 
 void GraphVideo::clear()
 {
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end(); ++i)
 		delete i->second;
 	for (unsigned int x = 0;x < edges.size();x++)
 		delete edges[x];
-	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); i++)
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); ++i)
 		delete *i;
 
 	nodes.clear();
@@ -1208,7 +1208,7 @@ void GraphVideo::deleteNode(const std::string *lnick)
 	//Otherwise node will get deleted without becoming disconnected and flying off the screen first.
 	if (iNode->second->getConEdges())
 	{
-		for (std::vector<Edge*>::iterator i = edges.begin(); i != edges.end(); i++)
+		for (std::vector<Edge*>::iterator i = edges.begin(); i != edges.end(); ++i)
 		{
 			Edge *e = *i;
 			if (e->isConnectedToNode(iNode->second))

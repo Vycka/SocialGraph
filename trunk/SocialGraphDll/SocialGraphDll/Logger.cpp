@@ -7,7 +7,13 @@
 
 Logger::Logger(const char *f)
 {
-	logFile.open(f,std::ios_base::out | std::ios_base::app);
+	isWorking = true;
+	logFile.open(f,std::ios_base::out | std::ios_base::app,_SH_DENYWR);
+	if (!logFile.good())
+	{
+		isWorking = false;
+		return;
+	}
 	int t = (int)time(NULL);
 	logQueue << t << ' ' << VID_INIT << std::endl;
 	qFlush();

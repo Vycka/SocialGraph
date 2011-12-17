@@ -104,9 +104,9 @@ void Graph::clear()
 	
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 		delete i->second;
-	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
+	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); ++i)
 		delete *i;
-	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); i++)
+	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); ++i)
 		delete *i;
 
 	nodes.clear();
@@ -124,8 +124,7 @@ Node *Graph::addNode(const std::string *nick,const std::string *lnick,double wei
 	{
 		iNode->second->appWeight(weight);
 		if (cfg->logSave) //logger node
-			if (weight != 0.0)
-				logger->wAddNode(iNode->second,weight);
+			logger->wAddNode(iNode->second,weight);
 		return iNode->second;
 	}
 	else
@@ -185,7 +184,7 @@ Node *Graph::findNode(const std::string *lnick)
 
 void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weight)
 {
-	if (*ln1 == *ln2 || weight == 0.0)
+	if (*ln1 == *ln2)
 		return;
 
 	//jei yra toks edge, padidinam weight, jei ner, kuriam/kraunam
@@ -231,9 +230,6 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 
 void Graph::updateEdge(Edge *e, double weight,const Node *inputFrom)
 {
-	if (weight == 0.0)
-		return;
-	double wLast = e->getWeight();
 	e->appWeight(weight);
 	e->updateActivityTime();
 	e->updateActivityTimeForNode(inputFrom);
@@ -292,7 +288,7 @@ void Graph::onMessage(const char *nick, const char *msg)
 void Graph::printLists()
 {
 	std::cout << "----Nodes----\n";
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end(); ++i)
 	{
 		std::cout << " | " << std::setw(16) << i->first << " | " 
 				  << std::setw(16) << i->second->getNick() << " | ";
@@ -442,7 +438,7 @@ void Graph::deleteUnusedNodes()
 		if (!found) //jei nerado tokio naudojamo, desim prie nenaudojamu saraso
 			nodesToErase.push_back(iNodes->second);
 	}
-	for (std::list<Node*>::iterator iErase = nodesToErase.begin(); iErase != nodesToErase.end();iErase++)
+	for (std::list<Node*>::iterator iErase = nodesToErase.begin(); iErase != nodesToErase.end(); ++iErase)
 	{
 		std::map<std::string,Node*>::iterator iNode = nodes.find((*iErase)->getLNick());
 		if (cfg->logSave)
@@ -545,9 +541,9 @@ void Graph::doLayout(int gSpringEmbedderIterations)
 	for (int it = 0; it < gSpringEmbedderIterations; it++) {
 			
 			// Calculate forces acting on nodes due to node-node repulsions...
-		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ai++)
+		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ++ai)
 		{
-			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); bi++)
+			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); ++bi)
 			{
 				Node *nodeA = *ai;
 				Node *nodeB = *bi;
@@ -1017,10 +1013,18 @@ void Graph::loggerStart(const std::string &fname)
 		return;
 
 	logger = new Logger(fname.c_str());
+	if (!logger->isLoggerWorking())
+	{
+		printToSGWindow("[WARNING] GraphLogger: Unable to initialize logger (can't create file or file is locked)");
+		cfg->logSave = false;
+		delete logger;
+		logger = NULL;
+		return;
+	}
 	logger->wPause();
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end(); ++i)
 		logger->wAddNode(i->second,i->second->getWeight());
-	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); i++)
+	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); ++i)
 		logger->wAddEdge(*i,(*i)->getWeight(),(*i)->getSource());
 	logger->wFrame(lastFrame);
 	logger->wResume();

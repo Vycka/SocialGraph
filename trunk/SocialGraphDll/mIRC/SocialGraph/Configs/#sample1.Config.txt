@@ -93,7 +93,7 @@ gMaxNodeMovement            0.5
 gMinDiagramSize             10
 gBorderSize                 50
 gNodeRadius                 3
-gNodeBumpWeight             0.2
+gNodeBumpWeight             0.35
 gMinMaxWeight               5
 
 ## Minimum pauses between frame generations and between uploads.
@@ -105,10 +105,10 @@ gCacheGdiTools              1
 
 ## Inference Heuristics weight values.
 ## Defaults are Ok and should be left untouched, unless you know, what they mean.
-hAdjacency   0.03
-hBinary      0.50
-hDirect      0.50
-hIndirect    0.15
+hAdjacency   0.05
+hBinary      0.90
+hDirect      0.90
+hIndirect    0.30
 
 ## ------------ OLD FRAMES SAVING  -------------------
 ## Should we save old stills somewhere, once new ones are generated?
@@ -176,7 +176,7 @@ vidMaxNodeMovement 0.0015
 vidC               0.0025
 
 ## gBorder for video
-vidBorderSize 50
+vidBorderSize 65
 
 ## gNodeRadius for video
 vidNodeRadius 8
