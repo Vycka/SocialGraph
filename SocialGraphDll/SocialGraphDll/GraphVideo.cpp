@@ -27,14 +27,22 @@ struct GvEdgeChatDot
 	double percentMoved;
 };
 
+struct GvEdgeBeatCircle
+{
+	GvEdgeBeatCircle(int str) : strength(str), step(0) {};
+	int strength, step;
+};
+
 struct GvEdgeData
 {
-	GvEdgeData() : framesDead(0), isDead(false) {};
+	GvEdgeData() : framesDead(0), isDead(false) { };
 	int framesDead;
 	std::vector<GvEdgeChatDot> sourceChatDots;
 	std::vector<GvEdgeChatDot> targetChatDots;
+	std::vector<GvEdgeBeatCircle> beatCircles;
 	bool isDead;
 };
+
 
 struct GvNodeData
 {
@@ -1129,13 +1137,14 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 
 void GraphVideo::decay(double d, int tNow)
 {
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end(); ++i)
+	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 	{
-		i->second->appWeight(-d);
-		if (i->second->getWeight() < 0)
-			i->second->setWeight(0);
-
+		Node *n = i->second;
+		n->appWeight(-d - (n->getWeight() > 1500 ? n->getWeight() / 150000.0 : 0.0) );
+		if (n->getWeight() < 0)
+			n->setWeight(0);
 	}
+
 	for (unsigned int x = 0; x < edges.size(); x++)
 	{
 		Edge *e = edges[x];

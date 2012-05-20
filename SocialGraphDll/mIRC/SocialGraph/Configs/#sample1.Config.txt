@@ -93,7 +93,7 @@ gMaxNodeMovement            0.5
 gMinDiagramSize             10
 gBorderSize                 50
 gNodeRadius                 3
-gNodeBumpWeight             0.35
+gNodeBumpWeight             0.5
 gMinMaxWeight               5
 
 ## Minimum pauses between frame generations and between uploads.

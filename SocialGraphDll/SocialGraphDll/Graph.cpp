@@ -397,10 +397,10 @@ void Graph::decay(double d, int tNow)
 {
 	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
 	{
-		i->second->appWeight(-d);
-		if (i->second->getWeight() < 0)
-			i->second->setWeight(0);
-
+		Node *n = i->second;
+		n->appWeight(-d - (n->getWeight() > 1500 ? n->getWeight() / 150000.0 : 0.0) );
+		if (n->getWeight() < 0)
+			n->setWeight(0);
 	}
 	for (unsigned int x = 0;x < edges.size();x++)
 	{
