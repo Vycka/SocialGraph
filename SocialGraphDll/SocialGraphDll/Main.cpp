@@ -297,37 +297,41 @@ ALIAS mReloadConfig(ALP)
 
 void main(int argc, char** arg)
 {
-	/*
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
 	if (argc != 2)
 	{
 		std::cout << "Missing config file..\n";	
 		system("pause");
-		//return;
-
+		return;
 	}
 
-	GraphConfig c(arg[1]);
-	if (c.isBadConfig())
+	GraphConfig cfg(arg[1]);
+	//GraphConfig cfg("Linkomanija.Config.txt");
+
+	if (cfg.isBadConfig())
 	{
 		std::cout << "Bad Config file\n";	
 		system("pause");
-		//return;
+		return;
 	}
 
-	srand((unsigned int)time((time_t*)0));
-
-	*/
-
-	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-	CColor test(255,255,255,255);
-	CColor test2 = CColor(test) * 0.5;
-	GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
-	//Graph *g = new Graph(c);
-	//g->printLists();
-	//g->saveToFileEx("i:\\test.txt");
-	GraphVideo *g = new GraphVideo(c);
-	g->renderVideo();
-	delete g;
-	system("pause");
+	Graph *graph = new Graph(cfg);
+	graph->randomizeNodePositions();
+	graph->makeImage();
+	delete graph;
 	Gdiplus::GdiplusShutdown(gdiplusToken);
+
+	//Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	//CColor test(255,255,255,255);
+	//CColor test2 = CColor(test) * 0.5;
+	//GraphConfig c("C:\\Users\\Viki\\Documents\\ADV_Seeker1\\SocialGraph\\Configs\\debug\\#linkomanija.config.txt");
+	////Graph *g = new Graph(c);
+	////g->printLists();
+	////g->saveToFileEx("i:\\test.txt");
+	//GraphVideo *g = new GraphVideo(c);
+	//g->renderVideo();
+	//delete g;
+	//system("pause");
+	//Gdiplus::GdiplusShutdown(gdiplusToken);
 }

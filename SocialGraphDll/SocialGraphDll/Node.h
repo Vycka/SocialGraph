@@ -23,6 +23,8 @@ public:
 	inline void setY(double y) { this->y = y; };
 	inline void setFX(double fx) { this->fx = fx; };
 	inline void setFY(double fy) { this->fy = fy; };
+	void setInertedX(double x);
+	void setInertedY(double y);
 	inline void setWeight(double weight) { this->weight = weight; };
 	inline void appWeight(double weight) { this->weight += weight; };
 	inline void appConEdges(int n) { this->cEdges += n; };
@@ -41,7 +43,7 @@ public:
 	inline LPUSERDATA getUserData() { return userData; };
 	//inline bool getNodeVisible() { return nodeVisible; };
 	
-
+	bool IsSecondaryColor;
 
 	friend Edge;
 private:
@@ -50,6 +52,7 @@ private:
 	LPUSERDATA userData;
 	std::string nick,lnick;
 	std::wstring wnick;
-	double weight,x,y,fx,fy;
+	double weight,x,y,fx,fy,accelerationX,accelerationY;
 	int cEdges;
+
 };

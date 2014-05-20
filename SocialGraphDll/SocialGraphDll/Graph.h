@@ -32,6 +32,7 @@ public:
 	virtual void clear();
 	Node* addNode(const std::string *nick,const std::string *lnick,double weight = 0.0);
 	Node* addNode(const std::string *nick,double weight = 0.0);
+	void randomizeNodePositions();
 	virtual void deleteNode(const std::string *lnick);
 	Node* findNode(const std::string *lnick);
 	void addEdge(const std::string *ln1, const std::string *ln2, double weight = 0);
@@ -55,7 +56,7 @@ public:
 	void updateFrame();
 	virtual void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
 	void makeImage();
-	virtual void doLayout(int gSpringEmbedderIterations);
+	
 	virtual void calcBounds();
 	virtual void drawImage(std::wstring *fWPath,int szClock);
 	void upload();
@@ -81,6 +82,7 @@ protected:
 	std::vector<Node*> visibleNodes;
 	std::list<EdgeChangeListRecord*> edgeChangeList;
 private:
+	void doLayout(int gSpringEmbedderIterations);
 	//opens/appends log file, writes VID_PAUSE command, populates list based on current edges,nodes lists, and writes VID_RESUME command.
 	void loggerStart(const std::string &fname);
 	//writes VID_PAUSE, VID_CLEAR headers closes the file and deletes logger object.

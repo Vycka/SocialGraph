@@ -16,7 +16,7 @@ public:
 	void drawImage(int szClock);
 	//does all calculations for next frame (updates layout, deltes faded out nodes/edges...) calls drawImage()
 	void makeImage(int iterations,const std::wstring &outputPath,int tNow = (int)time(NULL));
-	void doLayout(int gSpringEmbedderIterations);
+	void doLayout(int gSpringEmbedderIterations, int tNow);
 	void calcBounds();
 	void deleteUnusedNodes();
 	void decay(double d, int tNow);

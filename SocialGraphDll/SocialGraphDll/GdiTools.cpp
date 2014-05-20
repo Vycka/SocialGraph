@@ -26,11 +26,14 @@ GdiTools::GdiTools(const GraphConfig &cfg)
 	sbTitle = new Gdiplus::SolidBrush(*cTitle);
 	sbNode = new Gdiplus::SolidBrush(*cNode);
 
+	sbSecondaryNode = new Gdiplus::SolidBrush(cfg.iSecondaryNodeColor.argb());
+
 	fNick = new Gdiplus::Font(cfg.iNickFont.c_str(),(float)cfg.iNickFontSize);
 
 	fCredits = new Gdiplus::Font(L"SansSerif",10);
 	sbLabel = new Gdiplus::SolidBrush(*cLabel);
 	pNodeBorder = new Gdiplus::Pen(*cNodeBorder,2);
+	
 	GetEncoderClsid(cfg.fWEncoderMime.c_str(),&encoderClsid);
 	if (cfg.gPreserveAlpha)
 		g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
@@ -80,4 +83,5 @@ GdiTools::~GdiTools(void)
 	delete fVidNick;
 	delete cChatDotColor;
 	delete sbChatDotColor;
+	delete sbSecondaryNode;
 }

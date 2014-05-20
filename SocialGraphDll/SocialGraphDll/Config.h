@@ -22,7 +22,14 @@ struct CColor
 	inline CColor& operator -(const CColor &cc) { a -=cc.a; r -=cc.r; g -=cc.g; b -=cc.b; return *this; };
 	inline CColor& operator *(const double &d) { a = (unsigned char)(a * d); r = (unsigned char)(r * d); g = (unsigned char)(g * d); b = (unsigned char)(b * d); return *this; };
 	//RGB A for now //TODO Needs to be converted to ARGB in the future.
-	CColor(const std::string &str) { std::stringstream ss(str); ss >> r >> g >> b >> a; };
+	CColor(const std::string &str) {
+		int ir, ig, ib, ia;
+		std::stringstream ss(str); ss >> ir >> ig >> ib >> ia; 
+		r = ir;
+		g = ig;
+		b = ib;
+		a = ia;
+	};
 	unsigned char b,g,r,a; //do not change b,g,r,a variable declaration order or it will mess up argb() function
 };
 
@@ -68,7 +75,12 @@ protected:
 	std::map<std::string,std::string> cfgList;
 private:
 
-	inline bool paramToBool(const std::string &param) { return (param[0] == '1' ? true : false ); };
+	inline bool paramToBool(const std::string &param) { 
+		std::stringstream ss(param);
+		bool des;
+		ss >> des;
+		return des;
+	};
 	inline int paramToInt(const std::string &param) { return atoi(param.c_str()); };
 	inline double paramToDouble(const std::string &param) { return atof(param.c_str()); };
 	inline std::string paramToString(const std::string &param) { return replaceParam(getInQuotes(param)); };

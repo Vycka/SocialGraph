@@ -81,6 +81,9 @@ bool GraphDataFileHandler::load(const char *fName)
 
 	switch (fileVersion)
 	{
+	case 2:
+		loadState = loadV2(ss);
+		break;
 	case 1:
 		loadState = loadV1(ss);
 		break;
@@ -94,6 +97,31 @@ bool GraphDataFileHandler::load(const char *fName)
 	ss >> endCheck;
 	if (endCheck != this->cFileEnding)
 		return false;
+	return true;
+}
+
+//V2 Special version for stills generation from custom graph file
+bool GraphDataFileHandler::loadV2(std::stringstream &ss)
+{
+	if (!loadV1(ss))
+		return false;
+
+	int specialMarkerCount;
+	ss >> specialMarkerCount;
+
+	for (int x = 0; x < specialMarkerCount; x++)
+	{
+		std::string nodeName,lNodeName;
+		ss >> nodeName;
+		
+		strToLower(nodeName,lNodeName);
+
+		Node *node = graph->findNode(&lNodeName);
+
+		if (node != NULL)
+			node->IsSecondaryColor = true;
+	}
+
 	return true;
 }
 
