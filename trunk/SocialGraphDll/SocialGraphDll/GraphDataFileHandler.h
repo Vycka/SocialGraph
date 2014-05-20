@@ -24,6 +24,8 @@ public:
 	void generateHeader(int fVersion,int revNum = REVISION);
 private:
 	
+	bool loadV2(std::stringstream &ss);
+
 	bool loadV1(std::stringstream &ss);
 	bool saveV1(std::ofstream &fr);
 	bool loadV0(std::stringstream &ss);

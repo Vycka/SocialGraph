@@ -12,7 +12,8 @@ public:
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor,iEdgeColorInactive,iChatDotColor,iEdgeChangeListColor,iEdgeChangeListColorInactive;
+		iEdgeColor,iBorderColor,iEdgeColorInactive,iChatDotColor,iEdgeChangeListColor,iEdgeChangeListColorInactive,
+		iSecondaryNodeColor;
 	int iEdgeActiveMinAlpha;
 	std::wstring iNickFont;
 	//img font stuff
@@ -21,9 +22,10 @@ public:
 	double gTemporalDecayAmount,gK,gC,gMaxRepulsiveForceDistance,
 		gMaxNodeMovement,gMinDiagramSize,gBorderSize,
 		gNodeRadius,gNodeBumpWeight;
-	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeChangeListDrawLogSize;
+	int gMinPauseBeforeNextRender,gEdgeDecayMultiplyIdleSecs,gMinPauseBeforeNextUpload,gCacheGdiTools,gSpringEmbedderIterations,
+		gEdgeColorChangeInactivityMin,gEdgeColorChangeInactivityMax,gEdgeChangeListDrawLogSize,gMinEdgeWidth, gMaxEdgeWidth;
 	//bool gEdgeNickListDrawInserts, gEdgeNickListDrawRemoves;
-	bool gEdgeChangeListEnabled,gPreserveAlpha;
+	bool gEdgeChangeListEnabled,gPreserveAlpha, gDrawUnconnectedNodes, gDrawTimeStamp, gStrechToImageSize;
 	double gMinMaxWeight;
 	//ftp stuff
 	std::string ftpHost,ftpUser,ftpPass,ftpDir,ftpFile;

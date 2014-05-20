@@ -29,10 +29,11 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iEdgeChangeListColor = getCColor("iEdgeChangeListColor");
 	iEdgeChangeListColorInactive = getCColor("iEdgeChangeListColorInactive");
 	iChatDotColor    = getCColor("iChatDotColor");
+	iSecondaryNodeColor = getCColor("iSecondaryNodeColor","255 127 127 255");
 
 	//font/sizes/misc stuff
-	iNickFont     = getWString("iNickFont");
-	iNickFontSize = getDouble("iNickFontSize");
+	iNickFont           = getWString("iNickFont");
+	iNickFontSize       = getDouble("iNickFontSize");
 	iEdgeActiveMinAlpha = getInt("iEdgeActiveMinAlpha");
 	
 	//ftp
@@ -61,12 +62,17 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	gBorderSize                = getDouble("gBorderSize");
 	gNodeRadius                = getDouble("gNodeRadius");
 	gNodeBumpWeight            = getDouble("gNodeBumpWeight");
+	gMinEdgeWidth              = getInt("gMinEdgeWidth","2");
+	gMaxEdgeWidth              = getInt("gMaxEdgeWidth","4");
 	gMinPauseBeforeNextRender  = getInt("gMinPauseBeforeNextRender");
 	gMinPauseBeforeNextUpload  = getInt("gMinPauseBeforeNextUpload");
 	gEdgeDecayMultiplyIdleSecs = getInt("gEdgeDecayMultiplyIdleSecs");
 	gCacheGdiTools             = getInt("gCacheGdiTools");
 	gMinMaxWeight              = getDouble("gMinMaxWeight");
 	gPreserveAlpha             = getBool("gPreserveAlpha");
+	gDrawUnconnectedNodes      = getBool("gDrawUnconnectedNodes","0");
+	gDrawTimeStamp             = getBool("gDrawTimeStamp","1");
+	gStrechToImageSize         = getBool("gStrechToImageSize","1");
 
 	//inference heuristics
 	hAdjacency  = getDouble("hAdjacency");

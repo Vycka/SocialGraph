@@ -24,5 +24,5 @@ public:
 
 	Gdiplus::Font *fChannel,*fTitle,*fNick,*fCredits,*fVidTimelapseTime,*fVidTimelapseDate,*fVidNick;
 	Gdiplus::PointF *pChannel,*pTitle;
-	Gdiplus::SolidBrush *sbChannel,*sbTitle,*sbNode,*sbLabel;
+	Gdiplus::SolidBrush *sbChannel,*sbTitle,*sbNode, *sbSecondaryNode,*sbLabel;
 };

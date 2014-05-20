@@ -766,7 +766,7 @@ void GraphVideo::makeImage(int iterations,const std::wstring &outputPath,int tNo
 {
 	//QueryPerformanceCounter((LARGE_INTEGER*)&qpcTickBeforeRender);
 	updateVisibleNodeList();
-	doLayout(iterations);
+	doLayout(iterations,tNow);
 	calcBounds();
 
 	for (unsigned int x = 0; x < visibleDisconnectedNodes.size(); x++)
@@ -830,7 +830,7 @@ void GraphVideo::makeImage(int iterations,const std::wstring &outputPath,int tNo
 	copyCurrentBitmapToSaveQueue(outputPath);
 }
 
-void GraphVideo::doLayout(int gSpringEmbedderIterations)
+void GraphVideo::doLayout(int gSpringEmbedderIterations, int tNow)
 {
 	double k = cfg->gK;
 	double c = cfg->gC;
@@ -934,8 +934,15 @@ void GraphVideo::doLayout(int gSpringEmbedderIterations)
 			if (weight < 1) 
 				weight = 1;
 	
+			
 			attractiveForce *= (log(weight) * 0.5) + 1;
 			
+			//lower attractive for the first hour to simulate edge attraction acceleration
+			//int tDiff = tNow - edge->getChangeListLink()->getTimeBegin();
+			//if (tDiff > 3600)
+			//	tDiff = 3600;
+			//attractiveForce *= (pow(10,(tDiff/1800.0)) / 100.0);
+
 			nodeB->setFX(nodeB->getFX() - attractiveForce * deltaX / distance);
 			nodeB->setFY(nodeB->getFY() - attractiveForce * deltaY / distance);
 			nodeA->setFX(nodeA->getFX() + attractiveForce * deltaX / distance);
