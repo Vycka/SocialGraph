@@ -141,7 +141,7 @@ vidOutputHeight  1080
 
 ## What number of frames represent one day.
 ## Default value (1798.2) assumes, that you render your video in NTSC framerate, and you want that 1 miunte of the video would represent 24hours of the activity.
-vidFramesPerDay 1798.2017982017982017982017982018
+vidFramesPerDay 1800
 
 ## How many spring embedder iteration to do for each frame
 vidSEIterationsPerFrame 1
@@ -196,5 +196,14 @@ vidPreserveAlpha 0
 ## How many frames edge stays alive tu fully fade out before it dies?
 ## Fading out process will be handled by decreasing alpha of current edge color(color based on edge inactivity) to zero
 vidEdgeFramesToDie 30
+
+
+## -------------------------- INTERNAL STUFF FOR PERSONAL USE --------------------------- ##
+iSecondaryNodeColor 255 127 127 255
+gDrawUnconnectedNodes 0
+gDrawTimeStamp 0
+gStrechToImageSize 0
+gMinEdgeWidth 2
+gMaxEdgeWidth 4
 
 ## END OF CONFIG FILE
