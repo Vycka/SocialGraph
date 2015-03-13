@@ -1,0 +1,33 @@
+GraphDataFileHandler
+  * File handler needs to read all data into separate lists like "struct GraphData { lists,variables }". This will fix some incompatibility issues with Logger and won't reset current graph if file reading fails.
+
+Logger
+  * Needs major format redesign:
+    * Make some index file for faster seeking.
+    * Better way for handling new nodes.
+    * Better transition between pauses/resumes (when mirc is closed/started again)
+    * In overall, it needs probably a full rewrite.
+
+Graph (for stills)
+  * Automatic clean-up for unused nodes.
+  * Multi-network support (PRIORITY.. Sort of.)
+
+GraphVideo
+  * Redesign multi-threading - split threads before image is drawn on bitmaps (currently multi-threading only take's care of image compression).
+  * Calculate frames ahead before drawing - that would allow all new wide range of visual features (AKA Post-processing).
+  * Nodes would gain/lose speed momentum for smoothing out their movement.
+
+Config
+  * Add ability to generate missing variables to config file
+  * Move all hard-coded stuff to the config. like EdgeChangeList params, fonts, sizes and so on.
+
+
+New Features
+  * Autoupdate
+  * Audio analysis, extra animation from music.
+  * Directly encode videos using DirectShow.
+  * TBA
+  * IF anyone has ideas, you can submit them by commenting or in issues list.
+
+
+Those are the things that sooner or later socialgraph is going to have. None of them adds new features to the generated socialgraph, but gives ability to implement much wider visuals, features and so on. Also makes SocialGraphDLL more user-friendly by updating it self, updating its config files and everything else that is needed (GraphDataFileHandler was first step towards it by updating graphdata file seamlessly).
