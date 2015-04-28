@@ -789,38 +789,38 @@ void GraphVideo::makeImage(int iterations,const std::wstring &outputPath,int tNo
 	
 	for (unsigned int x = 0; x < edges.size(); x++)
 	{
-		Edge *e = edges[x];
-		GvEdgeData* edgeData = (GvEdgeData*)e->getUserData();
+		Edge *edge = edges[x];
+		GvEdgeData* edgeData = (GvEdgeData*)edge->getUserData();
 		if (!edgeData->isDead)
 			continue;
 		if (edgeData->framesDead >= cfg->vidEdgeFramesToDie)
 		{
-			e->breakChangeListLink();
-			e->getSource()->appConEdges(-1);
-			e->getTarget()->appConEdges(-1);
+
+			Node *sourceNode = edge->getSource();
+			Node *targetNode = edge->getTarget();
+
+			delete edge;
+			edges.erase(edges.begin() + x);
+
 
 			//Here's the only place where disconnectedStillVisible can become true.
 			//cancel fadeout here if it was active
 
-			if (e->getSource()->getConEdges() == 0)
+			if (sourceNode->getConEdges() == 0)
 			{
-				Node *n = e->getSource();
-				GvNodeData *nData = (GvNodeData*)n->getUserData();
-				visibleDisconnectedNodes.push_back(n);
+				GvNodeData *nData = (GvNodeData*)sourceNode->getUserData();
+				visibleDisconnectedNodes.push_back(sourceNode);
 				nData->disconnectedStillVisible = true;
 				nData->fadeOutCancel();
 
 			}
-			if (e->getTarget()->getConEdges() == 0)
+			if (targetNode->getConEdges() == 0)
 			{
-				Node *n = e->getTarget();
-				GvNodeData *nData = (GvNodeData*)n->getUserData();
-				visibleDisconnectedNodes.push_back(n);
+				GvNodeData *nData = (GvNodeData*)targetNode->getUserData();
+				visibleDisconnectedNodes.push_back(targetNode);
 				nData->disconnectedStillVisible = true;
 				nData->fadeOutCancel();
 			}
-			delete e;
-			edges.erase(edges.begin()+x);
 			x--;
 		}
 	}
@@ -1112,8 +1112,6 @@ void GraphVideo::addEdge(const std::string *ln1, const std::string *ln2, double 
 		else
 			relocateNode(node2);
 
-		node1->appConEdges(1);
-		node2->appConEdges(1);
 		e = new Edge(node1,node2,weight,activity);
 		e->updateActivityTimeForSource(activity);
 		e->setUserData(new GvEdgeData);
@@ -1166,8 +1164,6 @@ void GraphVideo::decay(double d, int tNow)
 			if (!firstFrameRendered)
 			{
 				e->breakChangeListLink();
-				e->getSource()->appConEdges(-1);
-				e->getTarget()->appConEdges(-1);
 				delete e;
 
 				edges.erase(edges.begin()+x);

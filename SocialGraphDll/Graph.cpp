@@ -102,10 +102,12 @@ void Graph::clear()
 	if (logger) //temporary workaround for calling clear before logger is initialized
 		logger->wEnd();
 	
-	for (std::map<std::string,Node*>::iterator i = nodes.begin();i != nodes.end();i++)
-		delete i->second;
 	for (std::vector<Edge*>::iterator i = edges.begin();i != edges.end(); ++i)
 		delete *i;
+
+	for (std::map<std::string, Node*>::iterator i = nodes.begin(); i != nodes.end(); i++)
+		delete i->second;
+
 	for (std::list<EdgeChangeListRecord*>::iterator i = edgeChangeList.begin();i != edgeChangeList.end(); ++i)
 		delete *i;
 
@@ -161,8 +163,7 @@ void Graph::deleteNode(const std::string *lnick)
 	for (unsigned int x = 0;x < edges.size();x++)
 		if (edges[x]->getSource() == iNode->second || edges[x]->getTarget() == iNode->second)
 		{
-			edges[x]->getSource()->appConEdges(-1);
-			edges[x]->getTarget()->appConEdges(-1);
+
 			delete edges[x];
 			edges.erase(edges.begin()+x);
 			x--;
@@ -216,8 +217,7 @@ void Graph::addEdge(const std::string *ln1, const std::string *ln2, double weigh
 		//tokie tikrai yra cia tik siaip reikia surast ju adresus
 		Node *source = findNode(ln1);
 		Node *target = findNode(ln2);
-		source->appConEdges(1);
-		target->appConEdges(1);
+
 
 		e = new Edge(source,target,weight);
 		edges.push_back(e);
@@ -419,8 +419,6 @@ void Graph::decay(double d, int tNow)
 
 		if (e->getWeight() <= 0)
 		{
-			e->getSource()->appConEdges(-1);
-			e->getTarget()->appConEdges(-1);
 			delete e;
 			edges.erase(edges.begin()+x);
 			x--;
@@ -540,17 +538,34 @@ void Graph::makeImage()
 {
 	makeImage(cfg->gSpringEmbedderIterations,&cfg->fWImageOutput);
 }
+
+void Graph::makeImage(int tNow)
+{
+	makeImage(cfg->gSpringEmbedderIterations, &cfg->fWImageOutput, tNow);
+}
+
 void Graph::doLayout(int gSpringEmbedderIterations)
 {
+	int tBegin = (int)time(0);
+	int tLast = tBegin;
+
+	std::cout << "Rendering graph..." << std::endl;
+
 	double k = cfg->gK;
 	double c = cfg->gC;
 	// Repulsive forces between nodes that are further apart than this are ignored.
 	double maxRepulsiveForceDistance = cfg->gMaxRepulsiveForceDistance;
 				
-		// For each iteration...
-	for (int it = 0; it < gSpringEmbedderIterations; it++) {
+	// For each iteration...
+	for (int it = 0; it < gSpringEmbedderIterations; it++) 
+	{
+		if ((int)time(0) != tLast)
+		{
+			std::cout << "Calculating " << it << " iteration.. " << ((int)time(0) - tBegin) << "secs passed..." << std::endl;
+			tLast = (int)time(0);
+		}
 			
-			// Calculate forces acting on nodes due to node-node repulsions...
+		// Calculate forces acting on nodes due to node-node repulsions...
 		for (std::vector<Node*>::iterator ai = visibleNodes.begin(); ai != visibleNodes.end(); ++ai)
 		{
 			for (std::vector<Node*>::iterator bi = ai + 1; bi != visibleNodes.end(); ++bi)
@@ -919,9 +934,22 @@ void Graph::drawImage(std::wstring *fWPath,int szClock)
 		int x1 = (int) ((width * (n->getX() - minX) / (maxX - minX)) + borderSize);
 		int y1 = (int) ((height * (n->getY() - minY) / (maxY - minY)) + borderSize);
 		int newNodeRadius = (int) (log((n->getWeight() / 10) + 1) + nodeRadius);
+		
+		
+		if (n->hasAlternativeColor())
+		{
+			Gdiplus::Color *nodeFillColor = new Gdiplus::Color(n->getAlternativeColor().argb());
+			Gdiplus::SolidBrush *nodeFillBrush = new Gdiplus::SolidBrush(*nodeFillColor);
 
-		Gdiplus::SolidBrush *sbNodeFillColor = (n->IsSecondaryColor ? gt->sbSecondaryNode : gt->sbNode);
-		gt->g->FillEllipse(sbNodeFillColor,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
+			gt->g->FillEllipse(nodeFillBrush, x1 - newNodeRadius, y1 - newNodeRadius, newNodeRadius * 2, newNodeRadius * 2);
+
+			delete nodeFillBrush;
+			delete nodeFillColor;
+		}
+		else
+		{
+			gt->g->FillEllipse(gt->sbNode, x1 - newNodeRadius, y1 - newNodeRadius, newNodeRadius * 2, newNodeRadius * 2);
+		}
 
 		gt->g->DrawEllipse(gt->pNodeBorder,x1 - newNodeRadius,y1 - newNodeRadius,newNodeRadius*2,newNodeRadius*2);
 		gt->g->DrawString(n->getWNick(),n->getNick().size(),gt->fNick,

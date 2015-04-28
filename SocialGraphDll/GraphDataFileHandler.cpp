@@ -111,15 +111,19 @@ bool GraphDataFileHandler::loadV2(std::stringstream &ss)
 
 	for (int x = 0; x < specialMarkerCount; x++)
 	{
+		unsigned int a, r, g, b;
 		std::string nodeName,lNodeName;
-		ss >> nodeName;
+
+		ss >> nodeName >> a >> r >> g >> b;
 		
 		strToLower(nodeName,lNodeName);
 
 		Node *node = graph->findNode(&lNodeName);
 
-		if (node != NULL)
-			node->IsSecondaryColor = true;
+		if (node == NULL)
+			node = graph->addNode(&nodeName, &lNodeName, 0);
+
+		node->setAlternativeColor(CColor(a, r, g, b));
 	}
 
 	return true;
@@ -196,8 +200,13 @@ bool GraphDataFileHandler::loadV0(std::stringstream &ss)
 		strToLower(n2,ln2);
 		Node *node1 = graph->findNode(&ln1);
 		Node *node2 = graph->findNode(&ln2);
-		node1->appConEdges(1);
-		node2->appConEdges(1);
+
+		if (node1 == NULL)
+			node1 =	graph->addNode(&n1, &ln1, 0);
+
+		if (node2 == NULL)
+			node2 = graph->addNode(&n2, &ln2, 0);
+
 		Edge *e = new Edge(node1,node2,weight,secs + tPassed);
 		graph->edges.push_back(e);
 	}

@@ -7,6 +7,10 @@ Edge::Edge(Node *source, Node *target, double weight, int secs)
 {
 	this->source = source;
 	this->target = target;
+
+	source->appConEdges(1);
+	target->appConEdges(1);
+
 	this->weight = weight;
 	this->lastActivity = secs;
 	changedInPause = false;
@@ -18,8 +22,11 @@ Edge::~Edge(void)
 {
 	if (userData)
 		delete userData;
-	if (changeListLink)
-		changeListLink->setEdge(NULL);
+
+	breakChangeListLink();
+
+	source->appConEdges(-1);
+	target->appConEdges(-1);
 }
 
 bool Edge::sameNicks(const std::string &ln1, const std::string &ln2)

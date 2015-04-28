@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <string>
 #include "Tools.h"
+#include "Config.h"
 
 #ifndef LPUSERDATA
 #define LPUSERDATA void*
@@ -27,7 +28,6 @@ public:
 	void setInertedY(double y);
 	inline void setWeight(double weight) { this->weight = weight; };
 	inline void appWeight(double weight) { this->weight += weight; };
-	inline void appConEdges(int n) { this->cEdges += n; };
 	//inline void setNodeVisible(bool isNodeStillVisible) { this->nodeVisible = isNodeStillVisible; };
 
 	inline const std::string& getNick() { return nick; };
@@ -41,18 +41,23 @@ public:
 	inline int getConEdges() { return cEdges; };
 	inline void setUserData(LPUSERDATA lpData) { userData = lpData; };
 	inline LPUSERDATA getUserData() { return userData; };
+	inline bool hasAlternativeColor() { return _hasAlternativeColor; };
+	inline void clearAlternativeColor() { _hasAlternativeColor = false; };
+	inline void setAlternativeColor(CColor alternativeColor) { this->alternativeColor = alternativeColor; _hasAlternativeColor = true; };
+	inline const CColor& getAlternativeColor() { return alternativeColor; };
 	//inline bool getNodeVisible() { return nodeVisible; };
 	
-	bool IsSecondaryColor;
-
 	friend Edge;
 private:
-	void set(const std::string &nick, const std::string &lNick, double weight, double posX,double posY);
+	inline void appConEdges(int n) { this->cEdges += n; };
+	void reset(const std::string &nick, const std::string &lNick, double weight, double posX,double posY);
 	//bool nodeVisible;
 	LPUSERDATA userData;
 	std::string nick,lnick;
 	std::wstring wnick;
 	double weight,x,y,fx,fy,accelerationX,accelerationY;
+	CColor alternativeColor;
+	bool _hasAlternativeColor;
 	int cEdges;
 
 };

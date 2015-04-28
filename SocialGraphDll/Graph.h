@@ -55,6 +55,7 @@ public:
 	void deleteIgnore(const std::string *lnick);
 	void updateFrame();
 	virtual void makeImage(int iterations, std::wstring *output,int tNow = (int)time(NULL));
+	virtual void makeImage(int tNow);
 	void makeImage();
 	
 	virtual void calcBounds();

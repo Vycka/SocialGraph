@@ -26,8 +26,6 @@ ftpFile    "filename.png"
 iOutputWidth   1280
 iOutputHeight  720
 
-
-
 ## root directory is the same, as in what active directory "mirc.exe" is launched.
 ## So, if you extracted SocialGraph.dll not to the "<mircActiveRootDir>\Socialgraph\", you will need to change all output paths in this config.
 
@@ -52,6 +50,8 @@ iBorderColor      102 102 102 255
 iEdgeChangeListColor 102 102 255 255
 iEdgeChangeListColorInactive 50 50 102 32
 iChatDotColor     105 105 191 255
+
+iNodeBorderWidth 2.0
 
 ## Minimum alpha for active edges.
 iEdgeActiveMinAlpha 110

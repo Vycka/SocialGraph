@@ -12,9 +12,9 @@ public:
 	int iOutputWidth,iOutputHeight;
 	CColor iBackgroundColor,iChannelColor,
 		iLabelColor,iTitleColor,iNodeBorderColor,iNodeColor,
-		iEdgeColor,iBorderColor,iEdgeColorInactive,iChatDotColor,iEdgeChangeListColor,iEdgeChangeListColorInactive,
-		iSecondaryNodeColor;
+		iEdgeColor,iBorderColor,iEdgeColorInactive,iChatDotColor,iEdgeChangeListColor,iEdgeChangeListColorInactive;
 	int iEdgeActiveMinAlpha;
+	double iNodeBorderWidth;
 	std::wstring iNickFont;
 	//img font stuff
 	double iNickFontSize;

@@ -3,23 +3,21 @@
 
 
 
-Node::Node(const std::string *nick,const std::string *lNick,double weight, double px, double py) : accelerationX(0), accelerationY(0)
+Node::Node(const std::string *nick, const std::string *lNick, double weight, double px, double py) 
+			: accelerationX(0), accelerationY(0), alternativeColor(CColor(255, 0, 0, 0))
 {
-	set(*nick,*lNick,weight,px,py);
-
-	IsSecondaryColor = false;
+	reset(*nick,*lNick,weight,px,py);
 }
 
-Node::Node(const std::string *nick,double weight,double px, double py) : accelerationX(0), accelerationY(0)
+Node::Node(const std::string *nick, double weight, double px, double py) 
+			: accelerationX(0), accelerationY(0), alternativeColor(CColor(255, 0, 0, 0))
 {
 	std::string lNick;
 	strToLower(*nick,lNick);
-	set(*nick,lNick,weight,px,py);
-
-	IsSecondaryColor = false;
+	reset(*nick,lNick,weight,px,py);
 }
 
-void Node::set(const std::string &nick, const std::string &lNick, double weight, double posX,double posY)
+void Node::reset(const std::string &nick, const std::string &lNick, double weight, double posX,double posY)
 {
 	setNick(&nick,&lNick);
 	this->weight = weight;
@@ -29,6 +27,7 @@ void Node::set(const std::string &nick, const std::string &lNick, double weight,
 	fy = 0;
 	cEdges = 0;
 	userData = NULL;
+	clearAlternativeColor();
 }
 
 Node::~Node()

@@ -29,7 +29,7 @@ GraphConfig::GraphConfig(const char *fn) : Config(fn)
 	iEdgeChangeListColor = getCColor("iEdgeChangeListColor");
 	iEdgeChangeListColorInactive = getCColor("iEdgeChangeListColorInactive");
 	iChatDotColor    = getCColor("iChatDotColor");
-	iSecondaryNodeColor = getCColor("iSecondaryNodeColor","255 127 127 255");
+	iNodeBorderWidth = getDouble("iNodeBorderWidth", "2.0");
 
 	//font/sizes/misc stuff
 	iNickFont           = getWString("iNickFont");
