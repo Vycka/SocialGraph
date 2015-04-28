@@ -1,0 +1,71 @@
+2009-05-12: v0.00
+  ! Pradejom programuot
+
+2009-05-13: v0.97 Alpha
+  ! Pirma kart paleidziam ant testo (alot of bugs)
+  + Add: Ftp uploadinimas
+
+2009-05-14: v0.98 Beta
+  * Fix: Memory leak'a ties Node.setNick() (neistrina seno wnick)
+  + Add: Daugiau infos paveiksliuko apacioj (cerdits, render time. t.t.)
+  * Fix: Visa diena koreguojam InferenceHeuristic'u itaka Edge stiprumams.
+  * Fix: nesuaktyvina Graph.decay() po Graph.addEdge() kai jau edge egzistuoja
+
+2009-05-15: v0.99 Beta
+  * Fix: Vis dar koreguojam InferenceHeuristic itakas
+  * Fix: pakeiciam Adjency-Heuristic, kad uzskaitytu pokalbi tada, kada jau egzistuoja edge tarp tu dvieju nicku
+  - Del: panaikinam visus Node.addWeight(), kai didnamas pridedamas/didinamas edge dabar Node'u weight'a didinsim tik per Graph.onMessage() konkreciam nickui o ne dviem
+  + Add: Node.addWeight() dydis jau Confige o ne hardcoded
+  * Fix: koreguojam node weight didejima visa diena
+  ? Daugiau nepamenu, bet kazkas dar buvo
+
+2009-05-16: v1.00 Stable
+  * FIX: Sutaisem labai bjauru crash bug'a ties DllUnload, kai leidziama dll unloadintis uz 10min (vietoj false netycia grazinam true) neaktyvuma ir taip neatlaisvinant resursu (gdiplus ir t.t.). ir kai sekanti karta bus DllLoad() jis megins Startup'int gdiplus, kai jau taip buvo padaryta ir to pasekoj crash.
+  ? Nieko rimto daugiau siandien, pirma STABLE versija jei daugiau crashu nera, einam laistyt
+
+2009-05-17: v1.01 Stable
+  * Fix: Graph.calcBounds() bugas skaiciuodavo remus pagal nodes sarasa o ne pagal visibleNodes. to pasekoj piesiant paveiksliuka kartais susispausdavo visi taskai i kruva
+  + Add: Perrasyta visa Config klase, dabar config failas ZYMIAI tvarkingesnis, supportina komentarus, ir daugiau primytiviam zmogui friendly, bei isimta nemazai hardcoded stuff i configa.
+  ? Isimta execInMirc funkcija is graph klases ir perkelta i irankius (Tools.h)
+  + Add: Galima atskirai reguliuot spalva elipses apibreztos aplink Node.
+  + Add: graph dabar siuncia signalus i mirc'a, kada generuojamas kadras. taip galima isvest info i kanala karts nuo karto.
+  ! Change: Atsisakyta wchar_t, dabar visur unicode'ui naudojama std::wstring
+  ? Kiti smulkus pakeitimai, kuriu nepamenu
+
+2009-05-19: v1.02 Stable
+  * Fix: minor fix'as kad storus edges truputi daugiau decayintu (dar reik pratestuot, kiek daugiau naikintu)
+  ! Change: pervadinom is SocialGraphDll.dll i SocialGraph.dll 
+
+2009-06-02 v1.03: Stable (so far)
+  * Fix: nesiusdavo mircui ftp klaidos jei tokia pasitaikydavo uploadinant
+  ! Change: sius dabar detalesnia ftp klaida jei imanoma, delko nepavyko uploadint
+  ! Change: decay veikimas. dabar stipriau prades naikinti tuos edges, kurie buvo neaktyvus ilgiau nei gEdgeDecayMultiplyIdleSecs.
+  + Add: Galimybe atskirai valdyt grafiko generavimo/uploadinimo pauzes (gMinPauseBeforeNextRender ir gMinPauseBeforeNextUpload parametrai)
+  + Add: Galimybe issaugot senus grafikus (oSaveOldFrames, oPathBegin, oPathEnd)
+  + Add: Multichannel supportas!!!
+  + Add: Klaidu check'ai config skaityme tad necrashins daugiau mirco blogas configas, o pasakys kur problema
+
+201x-xx-xx v1.1: Stable (not released)
+  + Add: gCacheGdiTools parametras, kad isjungt galetum GdiPlus Cache, jis tiem kurie nori kad botas valgytu maziau ramo, bet botas valgys daugiau cpu (defaultas 1)
+  + Add: Grafiko keitimosi loginima
+  + Add: Video kadru renderinima is grafiko keitimosi logo (su surenderintais kadrais galima poto padaryt video)
+  + Add: Generavimo laikas virsutiniam desiniam kampe.
+  + Add: Rysiu atsiradimo/dingimo changelog'o piesimas video renderinime.
+  + Add: Neaktyvus rysiai nupilkinami vietoj to kad butu isvalyti is grafiko
+  ! Change: neaktyvus rysiu naikinimo stiprumas kils kvadaru priklausomai nuo parametro, gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
+  + Add: gMinMaxWeight parametras - nustatantis, koks bus maziausias maxWeight, to pasekoj silpni santykiai nebus iskarto storos linijos, jei nebus nieko kito kanale kurie tarpusavy aktyviai sneketu.
+  * Fix: Multithreaded rendereris pagaliau pilnai sutvarkytas. (Ant AMD x6 1055T matomas 400% pagreitejimas)
+  + Add: Lekiantys taskiukai ant liniju, kurie parodys kaip pasnekovai tarpusavy snekasi.
+  + Add: Atjungti vartotojai nuo grafo nepradings iskart, o isleks pirma uz paveiksliuko ribu.
+  + Add: Alpha spalvos islaikymas paveiksliuke
+  ! Change: Visos Socialgraph zinutes perkeltos i @SocialGraph langa.
+  - Del: pasalintas gEdgeThreshold parametras, jis buvo praktiskai nenaudojamas ir su klaidom, beto tai, ka jis dare, galima pasiekt ir per kitus parametrus.
+  ! Change: Pakeistas GraphData failo formatas, jis bus atnaujintas automatiskai, taciau po sito nebebus galima grizt prie senesnes versijos.
+
+TODO File:
+Galimybe kad paskutinis x grafiku butu saugomi ftp serve
+Tvarkingesnis config failas (90% Done)
+unusedNodes cleanupas (jei butu ilgi uptimes) (70% - padarem rankiniu budu kvieciama /sgDeleteUnusedNodes, dabar liko sugalvot, kaip tai visiskai automatizuot)
+daugiau infos ant img (kiek nodes, kiek edges, dar kanors)
+jokio mrc isikisimo, dll stebi zinutes ir gaudo kurias reikia pats
+Dar kasnors.

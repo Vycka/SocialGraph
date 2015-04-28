@@ -1,0 +1,22 @@
+LIBRARY SocialGraph
+VERSION 1.03
+
+EXPORTS
+LoadDll
+UnloadDll
+mAddMessage
+mAddJoin
+mMakeImage
+mUpload
+mAddIgnore
+mDeleteIgnore
+mDeleteUnusedNodes
+mDeleteNode
+mDumpFile
+mInitGraph
+mUnloadGraph
+mRenderVideo
+mCancelVideoRendering
+mIsVideoRenderingInProgress
+mSaveOld
+mReloadConfig

@@ -1,0 +1,71 @@
+2009-05-12: v0.00
+  ! Started Programing
+
+2009-05-13: v0.97 Alpha
+  ! First test run (alot of bugs)
+  + Add: Ftp upload function
+
+2009-05-14: v0.98 Beta
+  * Fix: Memory leak on Node.setNick() (old wnick was left undeleted)
+  + Add: More information rendered on image (cerdits, render time, etc..)
+  * Fix: All day tuning InferenceHeuristic influence to edge weights.
+  * Fix: Not calling Graph.decay() in Graph.addEdge() if edge already exists
+
+2009-05-15: v0.99 Beta
+  * Fix: Still tuning InferenceHeuristic influence to edges
+  * Fix: Modified Adjency-Heuristic, from now it checks if edge between two nicks already exists.
+  - Del: Removing all Node.addWeight() calls from addEdge/updateEdge methods, now we only call it from Graph.onMessage() and only for one nick.
+  + Add: Node.addWeight() weights no more hardcoded (now in config).
+  * Fix: Tuning node weight increase all  day...
+  ? Some other minor fixes that i dont remember.
+
+2009-05-16: v1.00 Stable
+  * Fix: Crash after 10 minutes of inactivity, because allowing dll to unload after 10min inactivity and not cleaning up.
+  ? Nothinkg more for today but hey: We have our first stable version!!!
+
+2009-05-17: v1.01 Stable
+  * Fix: Graph.calcBounds() calculates min/max x/y by all node list, not by visible node list
+  + Add: Rewrited config class, now config file is more user freandly and supports comments.
+  ? Moved execInMirc function from Graph class to Tools (Tools.h)
+  + Add: Now Elipse ring color can be changed.
+  + Add: Graph sents signal genFrame to mirc so we can add some mrc code to announce sometimes when new graph is created.
+  ! Change: removed all wchar_t and replaced with std::wstring
+  ? Other Minor fixes that i dont remember.
+
+2009-05-19: v1.02 Stable
+  * Fix: Minor fix so edges with higher weights decay faster
+  ! Change: Renamed SocialGraphDll.dll o SocialGraph.dll 
+
+2009-06-02 v1.03: Stable (so far)
+  * Fix: Dll not showing FTP upload error in mirc
+  ! Change: FTP Error now has more details
+  ! Change: Edge decay system. it decays inactive edges more. (gTemporalDecayAmount + (int)((currentTime - edgeLastActivity) / gEdgeDecayMultiplyIdleSecs) * gTemporalDecayAmount).
+  + Add: Now graph render and upload pauses can be configurated seperately (gMinPauseBeforeNextRender and gMinPauseBeforeNextUpload variables)
+  + Add: Ability to save old graph images (oSaveOldFrames, oPathBegin, oPathEnd)
+  + Add: Multichannel Support!!!
+  + Add: Error checking in config files. so bad config now does not crash mirc and reports where is error instead(hopefully).
+
+201x-xx-xx v1.1: Stable (not released)
+  + Add: gCacheGdiTools param to turn of GdiTools Cache for those who want that bot would use as less memory as possible (but it will use more cpu) (default 1 - so no change here)
+  + Add: Graph changes logging (needed to video rendering)
+  + Add: Stills renderer (VideoGraph) based from graph log (with those stills you cane make video then)
+  + Add: Generation time in upper right corner (good for timelapse stuff in videos).
+  + Add: Relations changelist drawing in upper right corner below timelapse time.
+  + Add: Inactive relation edges will be greyed out, if they stay on graph inactive.
+  ! Change: Inactive edges decay value will be squared based from inactivity vs gEdgeDecayMultiplyIdleSecs (gTemporalDecayAmount + gTemporalDecayAmount*((int)(inactivity/gEdgeDecayMultiplyIdleSecs))^2 )
+  + Add: gMinMaxWeight parameter - minimum assumed weight, so just appeared relation edges wont be very thick, if there are no other thick relations.
+  * Fix: Multithreaded VideoGraph renderer fixed (On my AMD x6 1055T I meassured 400% Speedup.)
+  + Add: Flying dots on relation edges in GraphVideo, they will represent, who addressed who.
+  + Add: Nodes in graph video, which looses all relation edges, won't disappear instantly, instead they will fly off the screen and fade out, once they reach gBorder
+  + Add: Alpha channel support for image output
+  ! Change: Moved all SocialSraph messages to @SocialGraph window.
+  - Del: gEdgeThreshold parameter, it was buggy and useless, and it's effect can be achieved in other ways.
+  + Change: GraphData file format changed, it will be updated automatically, however, after that downgrading won't be possible!
+
+TODO File:
+ability to keep last n graphs in ftp serv
+More user freandly config file (90% Done)
+unusedNodes cleanup (if bot will have big uptimes) (70% - ATM users can init it manualy from mirc /sgDeleteUnusedNodes, now its left to make it automaticly)
+more info in img (how much nodes, edges, etc)
+no mrc code. everything controled from dll.
+dunno.. smth else..

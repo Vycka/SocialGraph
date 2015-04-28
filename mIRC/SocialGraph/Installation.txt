@@ -1,0 +1,79 @@
+This is a basic installation instructions to get this thing working.
+advanced program features will not be reviewed here at the moment.
+(sorry for bad grammar, didn't had time to review what i wrote, but its still better than nothing, if you want, you can fix, it would realy help for the project :P)
+
+First you need to copy everything from this directory (where this installation.txt is located) to <mIRC RootDir>\SocialGraph\
+by default mIRC is located in "C:\Program Files\mIRC\"
+so if everythig is done correctly then SocialGraph.mrc file should be in <mIRC ROOT>\SocialGraph\SocialGraph.mrc
+(and dont forget that Configs and Graph-Saves need to be copied as well)
+
+if downloaded binaries then SocialGraph.dll already be here so you must alredy have copied it there
+but if you compiling code your self, then compile it under Release-DLL configuration and copy later to <mIRC ROOT>\SocialGraph\
+
+next we want to configure config file to mach your channel settings
+script will read all *config.txt files from Configs directory and assumes that they are seperate configs for diffrent channels
+so if you want to generate graphs for more than one channel, than create copy of #sample1.config.txt and config for your other channel
+and repeat those steps until you are satisfied :)
+(! Remember, program reads all *Config.txt files, so everyconfig must end with config.txt, so if you are renaming them
+make sure that they have correct names: #mychannel.Config.txt #test.Config.txt #sample1.Congig.txt ....)
+
+now lets start configing
+Config file has alot of comments in lithuanian language, ATM ignore them. I Will translate it later.
+
+first you need to enter channel name there for which channel you are going to create graphs
+nChannel "<your channel name goes here>"
+examples:
+
+nChannel "#test"
+or
+nChannel "#sample1"
+or
+nChannel "#mychannel"
+...
+
+Remeber, only one channel per config file, dont duplicate variable names in config because bad things might happen.
+
+
+If You want to upload generatet graphs to ftp
+these are variables in config:
+
+ftpUpload  0
+ftpHost    "host"
+ftpPort    21
+ftpUser    "user"
+ftpPass    "pass"
+ftpDir     "remote/ftp/dir"
+ftpFile    "filename.png"
+
+these variables are self explaining..
+change ftpUpload from 0 to 1 and fill in rest ftp variables based on your ftp server configuration
+
+Now thats about it with configuration file for basic stuff.
+
+Now practicly you need to load SocialGraph.mrc file using writing command in mirc:
+/load -rs SocialGraph\SocialGraph.mrc
+if you done everything correctly, you should see in mirc
+SocialGraph: v1.03 Dll Loaded!
+<and printed list of loaded config files>
+
+if there are no errors about missing/bad config then graphs should start appearing by default configuration to
+<mIRC Roott>\SocialGraph\Graph-Saves\<channel name>.Image.png
+and one more file
+<mIRC Roott>\SocialGraph\Graph-Saves\<channel name>.GraphData.txt
+GraphData.txt is for remembering how graph i placed. so it will resume where it ended when you restart your mIRC
+so Dont delete it unless you want to reset your graph.
+
+if you get any errors, or no loaded configs are printed
+disable script using
+/sgDisable
+fix repored errors/config file names and try again using
+/sgEnable
+repeat that until no errors are printed :)
+
+if your graph is not appearing but there are people chatting in channel
+disable script using commands provided above and make sure that you correctly filled in configuration file
+if your graph is uploaded in ftp but directory Graph-Saves remains empty, that means your mIRC.exe is executed in diffrent folder than folder in which mirc is placed
+so please execute your mIRC.exe in same folder because basic config wont work unless you write full paths where needed in config.
+
+if you still got problems you could try contact me.
+maybe there is a bug that needs to be fixed :)

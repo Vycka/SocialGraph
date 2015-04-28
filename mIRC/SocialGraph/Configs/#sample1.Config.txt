@@ -1,0 +1,209 @@
+## First and most important parameter in config is "nChannel". writing this parameter corectly is enough to start SocialGraph
+
+## Write name of the channel. Of what channel activity graphs will be made.
+## All <channel> parts in this config will be automatically replaced with nChannel parameter.
+nChannel "#sample1"
+
+## !! Everything below is not necessary to change, to make socialgraph functioning.
+## However, you might wanna setup ftp upload, and change few other parameters in the future
+## once you are sure, that socialgraph is working.
+
+## Title for socialgraph if needed.
+nTitle   "A Social Network Diagram for an IRC Channel"
+
+## Should active stills be uploaded to the ftp server?
+## 1 - true; 0 - false;
+ftpUpload  0
+ftpHost    "host"
+ftpPort    21
+ftpUser    "user"
+ftpPass    "pass"
+ftpDir     "remote/ftp/dir"
+## dont use # in file name because browsers get crazy about that
+ftpFile    "filename.png"
+
+## Still image Width*Height 
+iOutputWidth   1280
+iOutputHeight  720
+
+
+
+## root directory is the same, as in what active directory "mirc.exe" is launched.
+## So, if you extracted SocialGraph.dll not to the "<mircActiveRootDir>\Socialgraph\", you will need to change all output paths in this config.
+
+## File name, to where active still will be saved.
+fImageOutput  "SocialGraph\Graph-Saves\<channel>.Image.png"
+
+## data file, to where all information about active graph is saved, so it can resume in the future. (Practically it's a graphs savefile.)
+fGraphData    "SocialGraph\Graph-Saves\<channel>.GraphData.txt"
+
+## RGB A for colors, used in socialgraph.
+//varName          R   G   B   A
+iBackgroundColor  255 255 255 255
+iChannelColor     238 238 255 255
+iLabelColor       0     0   0 255
+iTitleColor       153 153 204 255
+iNodeBorderColor  102 102 255 255
+iNodeColor        255 255   0 255
+## edge alpha will be dynamicly calculated by relation strength, however it won't exceed specified value below
+iEdgeColor        102 102 255 255
+iEdgeColorInactive 50 50 50 10
+iBorderColor      102 102 102 255
+iEdgeChangeListColor 102 102 255 255
+iEdgeChangeListColorInactive 50 50 102 32
+iChatDotColor     105 105 191 255
+
+## Minimum alpha for active edges.
+iEdgeActiveMinAlpha 110
+
+## Font info for nickname drawing in stills.
+iNickFont "Tahoma"
+iNickFontSize     8
+
+## Nick relation changelist only works in video rendering at this moment. It will be implamented for stills in the future releases.
+## Select here, which information and how many lines of it to draw?
+gEdgeChangeListEnabled 1
+gEdgeChangeListDrawLogSize 15
+
+## after how much seconds edges will start to grey out, and after how many seconds greying out reaches maximum?
+## These parameters also apply to Changelist lines.
+gEdgeColorChangeInactivityMin 900
+gEdgeColorChangeInactivityMax 7200
+
+
+## - Advanced Socialgraph parameters (Better left untouched, unless you know what you are doing) -
+
+## image/bmp image/jpeg image/gif image/tiff image/png 
+fEncoderMime   "image/png"
+
+## Should alpha channel be preserved in outputed still image?
+gPreserveAlpha 0
+
+## Andvenced parameters for graph spring embedder physics simulation.
+## Should not be touched unless you know what you are doing.
+gTemporalDecayAmount        0.02
+## 21600 = 6hours
+gEdgeDecayMultiplyIdleSecs  21600
+gSpringEmbedderIterations   1500
+gK                          2
+## GraphVideo has its own gC and gM.. values.
+gC                          0.01
+gMaxRepulsiveForceDistance  6
+gMaxNodeMovement            0.5
+gMinDiagramSize             10
+gBorderSize                 50
+gNodeRadius                 3
+gNodeBumpWeight             0.5
+gMinMaxWeight               5
+
+## Minimum pauses between frame generations and between uploads.
+gMinPauseBeforeNextRender   30
+gMinPauseBeforeNextUpload   30
+
+## Caching GDI tools uses more memory per one loaded graph, However, it will save some cpu cycles.
+gCacheGdiTools              1
+
+## Inference Heuristics weight values.
+## Defaults are Ok and should be left untouched, unless you know, what they mean.
+hAdjacency   0.05
+hBinary      0.90
+hDirect      0.90
+hIndirect    0.30
+
+## ------------ OLD FRAMES SAVING  -------------------
+## Should we save old stills somewhere, once new ones are generated?
+## Final target will be "oPathBegin+Frame+oPathEnd"
+
+oSaveOldFrames 0
+oPathBegin "SocialGraph\Graph-Saves\OldFrames\<channel>-"
+oPathEnd   ".png"
+
+
+## ------------Graph Logging (Usable for graph video rendering) ----------
+## Should the graph logging be enabled?
+## Logged information later can be used with video rendering to generate video.
+logSave 0
+logFile "SocialGraph\Graph-Saves\<channel>.GraphLog.txt"
+
+## ------------ VIDEO RENDERING ------------
+## set path template, in where graphvideo frames will be created
+## Final target will be: "vidRenderPBegin+frameNr+vidRenderPEnd"
+vidRenderPBegin "SocialGraph\Graph-Saves\RenderedFrames\<channel>-"
+vidRenderPEnd   ".png"
+
+## Frame Size for video, Default parameters are optimized for FullHD resolution (1920x1080)
+vidOutputWidth   1920
+vidOutputHeight  1080
+
+## 1798.2 == 29.97fps (24h==1min) (NTSC framerate)
+## 3596.4 == 59.94fps (24h==1min) (Double NTSC framerate)
+## 7192.8 == 119.88fps (24h==1min) (Quad NTSC framerate)
+
+## What number of frames represent one day.
+## Default value (1798.2) assumes, that you render your video in NTSC framerate, and you want that 1 miunte of the video would represent 24hours of the activity.
+vidFramesPerDay 1800
+
+## How many spring embedder iteration to do for each frame
+vidSEIterationsPerFrame 1
+
+## How many threads to use when saving graph images. It is recommended to set to the number of physical cores your cpu has.
+## vidRendererThreads has to be at least 1 and no more than 16 (MAX_THREADS). 
+vidRendererThreads 4
+
+## Initial time (unix time) and end time (unix time), to render from log file, but because of the really basic implamentation of this feature, graphlog file will still be parsed from beginning,
+## And frames will start to be drawn from specified time. So its better just to start logging to the new file once you plan to generate new video
+## 0 means infinity to both directions, so if Begin time is 0, graph will be rendered from beggining, 0 in end time means, that graph will be rendered to the end of the log.
+vidBeginRenderTime 0
+vidEndRenderTime 0
+
+## vidXYDivRatio Recommended val: (100*(finalFramsPerSec/30))
+## (finalFramesPerSec is not the fps in which you will render your source video, but the fps in which the final video will be converted!)
+## The bigger vidXYDivRatio, the less jerky graphvideo will be, however, because of it, graph can be zoomed out too much for the long time, and all nodes will move to their own places slower when cluttered.
+## Trivia: This algorithm is in overall bad for video rendering, but good for stills, so in video rendering it needs to be reprogrammed one day.
+vidXYDivRatio 100
+
+## what font to use for nicknames when rendering video
+vidNickFont "SansSerif"
+vidNickFontSize 12
+
+## flying dots on edges config. 
+vidEdgeChatDotEnabled 1
+vidEdgeChatDotSpeedPixelsPerFrame 6
+vidEdgeChatDotRadius 3
+
+## gC and gMaxNodeMovement and values for active nodes.
+vidMaxNodeMovement 0.0015
+vidC               0.0025
+
+## gBorder for video
+vidBorderSize 65
+
+## gNodeRadius for video
+vidNodeRadius 8
+
+## gC and gMaxNodeMovement values for disconnected nodes.
+vidMaxNodeMovementDisconnected 0.005
+vidCDisconnected               0.005
+
+## How many frames takes for disconnected nodes to fade out, once they reach gBorder zone.
+vidDisconnectedFadeOutFrames 20
+
+## Should alpha channel be preserved in outputed images?
+## Using that allows to make more postprocessing customization to the video
+## For instance: Background color can be made transperant and in postprocess you can add diferent background image or even an animation without messing socialgraph
+vidPreserveAlpha 0
+
+## How many frames edge stays alive tu fully fade out before it dies?
+## Fading out process will be handled by decreasing alpha of current edge color(color based on edge inactivity) to zero
+vidEdgeFramesToDie 30
+
+
+## -------------------------- INTERNAL STUFF FOR PERSONAL USE --------------------------- ##
+iSecondaryNodeColor 255 127 127 255
+gDrawUnconnectedNodes 0
+gDrawTimeStamp 0
+gStrechToImageSize 0
+gMinEdgeWidth 2
+gMaxEdgeWidth 4
+
+## END OF CONFIG FILE
